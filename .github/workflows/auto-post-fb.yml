@@ -1,0 +1,39 @@
+name: Auto Post to Facebook
+
+on:
+  schedule:
+    - cron: '30 * * * *'   # Chạy mỗi giờ vào phút thứ 30
+  workflow_dispatch:       # Cho phép chạy thủ công
+
+permissions:
+  contents: write
+
+jobs:
+  auto-post:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install axios composio-core
+
+      - name: Run Facebook Poster Script
+        env:
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          COMPOSIO_API_KEY: ${{ secrets.COMPOSIO_API_KEY }}
+        run: node auto-post-fb.js
+
+      - name: Commit & push if posted-movies.json changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add posted-movies.json
+          git diff --staged --quiet || git commit -m "chore: update posted-movies.json [$(date +'%Y-%m-%d %H:%M')]"
+          git push
