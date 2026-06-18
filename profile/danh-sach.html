@@ -22,16 +22,15 @@
     <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"
         name="viewport" />
     <title>Tài khoản của tôi - A Phim</title>
-    <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="shortcut icon" href="/favicon.ico">
 
     <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/favicon.png">
 
     <!-- Apple Mobile Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -871,7 +870,7 @@
     </script>
 
 
-    <main id="profileMain" style="padding-top:80px;padding-bottom:80px;">
+    <main style="padding-top:80px;padding-bottom:80px;">
         <div style="max-width:1100px;margin:0 auto;padding:0 16px;">
 
             <!-- ══ HERO CARD: full width above 2-col grid ══ -->
@@ -1441,7 +1440,7 @@
             <!-- END 2-col grid -->
 
         </div>
-</main>
+    </main>
 
     <!-- Cover Picker Modal -->
     <div id="coverPickerModal"
@@ -1537,23 +1536,6 @@
         });
     </script>
     <!-- Footer -->
-    <!-- [INLINE-AD] APhim Partner Banners -->
-    <div class="aphim-inline-ad">
-        <span class="aphim-inline-ad-label">Quảng cáo</span>
-        <div class="aphim-inline-ad-inner">
-            <a class="aphim-inline-ad-item" href="https://vsbet294.com/p/BSYk" target="_blank" rel="noopener nofollow" aria-label="VSBet">
-                <img src="/ads/catfish/vsbet.gif" alt="VSBet" loading="lazy">
-            </a>
-            <a class="aphim-inline-ad-item" href="https://colatv99.live/" target="_blank" rel="noopener nofollow" aria-label="ColaTV">
-                <img src="/ads/catfish/colatv.gif" alt="ColaTV" loading="lazy">
-            </a>
-            <a class="aphim-inline-ad-item" href="https://colascores.com/" target="_blank" rel="noopener nofollow" aria-label="ColaScore">
-                <img src="/ads/catfish/colascore.gif" alt="ColaScore" loading="lazy">
-            </a>
-        </div>
-    </div>
-    <!-- [/INLINE-AD] -->
-    <script src="/js/inline-ad-slideshow.js?v=3" defer></script>
                     <footer class="bg-[#07080a] border-t border-white/5 py-12 relative overflow-hidden">
         <!-- Background pattern/logo graphic -->
         <div class="absolute right-0 top-1/2 -translate-y-1/2 opacity-5 pointer-events-none scale-150">
@@ -1737,7 +1719,6 @@
 
     <!-- Auth + User -->
     <script src="js/auth.js?v=38"></script>
-    <script src="js/premium-ad-blocker.js?v=1"></script>
     <script src="js/auth-modal.js?v=13"></script>
     <script src="js/user.js?v=38"></script>
     <script src="js/rating.js?v=13"></script>
@@ -2500,7 +2481,6 @@
 
     <!-- ====== APhim Catfish Banner + Popup ====== -->
     <link rel="stylesheet" href="/css/catfish-banner.css?v=17">
-    <link rel="stylesheet" href="/css/inline-ad.css?v=15">
     <script src="/js/catfish-banner.js?v=18" defer></script>
     <!-- ====== End Catfish Banner ====== -->
 </body>
