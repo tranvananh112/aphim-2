@@ -3,10 +3,17 @@ let currentMovie = null;
 
 document.addEventListener('DOMContentLoaded', async function () {
     const urlParams = new URLSearchParams(window.location.search);
-    const slug = urlParams.get('slug');
+    let slug = urlParams.get('slug');
+
+    if (!slug && window.location.pathname.startsWith('/phim/')) {
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        if (parts.length >= 2 && !parts[1].endsWith('.html')) {
+            slug = parts[1];
+        }
+    }
 
     if (!slug) {
-        window.location.href = 'index.html';
+        window.location.href = '/';
         return;
     }
 
@@ -77,10 +84,10 @@ function renderMovieDetail(movie) {
     const titleElement = document.querySelector('h1');
     if (titleElement) {
         // Vietnamese name larger, English name smaller and on one line
-        titleElement.className = 'font-extrabold text-white mb-4 leading-tight tracking-tight';
+        titleElement.className = 'font-vietnam lg:font-playfair font-extrabold lg:font-normal text-white mb-4 leading-tight tracking-tight lg:tracking-normal drop-shadow-2xl text-center lg:text-left w-full';
         titleElement.innerHTML = `
-            <span class="block text-3xl md:text-5xl lg:text-7xl">${movie.name}</span>
-            <span class="block text-xl md:text-3xl lg:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-primary to-red-400 whitespace-nowrap overflow-hidden text-ellipsis">
+            <span class="block text-4xl md:text-5xl lg:text-7xl mb-1">${movie.name}</span>
+            <span class="block text-xl md:text-3xl lg:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-bright whitespace-nowrap overflow-hidden text-ellipsis opacity-90 font-bold tracking-wide">
                 ${movie.origin_name}
             </span>
         `;
@@ -145,16 +152,16 @@ function renderMovieDetail(movie) {
             if (!refMatched) {
                 if (movie.type === 'series') {
                     categoryName = 'Phim Bộ';
-                    categoryLink = 'danh-sach.html?list=phim-bo';
+                    categoryLink = '/danh-sach?list=phim-bo';
                 } else if (movie.type === 'single') {
                     categoryName = 'Phim Lẻ';
-                    categoryLink = 'danh-sach.html?list=phim-le';
+                    categoryLink = '/danh-sach?list=phim-le';
                 } else if (movie.type === 'hoathinh') {
                     categoryName = 'Hoạt Hình';
-                    categoryLink = 'danh-sach.html?list=hoat-hinh';
+                    categoryLink = '/danh-sach?list=hoat-hinh';
                 } else if (movie.type === 'tvshows') {
                     categoryName = 'TV Shows';
-                    categoryLink = 'danh-sach.html?list=tv-shows';
+                    categoryLink = '/danh-sach?list=tv-shows';
                 }
             }
             
@@ -212,28 +219,34 @@ function renderMovieDetail(movie) {
     // Update categories and actors
     addMovieMetadata(movie);
     
-    // Add Các bản chiếu
-    renderVersions(movie);
-
     // Load movie gallery
     loadMovieGallery(movie);
 
     // Update watch button
-    const watchBtn = document.querySelector('a[href="watch.html"]');
+    const watchBtn = document.getElementById('watchNowBtn') || document.querySelector('a[href="/watch"]') || document.querySelector('a[href="watch.html"]');
     if (watchBtn) {
         // Check if admin has set a custom link
         const movieLinks = JSON.parse(localStorage.getItem('movieLinks') || '{}');
         const customLink = movieLinks[movie.slug];
 
         if (customLink) {
-            // Admin đã set link, cho phép xem
-            watchBtn.href = `watch.html?slug=${movie.slug}`;
+            const isHtmlEnv = window.location.pathname.includes('.html');
+            if (isHtmlEnv) {
+                watchBtn.href = `/watch.html?slug=${movie.slug}`;
+            } else {
+                watchBtn.href = `/xem-phim/${movie.slug}`;
+            }
             watchBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             console.log('✅ Custom link found for movie:', movie.slug);
         } else if (movie.episodes && movie.episodes.length > 0) {
             // Có episodes từ API
             const firstEpisode = movie.episodes[0].server_data[0];
-            watchBtn.href = `watch.html?slug=${movie.slug}&episode=${firstEpisode.slug}`;
+            const isHtmlEnv = window.location.pathname.includes('.html');
+            if (isHtmlEnv) {
+                watchBtn.href = `/watch.html?slug=${movie.slug}&episode=tap-${firstEpisode.slug}`;
+            } else {
+                watchBtn.href = `/xem-phim/${movie.slug}/tap-${firstEpisode.slug}`;
+            }
         } else {
             // Không có link
             watchBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -260,6 +273,9 @@ function renderMovieDetail(movie) {
             alert('Phim chưa có trailer');
         });
     }
+
+    // Tích hợp Các bản chiếu
+    renderVersions(movie);
 }
 
 // Render "Các bản chiếu"
@@ -303,11 +319,11 @@ function renderVersions(movie) {
                         <dotlottie-wc src="https://lottie.host/3d743490-d86f-4cc7-9170-2fefdb01db16/8A8VL5a8T2.lottie" style="width: 100%; height: 100%;" autoplay loop></dotlottie-wc>
                     </div>
 
-                    <div class="relative z-10 flex items-center gap-2 text-white/90">
+                    <div class="relative z-10 flex items-center gap-2 ${isSvap1 ? 'text-[#fcd576]' : 'text-white/90'}">
                         <span class="material-icons-round text-sm">closed_caption</span>
                         <span class="text-[13px] font-medium">${displayLang} (SVAP1)</span>
                     </div>
-                    <div class="relative z-10 text-white/90 font-medium text-[15px] line-clamp-1 leading-snug">${movie.name}</div>
+                    <div class="relative z-10 ${isSvap1 ? 'text-[#fcd576]' : 'text-white/90'} font-medium text-[15px] line-clamp-1 leading-snug">${movie.name}</div>
                     <div style="align-self: flex-start; padding: 6px 14px; border-radius: 4px; z-index: 10; position: relative;" class="mt-1 ${isSvap1 ? 'bg-[#fcd576] text-black' : 'bg-white text-black'} text-[13px] font-bold shadow-sm group-hover:bg-gray-200 transition-colors">
                         ${isSvap1 ? '<span class="flex items-center gap-1"><span class="material-icons-round text-[14px]">check_circle</span> Đang xem bản này</span>' : 'Xem bản này'}
                     </div>
@@ -317,11 +333,11 @@ function renderVersions(movie) {
                 <button onclick="changeVersion('aphim1.io.vn')" style="flex: 1; min-width: 260px; background-color: #2b7a4b;" class="relative overflow-hidden rounded-xl ${isSvap2 ? 'border: 1px solid #fcd576;' : 'border: 1px solid transparent; hover:border-white/30;'} p-4 text-left shadow-lg hover:-translate-y-1 transition-all flex flex-col gap-3 group">
                     <div id="svap-bg-2" style="position: absolute; top: 0; right: 0; bottom: 0; width: 65%; background-image: url('${imgUrl}'); background-size: cover; background-position: center; pointer-events: none; z-index: 0; opacity: 0.6; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 70%); mask-image: linear-gradient(to right, transparent 0%, black 70%); transition: transform 0.5s ease, background-image 0.5s ease;" class="group-hover:scale-110"></div>
 
-                    <div class="relative z-10 flex items-center gap-2 text-white/90">
+                    <div class="relative z-10 flex items-center gap-2 ${isSvap2 ? 'text-[#fcd576]' : 'text-white/90'}">
                         <span class="material-icons-round text-sm">mic</span>
                         <span class="text-[13px] font-medium">${displayLang} (SVAP2)</span>
                     </div>
-                    <div class="relative z-10 text-white/90 font-medium text-[15px] line-clamp-1 leading-snug">${movie.name}</div>
+                    <div class="relative z-10 ${isSvap2 ? 'text-[#fcd576]' : 'text-white/90'} font-medium text-[15px] line-clamp-1 leading-snug">${movie.name}</div>
                     <div style="align-self: flex-start; padding: 6px 14px; border-radius: 4px; z-index: 10; position: relative;" class="mt-1 ${isSvap2 ? 'bg-[#fcd576] text-black' : 'bg-white text-black'} text-[13px] font-bold shadow-sm group-hover:bg-gray-200 transition-colors">
                         ${isSvap2 ? '<span class="flex items-center gap-1"><span class="material-icons-round text-[14px]">check_circle</span> Đang xem bản này</span>' : 'Xem bản này'}
                     </div>
@@ -331,11 +347,11 @@ function renderVersions(movie) {
                 <button onclick="changeVersion('aphim.io.vn')" style="flex: 1; min-width: 260px; background-color: #1e3a8a;" class="relative overflow-hidden rounded-xl ${isSvap3 ? 'border: 1px solid #fcd576;' : 'border: 1px solid transparent; hover:border-white/30;'} p-4 text-left shadow-lg hover:-translate-y-1 transition-all flex flex-col gap-3 group">
                     <div id="svap-bg-3" style="position: absolute; top: 0; right: 0; bottom: 0; width: 65%; background-image: url('${imgUrl}'); background-size: cover; background-position: center; pointer-events: none; z-index: 0; opacity: 0.6; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 70%); mask-image: linear-gradient(to right, transparent 0%, black 70%); transition: transform 0.5s ease, background-image 0.5s ease;" class="group-hover:scale-110"></div>
 
-                    <div class="relative z-10 flex items-center gap-2 text-white/90">
+                    <div class="relative z-10 flex items-center gap-2 ${isSvap3 ? 'text-[#fcd576]' : 'text-white/90'}">
                         <span class="material-icons-round text-sm">hd</span>
                         <span class="text-[13px] font-medium">${displayLang} (SVAP3)</span>
                     </div>
-                    <div class="relative z-10 text-white/90 font-medium text-[15px] line-clamp-1 leading-snug">${movie.name}</div>
+                    <div class="relative z-10 ${isSvap3 ? 'text-[#fcd576]' : 'text-white/90'} font-medium text-[15px] line-clamp-1 leading-snug">${movie.name}</div>
                     <div style="align-self: flex-start; padding: 6px 14px; border-radius: 4px; z-index: 10; position: relative;" class="mt-1 ${isSvap3 ? 'bg-[#fcd576] text-black' : 'bg-white text-black'} text-[13px] font-bold shadow-sm group-hover:bg-gray-200 transition-colors">
                         ${isSvap3 ? '<span class="flex items-center gap-1"><span class="material-icons-round text-[14px]">check_circle</span> Đang xem bản này</span>' : 'Xem bản này'}
                     </div>
@@ -344,12 +360,12 @@ function renderVersions(movie) {
         </div>
     `;
 
-    const oldVersions = document.getElementById('versions-container');
-    if (oldVersions) oldVersions.remove();
+    const oldContainer = document.getElementById('versions-container');
+    if (oldContainer) oldContainer.remove();
 
     const wrapper = document.createElement('div');
     wrapper.id = 'versions-container';
-    wrapper.className = 'w-full';
+    wrapper.className = 'w-full block';
     wrapper.innerHTML = versionsHTML;
 
     actionsContainer.after(wrapper);
@@ -418,6 +434,7 @@ window.changeVersion = function(domain) {
         return;
     }
     
+    // Xây dựng URL đích
     const isNodeDomain = domain === 'aphim.top';
     let newUrl = 'https://' + domain;
     
@@ -477,12 +494,34 @@ async function loadMovieGallery(movie) {
                 galleryCount.textContent = `(${backdrops.length} ảnh)`;
                 
                 scrollContainer.innerHTML = backdrops.map((img, index) => `
-                    <div class="flex-shrink-0 w-[280px] md:w-[400px] aspect-video rounded-xl overflow-hidden shadow-lg border border-white/10 group-hover:border-white/30 transition-colors relative cursor-pointer" onclick="openLightbox(window.movieGalleryImageUrls, ${index})">
+                    <div class="flex-shrink-0 w-[200px] md:w-[280px] aspect-video rounded-xl overflow-hidden shadow-lg border border-white/10 group-hover:border-white/30 transition-colors relative cursor-pointer" onclick="openLightbox(window.movieGalleryImageUrls, ${index})">
                         <img src="https://wsrv.nl/?url=image.tmdb.org/t/p/w780${img.file_path}" alt="Cảnh phim ${movie.name}" loading="lazy" class="w-full h-full object-cover transform transition-transform duration-500 hover:scale-110">
                     </div>
                 `).join('');
                 
                 setupGalleryScroll();
+                
+                // Di chuyển phần hình ảnh lên nằm ngay dưới danh sách tập phim
+                const mobileEpisodesWrapper = document.getElementById('episodes-mobile')?.parentElement;
+                if (mobileEpisodesWrapper) {
+                    mobileEpisodesWrapper.after(galleryContainer);
+                    console.log('✅ Gallery container moved below mobile episodes list');
+                }
+
+                // Update SVAP backgrounds with gallery images dynamically
+                const svapBg1 = document.getElementById('svap-bg-1');
+                const svapBg2 = document.getElementById('svap-bg-2');
+                const svapBg3 = document.getElementById('svap-bg-3');
+
+                if (svapBg1 && svapBg2 && svapBg3) {
+                    const img1 = backdrops[0]?.file_path;
+                    const img2 = backdrops[1]?.file_path || img1;
+                    const img3 = backdrops[2]?.file_path || img2;
+                    
+                    if (img1) svapBg1.style.backgroundImage = `url('https://wsrv.nl/?url=image.tmdb.org/t/p/w780${img1}')`;
+                    if (img2) svapBg2.style.backgroundImage = `url('https://wsrv.nl/?url=image.tmdb.org/t/p/w780${img2}')`;
+                    if (img3) svapBg3.style.backgroundImage = `url('https://wsrv.nl/?url=image.tmdb.org/t/p/w780${img3}')`;
+                }
             }
         }
     } catch (err) {
@@ -569,7 +608,7 @@ function addMovieMetadata(movie) {
 
     // Build metadata cards FIRST
     const metadataHTML = `
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-4 w-full">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8 w-full">
             <!-- Thể Loại -->
             ${movie.category && movie.category.length > 0 ? `
             <div style="background-color: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1);" class="rounded-xl p-3 shadow-lg hover:bg-white/20 transition-all duration-300">
@@ -582,7 +621,7 @@ function addMovieMetadata(movie) {
                 </div>
                 <div class="flex flex-wrap gap-1.5">
                     ${movie.category.map(cat => `
-                        <a href="search.html?category=${cat.slug}" style="border-color: rgba(59,130,246,0.3); color: #93c5fd; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-blue-500/30 transition-colors">
+                        <a href="/search?category=${cat.slug}" style="border-color: rgba(59,130,246,0.3); color: #93c5fd; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-blue-500/30 transition-colors">
                             ${cat.name}
                         </a>
                     `).join('')}
@@ -602,7 +641,7 @@ function addMovieMetadata(movie) {
                 </div>
                 <div class="flex flex-wrap gap-1.5">
                     ${movie.country.map(c => `
-                        <a href="search.html?country=${c.slug}" style="border-color: rgba(168,85,247,0.3); color: #d8b4fe; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-purple-500/30 transition-colors">
+                        <a href="/search?country=${c.slug}" style="border-color: rgba(168,85,247,0.3); color: #d8b4fe; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-purple-500/30 transition-colors">
                             ${c.name}
                         </a>
                     `).join('')}
@@ -705,9 +744,9 @@ function addMovieMetadata(movie) {
         console.log('🎭 Rendering cast section for', movie.actor.length, 'actors:', movie.actor);
 
         const castHTML = `
-            <div class="mt-0 mb-10" id="cast-section">
-                <div class="relative">
-                    <div id="cast-container" class="flex gap-4 overflow-x-auto scrollbar-hide" style="scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 8px;">
+            <div class="mt-0 mb-8 w-full max-w-full overflow-hidden" id="cast-section">
+                <div class="relative w-full max-w-full">
+                    <div id="cast-container" class="flex gap-4 overflow-x-auto scrollbar-hide w-full max-w-full" style="scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 8px;">
                         ${movie.actor.slice(0, 10).map((actor, index) => {
             const colors = ['from-red-500 to-red-700', 'from-blue-500 to-blue-700', 'from-green-500 to-green-700', 'from-yellow-500 to-yellow-700', 'from-purple-500 to-purple-700', 'from-pink-500 to-pink-700', 'from-indigo-500 to-indigo-700', 'from-teal-500 to-teal-700'];
             const colorClass = colors[index % colors.length];
@@ -776,7 +815,7 @@ function renderEpisodes(episodes) {
         const isActive = index === 0;
         
         return `
-            <a href="watch.html?slug=${currentMovie.slug}&episode=${ep.slug}"
+            <a href="/xem-phim/${currentMovie.slug}/tap-${ep.slug}"
                 class="${isActive ? 'bg-[#fcd576] text-black font-bold border-transparent' : 'bg-[#323447] hover:bg-white/10 text-gray-300 border-white/5'} px-4 py-3 rounded-lg flex items-center justify-center gap-2 transition-all border whitespace-nowrap shadow-lg hover:-translate-y-1">
                 <span class="material-icons-round text-[18px]">${isActive ? 'play_arrow' : 'play_arrow'}</span>
                 <span>${ep.name}</span>
@@ -796,10 +835,10 @@ function setupFavoriteButton() {
     const isFav = userService.isFavorite(currentMovie.slug);
 
     const favBtn = document.createElement('button');
-    favBtn.className = 'flex-1 lg:flex-none px-3 sm:px-6 md:px-8 py-3 md:py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full backdrop-blur-md border border-white/10 hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 md:gap-3';
+    favBtn.className = 'w-[52px] h-[52px] lg:w-auto lg:h-auto lg:px-8 lg:py-4 bg-[#323447] lg:bg-white/10 lg:hover:bg-white/20 text-gray-300 lg:text-white font-semibold rounded-full lg:backdrop-blur-md border border-white/5 lg:border-white/30 lg:hover:border-white/50 transition-all duration-300 flex items-center justify-center gap-0 lg:gap-3 shadow-lg flex-shrink-0';
     favBtn.innerHTML = `
-        <span class="material-icons-round text-base md:text-xl">${isFav ? 'favorite' : 'favorite_border'}</span>
-        <span class="text-xs sm:text-sm md:text-base whitespace-nowrap">${isFav ? 'Đã lưu' : 'Lưu phim'}</span>
+        <span class="material-icons-round text-2xl lg:text-xl">${isFav ? 'favorite' : 'favorite_border'}</span>
+        <span class="hidden lg:inline text-base whitespace-nowrap">${isFav ? 'Đã lưu' : 'Lưu phim'}</span>
     `;
 
     favBtn.addEventListener('click', () => {
@@ -810,10 +849,10 @@ function setupFavoriteButton() {
         }
         if (userService.isFavorite(currentMovie.slug)) {
             userService.removeFromFavorites(currentMovie.slug);
-            favBtn.innerHTML = '<span class="material-icons-round text-base md:text-xl">favorite_border</span><span class="text-xs sm:text-sm md:text-base whitespace-nowrap">Lưu phim</span>';
+            favBtn.innerHTML = '<span class="material-icons-round text-2xl lg:text-xl">favorite_border</span><span class="hidden lg:inline text-base whitespace-nowrap">Lưu phim</span>';
         } else {
             if (userService.addToFavorites(currentMovie)) {
-                favBtn.innerHTML = '<span class="material-icons-round text-base md:text-xl">favorite</span><span class="text-xs sm:text-sm md:text-base whitespace-nowrap">Đã lưu</span>';
+                favBtn.innerHTML = '<span class="material-icons-round text-2xl lg:text-xl">favorite</span><span class="hidden lg:inline text-base whitespace-nowrap">Đã lưu</span>';
             }
         }
     });
@@ -822,10 +861,10 @@ function setupFavoriteButton() {
 
     // ── Playlist button ──────────────────────────────────
     const plBtn = document.createElement('button');
-    plBtn.className = 'flex-1 lg:flex-none px-3 sm:px-6 md:px-8 py-3 md:py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full backdrop-blur-md border border-white/10 hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 md:gap-3';
+    plBtn.className = 'w-[52px] h-[52px] lg:w-auto lg:h-auto lg:px-8 lg:py-4 bg-[#323447] lg:bg-white/10 lg:hover:bg-white/20 text-gray-300 lg:text-white font-semibold rounded-full lg:backdrop-blur-md border border-white/5 lg:border-white/30 lg:hover:border-white/50 transition-all duration-300 flex items-center justify-center gap-0 lg:gap-3 shadow-lg flex-shrink-0';
     plBtn.innerHTML = `
-        <span class="material-icons-round text-base md:text-xl">playlist_add</span>
-        <span class="text-xs sm:text-sm md:text-base whitespace-nowrap">Thêm vào</span>
+        <span class="material-icons-round text-2xl lg:text-xl">playlist_add</span>
+        <span class="hidden lg:inline text-base whitespace-nowrap">Thêm vào</span>
     `;
     plBtn.addEventListener('click', () => {
         // ✅ Auth gate: hiện modal nếu chưa đăng nhập
@@ -1002,7 +1041,7 @@ function showError(message) {
         main.innerHTML = `
             <div class="container mx-auto px-6 py-20 text-center">
                 <h2 class="text-2xl font-bold text-red-400 mb-4">${message}</h2>
-                <a href="index.html" class="inline-block px-6 py-3 bg-primary text-black font-bold rounded-lg hover:bg-primary/90 transition-colors">
+                <a href="/" class="inline-block px-6 py-3 bg-primary text-black font-bold rounded-lg hover:bg-primary/90 transition-colors">
                     Về trang chủ
                 </a>
             </div>
