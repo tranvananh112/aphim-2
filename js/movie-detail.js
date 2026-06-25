@@ -494,8 +494,8 @@ async function loadMovieGallery(movie) {
                 galleryCount.textContent = `(${backdrops.length} ảnh)`;
                 
                 scrollContainer.innerHTML = backdrops.map((img, index) => `
-                    <div style="flex-shrink: 0; width: 280px; aspect-ratio: 16/9; max-width: 80vw;" class="rounded-xl overflow-hidden shadow-lg border border-white/10 group-hover:border-white/30 transition-colors relative cursor-pointer" onclick="openLightbox(window.movieGalleryImageUrls, ${index})">
-                        <img src="https://wsrv.nl/?url=image.tmdb.org/t/p/w780${img.file_path}" alt="Cảnh phim ${movie.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" class="transform transition-transform duration-500 hover:scale-110">
+                    <div style="flex: 0 0 auto; width: 280px; max-width: 80vw;" class="aspect-video rounded-xl overflow-hidden shadow-lg border border-white/10 group-hover:border-white/30 transition-colors relative cursor-pointer" onclick="openLightbox(window.movieGalleryImageUrls, ${index})">
+                        <img src="https://wsrv.nl/?url=image.tmdb.org/t/p/w780${img.file_path}" alt="Cảnh phim ${movie.name}" loading="lazy" class="w-full h-full object-cover transform transition-transform duration-500 hover:scale-110">
                     </div>
                 `).join('');
                 
@@ -827,47 +827,88 @@ function renderEpisodes(episodes) {
     if (mobileContainer) mobileContainer.innerHTML = html;
 }
 
-// Setup favorite button
 function setupFavoriteButton() {
     const buttonsContainer = document.querySelector('.movie-actions-container');
     if (!buttonsContainer || !currentMovie) return;
 
     const isFav = userService.isFavorite(currentMovie.slug);
 
+    const existingFavBtn = document.getElementById('favoriteMovieBtn');
+    const existingPlBtn = document.getElementById('saveMovieBtn');
+
+    if (existingFavBtn && existingPlBtn) {
+        // Just bind events and update state to existing buttons
+        const favIcon = existingFavBtn.querySelector('.material-icons-round');
+        const favText = existingFavBtn.querySelector('span:not(.material-icons-round)');
+        
+        if (favIcon) favIcon.textContent = isFav ? 'favorite' : 'favorite_border';
+        if (favText) favText.textContent = isFav ? 'Đã lưu' : 'Lưu phim';
+
+        existingFavBtn.addEventListener('click', () => {
+            if (!authService.isLoggedIn()) {
+                if (typeof window.showAuthModal === 'function') window.showAuthModal('login');
+                return;
+            }
+            if (userService.isFavorite(currentMovie.slug)) {
+                userService.removeFromFavorites(currentMovie.slug);
+                if (favIcon) favIcon.textContent = 'favorite_border';
+                if (favText) favText.textContent = 'Lưu phim';
+            } else {
+                if (userService.addToFavorites(currentMovie)) {
+                    if (favIcon) favIcon.textContent = 'favorite';
+                    if (favText) favText.textContent = 'Đã lưu';
+                }
+            }
+        });
+
+        existingPlBtn.addEventListener('click', () => {
+            if (!authService.isLoggedIn()) {
+                if (typeof window.showAuthModal === 'function') window.showAuthModal('login');
+                return;
+            }
+            if (typeof openPlaylistModal === 'function') {
+                openPlaylistModal({
+                    slug: currentMovie.slug,
+                    name: currentMovie.name,
+                    thumb_url: currentMovie.thumb_url || currentMovie.poster_url,
+                    year: currentMovie.year
+                });
+            }
+        });
+        return;
+    }
+
+    // Fallback if not found in HTML
     const favBtn = document.createElement('button');
-    favBtn.className = 'w-[52px] h-[52px] lg:w-auto lg:h-auto lg:px-8 lg:py-4 bg-[#323447] lg:bg-white/10 lg:hover:bg-white/20 text-gray-300 lg:text-white font-semibold rounded-full lg:backdrop-blur-md border border-white/5 lg:border-white/30 lg:hover:border-white/50 transition-all duration-300 flex items-center justify-center gap-0 lg:gap-3 shadow-lg flex-shrink-0';
+    favBtn.className = 'flex-none px-4 sm:px-6 md:px-8 py-3 md:py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full backdrop-blur-md border border-white/10 hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0';
     favBtn.innerHTML = `
-        <span class="material-icons-round text-2xl lg:text-xl">${isFav ? 'favorite' : 'favorite_border'}</span>
-        <span class="hidden lg:inline text-base whitespace-nowrap">${isFav ? 'Đã lưu' : 'Lưu phim'}</span>
+        <span class="material-icons-round text-base md:text-xl">${isFav ? 'favorite' : 'favorite_border'}</span>
+        <span class="text-xs sm:text-sm md:text-base whitespace-nowrap">${isFav ? 'Đã lưu' : 'Lưu phim'}</span>
     `;
 
     favBtn.addEventListener('click', () => {
-        // ✅ Auth gate: hiện modal nếu chưa đăng nhập
         if (!authService.isLoggedIn()) {
             if (typeof window.showAuthModal === 'function') window.showAuthModal('login');
             return;
         }
         if (userService.isFavorite(currentMovie.slug)) {
             userService.removeFromFavorites(currentMovie.slug);
-            favBtn.innerHTML = '<span class="material-icons-round text-2xl lg:text-xl">favorite_border</span><span class="hidden lg:inline text-base whitespace-nowrap">Lưu phim</span>';
+            favBtn.innerHTML = '<span class="material-icons-round text-base md:text-xl">favorite_border</span><span class="text-xs sm:text-sm md:text-base whitespace-nowrap">Lưu phim</span>';
         } else {
             if (userService.addToFavorites(currentMovie)) {
-                favBtn.innerHTML = '<span class="material-icons-round text-2xl lg:text-xl">favorite</span><span class="hidden lg:inline text-base whitespace-nowrap">Đã lưu</span>';
+                favBtn.innerHTML = '<span class="material-icons-round text-base md:text-xl">favorite</span><span class="text-xs sm:text-sm md:text-base whitespace-nowrap">Đã lưu</span>';
             }
         }
     });
-
     buttonsContainer.appendChild(favBtn);
 
-    // ── Playlist button ──────────────────────────────────
     const plBtn = document.createElement('button');
-    plBtn.className = 'w-[52px] h-[52px] lg:w-auto lg:h-auto lg:px-8 lg:py-4 bg-[#323447] lg:bg-white/10 lg:hover:bg-white/20 text-gray-300 lg:text-white font-semibold rounded-full lg:backdrop-blur-md border border-white/5 lg:border-white/30 lg:hover:border-white/50 transition-all duration-300 flex items-center justify-center gap-0 lg:gap-3 shadow-lg flex-shrink-0';
+    plBtn.className = 'flex-none px-4 sm:px-6 md:px-8 py-3 md:py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full backdrop-blur-md border border-white/10 hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0';
     plBtn.innerHTML = `
-        <span class="material-icons-round text-2xl lg:text-xl">playlist_add</span>
-        <span class="hidden lg:inline text-base whitespace-nowrap">Thêm vào</span>
+        <span class="material-icons-round text-base md:text-xl">playlist_add</span>
+        <span class="text-xs sm:text-sm md:text-base whitespace-nowrap">Thêm vào</span>
     `;
     plBtn.addEventListener('click', () => {
-        // ✅ Auth gate: hiện modal nếu chưa đăng nhập
         if (!authService.isLoggedIn()) {
             if (typeof window.showAuthModal === 'function') window.showAuthModal('login');
             return;

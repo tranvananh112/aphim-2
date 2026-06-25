@@ -12,7 +12,7 @@
     height: 100vh;
     z-index: -1;
     overflow: hidden;
-    background-color: var(--bg-void, #050508);
+    background-color: #1e2130;
     pointer-events: none;
 }
 
@@ -20,8 +20,10 @@
 .ambient-orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(150px);
-    transform: translateZ(0); /* Force GPU compositing without excessive memory */
+    /* Giảm blur từ 150px xuống 40px để cứu hiệu năng GPU trên màn hình lớn */
+    filter: blur(40px);
+    transform: translate3d(0,0,0); /* Force hardware compositing */
+    will-change: transform; /* Báo cho browser biết layer này sẽ chuyển động độc lập */
 }
 
 /* ── Orb 1: Brighter Slate ── */
@@ -64,7 +66,7 @@
     width: 80vw;
     height: 80vw;
     background: radial-gradient(circle, rgba(13, 15, 23, 0.4) 0%, transparent 70%);
-    filter: blur(200px);
+    filter: blur(50px);
     opacity: 0.3;
 }
 
@@ -167,18 +169,15 @@
    Biến các khối nền đặc (solid) thành kính mờ lộ ambient
    ============================================================ */
 
-/* Xóa màu nền đặc của body/main */
+/* Nền solid #1e2130 cho toàn bộ trang */
+html,
 body,
 main,
 body.bg-background-dark,
 main.bg-background-dark,
 .bg-background-dark {
-    background-color: transparent !important;
-}
-
-/* Chắc chắn body/html không che ambient */
-html {
-    background-color: var(--bg-void, #050508);
+    background-color: #1e2130 !important;
+    background: #1e2130 !important;
 }
 
 /* Biến surface sang glass */
@@ -192,9 +191,7 @@ html {
 
 /* Footer glass */
 .bg-\[\#1e202c\] {
-    background-color: rgba(5, 5, 8, 0.78) !important;
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background-color: #1e2130 !important;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -204,7 +201,6 @@ html {
 .horror-section,
 .coming-soon-section,
 .top-movies-section,
-.top-movies-section *:not(.movie-card):not(img):not(button):not(.rank-big-number),
 .country-section,
 .imdb-section,
 section.bg-background-dark,
@@ -212,8 +208,8 @@ section[id],
 section,
 #dynamicSections,
 #dynamicSections > div {
-    background-color: transparent !important;
-    background: transparent !important;
+    background-color: #1e2130 !important;
+    background: #1e2130 !important;
 }
 
 /* Glass cards giữ nền riêng */
@@ -230,9 +226,9 @@ section,
 .hero-bottom-gradient {
     background: linear-gradient(
         to top,
-        rgba(5, 5, 8, 0.98) 0%,
-        rgba(5, 5, 8, 0.88) 25%,
-        rgba(5, 5, 8, 0.42) 60%,
+        rgba(30, 33, 48, 0.98) 0%,
+        rgba(30, 33, 48, 0.88) 25%,
+        rgba(30, 33, 48, 0.42) 60%,
         transparent 100%
     ) !important;
 }
@@ -241,14 +237,14 @@ section,
 .horror-banner-gradient {
     background: linear-gradient(
         90deg,
-        rgba(5, 5, 8, 0.92) 15%,
+        rgba(30, 33, 48, 0.92) 15%,
         transparent 60%
     ) !important;
 }
 .horror-banner-overlay {
     background: linear-gradient(
         0deg,
-        rgba(5, 5, 8, 0.96) 5%,
+        rgba(30, 33, 48, 0.96) 5%,
         transparent 40%
     ) !important;
 }
@@ -258,9 +254,7 @@ section,
 [style*="background: #1e202c"],
 [style*="background-color:#1e202c"],
 [style*="background:#1e202c"] {
-    background-color: rgba(18, 19, 31, 0.45) !important;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background-color: #1e2130 !important;
 }
 /* ?? Orb 6: Deep Violet */
 .ambient-orb-6 {
@@ -297,3 +291,42 @@ section,
 }
 
 
+
+/* �?ng b? m�u n?n Footer v� t?t Logo ch�m tr�n m?i trang */
+footer, footer.bg-[#07080a], footer.bg-[#1e202c] { background-color: #1e2130 !important; background: #1e2130 !important; border-top: 1px solid rgba(255, 255, 255, 0.05) !important; }
+footer img[style*='opacity: 0.04'] { display: none !important; }
+footer img[src*='apple-touch-icon.png'][style*='absolute'] { display: none !important; }
+
+
+/* Dong bo mau nen Footer va tat Logo chim tren moi trang */
+
+footer img[style*='opacity: 0.04'] { display: none !important; }
+footer img[src*='apple-touch-icon.png'][style*='absolute'] { display: none !important; }
+
+
+/* Nền rồng cho Footer */
+footer {
+    background-color: #1e2130 !important;
+    background-image: url('https://beam-images.warnermediacdn.com/2024-03/leadimage_background_hotd_eng_0.jpg?host=wbd-dotcom-drupal-prd-us-east-1.s3.amazonaws.com&w=1920') !important;
+    background-size: cover !important;
+    background-position: center right !important;
+    background-repeat: no-repeat !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Lớp phủ tối mờ lên trên nền rồng để chữ dễ đọc */
+footer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(30, 33, 48, 0.7) !important;
+    pointer-events: none;
+    z-index: 0;
+}
+
+
+/* Loại bỏ các lớp nền xám cũ */
+.bg-void, .sofaflix-section {
+    background-color: transparent !important;
+    background: transparent !important;
+}
