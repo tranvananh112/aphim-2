@@ -880,10 +880,10 @@ function setupFavoriteButton() {
 
     // Fallback if not found in HTML
     const favBtn = document.createElement('button');
-    favBtn.className = 'flex-none px-4 sm:px-6 md:px-8 py-3 md:py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full backdrop-blur-md border border-white/10 hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0';
+    favBtn.className = 'w-[52px] h-[52px] lg:w-auto lg:h-auto lg:px-8 lg:py-4 bg-[#323447] lg:bg-white/10 lg:hover:bg-white/20 text-gray-300 lg:text-white font-semibold rounded-full lg:backdrop-blur-md border border-white/5 lg:border-white/30 lg:hover:border-white/50 transition-all duration-300 flex items-center justify-center gap-0 lg:gap-3 shadow-lg flex-shrink-0';
     favBtn.innerHTML = `
-        <span class="material-icons-round text-base md:text-xl">${isFav ? 'favorite' : 'favorite_border'}</span>
-        <span class="text-xs sm:text-sm md:text-base whitespace-nowrap">${isFav ? 'Đã lưu' : 'Lưu phim'}</span>
+        <span class="material-icons-round text-2xl lg:text-xl">${isFav ? 'favorite' : 'favorite_border'}</span>
+        <span class="hidden lg:inline text-base whitespace-nowrap">${isFav ? 'Đã lưu' : 'Lưu phim'}</span>
     `;
 
     favBtn.addEventListener('click', () => {
@@ -893,20 +893,20 @@ function setupFavoriteButton() {
         }
         if (userService.isFavorite(currentMovie.slug)) {
             userService.removeFromFavorites(currentMovie.slug);
-            favBtn.innerHTML = '<span class="material-icons-round text-base md:text-xl">favorite_border</span><span class="text-xs sm:text-sm md:text-base whitespace-nowrap">Lưu phim</span>';
+            favBtn.innerHTML = '<span class="material-icons-round text-2xl lg:text-xl">favorite_border</span><span class="hidden lg:inline text-base whitespace-nowrap">Lưu phim</span>';
         } else {
             if (userService.addToFavorites(currentMovie)) {
-                favBtn.innerHTML = '<span class="material-icons-round text-base md:text-xl">favorite</span><span class="text-xs sm:text-sm md:text-base whitespace-nowrap">Đã lưu</span>';
+                favBtn.innerHTML = '<span class="material-icons-round text-2xl lg:text-xl">favorite</span><span class="hidden lg:inline text-base whitespace-nowrap">Đã lưu</span>';
             }
         }
     });
     buttonsContainer.appendChild(favBtn);
 
     const plBtn = document.createElement('button');
-    plBtn.className = 'flex-none px-4 sm:px-6 md:px-8 py-3 md:py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full backdrop-blur-md border border-white/10 hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0';
+    plBtn.className = 'w-[52px] h-[52px] lg:w-auto lg:h-auto lg:px-8 lg:py-4 bg-[#323447] lg:bg-white/10 lg:hover:bg-white/20 text-gray-300 lg:text-white font-semibold rounded-full lg:backdrop-blur-md border border-white/5 lg:border-white/30 lg:hover:border-white/50 transition-all duration-300 flex items-center justify-center gap-0 lg:gap-3 shadow-lg flex-shrink-0';
     plBtn.innerHTML = `
-        <span class="material-icons-round text-base md:text-xl">playlist_add</span>
-        <span class="text-xs sm:text-sm md:text-base whitespace-nowrap">Thêm vào</span>
+        <span class="material-icons-round text-2xl lg:text-xl">playlist_add</span>
+        <span class="hidden lg:inline text-base whitespace-nowrap">Thêm vào</span>
     `;
     plBtn.addEventListener('click', () => {
         if (!authService.isLoggedIn()) {
@@ -1077,12 +1077,20 @@ function loadRatingsAndComments(slug) {
 
 // Show error
 function showError(message) {
+    if (!document.getElementById('dotlottie-script')) {
+        const script = document.createElement('script');
+        script.id = 'dotlottie-script';
+        script.src = "https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.14/dist/dotlottie-wc.js";
+        script.type = "module";
+        document.body.appendChild(script);
+    }
     const main = document.querySelector('main');
     if (main) {
         main.innerHTML = `
-            <div class="container mx-auto px-6 py-20 text-center">
-                <h2 class="text-2xl font-bold text-red-400 mb-4">${message}</h2>
-                <a href="/" class="inline-block px-6 py-3 bg-primary text-black font-bold rounded-lg hover:bg-primary/90 transition-colors">
+            <div class="container mx-auto px-6 py-20 text-center flex flex-col items-center justify-center">
+                <dotlottie-wc src="/icons/404-cat.lottie" style="width: 240px; height: 240px; max-width: 100%; margin-bottom: -10px;" autoplay loop></dotlottie-wc>
+                <h2 class="text-2xl font-bold text-red-400 mb-4 mt-2">${message || 'Rất tiếc, không tìm thấy phim này!'}</h2>
+                <a href="/" class="inline-block px-6 py-3 bg-[#fcd576] text-black font-bold rounded-xl hover:bg-yellow-500 transition-all shadow-[0_4px_12px_rgba(252,213,118,0.3)] hover:-translate-y-1">
                     Về trang chủ
                 </a>
             </div>
