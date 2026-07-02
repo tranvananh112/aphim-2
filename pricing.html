@@ -3,12 +3,12 @@
 
 <head>
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8X0NQ0Y10R"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYK5R13WK2"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-        gtag('config', 'G-8X0NQ0Y10R');
+        gtag('config', 'G-QYK5R13WK2');
     </script>
     <meta charset="UTF-8">
     <link rel="canonical" href="https://aphim.io.vn/pricing.html" />
@@ -489,14 +489,14 @@
     <!-- <link rel="stylesheet" href="css/imdb-carousel-3d.css?v=13"> --> <!-- Removed: 404 error -->
     <link rel="stylesheet" href="css/hero-mobile-fix.css?v=13">
     <link rel="stylesheet" href="css/page-animations.css?v=13">
-    <link rel="stylesheet" href="css/ambient-bg.css?v=1782358933843">
+    <link rel="stylesheet" href="css/ambient-bg.css?v=1782358934022">
     <link rel="stylesheet" href="css/design-tokens.css?v=13">
     <link rel="stylesheet" href="css/movie-cards-v2.css?v=13">
     <link rel="stylesheet" href="css/portrait-cards-v3.css?v=13">
     <link rel="stylesheet" href="css/top-ranking-v2.css?v=13">
     <link rel="stylesheet" href="css/seamless-sections.css?v=15">
     <link rel="stylesheet" href="css/progressive-image.css?v=13">
-    <link rel="stylesheet" href="css/interests-section.css?v=14">
+    <link rel="stylesheet" href="css/interests-section.css?v=25">
     <link rel="stylesheet" href="css/top-comments.css?v=13">
     <link rel="stylesheet" href="css/mobile-menu-modern.css?v=38">
     <link rel="stylesheet" href="css/mobile-viewport-fix.css?v=36">
@@ -713,8 +713,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="APhim">
     <link rel="stylesheet" href="css/design-tokens.css?v=13">
-    <link rel="stylesheet" href="css/ambient-bg.css?v=1782358933843">
-    <link rel="stylesheet" href="css/interests-section.css?v=14">
+    <link rel="stylesheet" href="css/ambient-bg.css?v=1782358934022">
+    <link rel="stylesheet" href="css/interests-section.css?v=25">
     <link rel="stylesheet" href="css/top-ranking-v2.css?v=13">
     <link rel="stylesheet" href="css/movie-cards-v2.css?v=13">
     <link rel="stylesheet" href="css/coming-soon-section.css?v=13">
@@ -941,6 +941,7 @@
 
                         <a href="search.html" class="nav-flat-link">Khám Phá</a>
                         <a href="pricing.html" class="nav-flat-link">Gói Cước</a>
+                        <a href="lich-chieu.html" class="nav-flat-link">Lịch Chiếu</a>
                         <a href="phim-x.html" class="nav-flat-link nav-flat-link--danger">🔞 Phim X</a>
                     </nav-links>
                 </div>
@@ -950,12 +951,12 @@
             <!-- ZONE 3: Right — Auth + Mobile Toggle -->
             <div class="flex items-center gap-3 flex-shrink-0 ml-4">
                 <!-- Auth Container (filled by auth.js / user-ui.js) -->
-                <div id="authContainer" class="flex items-center">
+                <div id="authContainer" class="flex items-center" style="overflow: visible !important;">
                     <a href="login.html"
                         onclick="if(window.showAuthModal){event.preventDefault();event.stopImmediatePropagation();window.showAuthModal('login');return false;}"
                         class="nav-auth-btn hidden lg:inline-flex">
-                        <span class="material-icons-round" style="font-size:16px;">person</span>
-                        Đăng Nhập
+                        <dotlottie-player src="/icons/panda.lottie" background="transparent" speed="1" style="width: 40px; height: 40px; transform: scale(1.85); margin: -10px -4px -10px -12px;" loop autoplay></dotlottie-player>
+                        <span class="auth-btn-text">Đăng Nhập</span>
                     </a>
                 </div>
                 <!-- Mobile Menu Button -->
@@ -966,6 +967,8 @@
         </div>
 
     </nav>
+    <!-- Lottie Player -->
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 
     <!-- Categories/Countries Dropdown logic -->
     <script src="js/categories-dropdown.js?v=13"></script>

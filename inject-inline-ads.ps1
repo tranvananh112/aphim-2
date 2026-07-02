@@ -12,10 +12,13 @@ $bannerHTML = @'
     <div class="aphim-inline-ad">
         <span class="aphim-inline-ad-label">Quảng cáo</span>
         <div class="aphim-inline-ad-inner">
+            <a class="aphim-inline-ad-item" href="https://www.aa8qbet.com/?ch=74858ce908" target="_blank" rel="noopener nofollow" aria-label="8QBet">
+                <img src="/quangcao/8pbet/banner_8Qbet.gif" alt="8QBet" loading="lazy">
+            </a>
             <a class="aphim-inline-ad-item" href="https://vsbet294.com/p/BSYk" target="_blank" rel="noopener nofollow" aria-label="VSBet">
                 <img src="/ads/catfish/vsbet.gif" alt="VSBet" loading="lazy">
             </a>
-            <a class="aphim-inline-ad-item" href="https://colatv99.live/" target="_blank" rel="noopener nofollow" aria-label="ColaTV">
+            <a class="aphim-inline-ad-item" href="https://colatv88.live/" target="_blank" rel="noopener nofollow" aria-label="ColaTV">
                 <img src="/ads/catfish/colatv.gif" alt="ColaTV" loading="lazy">
             </a>
             <a class="aphim-inline-ad-item" href="https://colascores.com/" target="_blank" rel="noopener nofollow" aria-label="ColaScore">

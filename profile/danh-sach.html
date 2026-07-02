@@ -10,12 +10,12 @@
 
     <script src="js/chat-init-guard.js?v=37"></script>
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8X0NQ0Y10R"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QYK5R13WK2"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-        gtag('config', 'G-8X0NQ0Y10R');
+        gtag('config', 'G-QYK5R13WK2');
     </script>
 
     
@@ -633,7 +633,7 @@
             background: rgba(232, 185, 79, 0.5);
         }
     </style>
-    <link rel="stylesheet" href="css/ambient-bg.css?v=1782358933845">
+    <link rel="stylesheet" href="css/ambient-bg.css?v=1782358934023">
     <link rel="stylesheet" href="css/nav-desktop-v2.css?v=15">
     <link rel="stylesheet" href="css/design-tokens.css?v=13">
     <script src="js/anti-devtools.js?v=10"></script>
@@ -839,8 +839,8 @@
                     <a href="login.html"
                         onclick="if(window.showAuthModal){event.preventDefault();event.stopImmediatePropagation();window.showAuthModal('login');return false;}"
                         class="nav-auth-btn hidden lg:inline-flex">
-                        <span class="material-icons-round" style="font-size:16px;">person</span>
-                        Đăng Nhập
+                        <dotlottie-player src="/icons/panda.lottie" background="transparent" speed="1" style="width: 40px; height: 40px; transform: scale(1.85); margin: -10px -4px -10px -12px;" loop autoplay></dotlottie-player>
+                        <span class="auth-btn-text">Đăng Nhập</span>
                     </a>
                 </div>
                 <!-- Mobile Menu Button -->
@@ -855,6 +855,8 @@
             <!-- Content will be injected by mobile-menu-simple.js -->
         </div>
     </nav>
+    <!-- Lottie Player -->
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 
     <script>
         // Mobile menu toggle

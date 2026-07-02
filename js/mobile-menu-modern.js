@@ -56,7 +56,7 @@
             ? (savedAvatar
                 ? `<img src="${escHtml(savedAvatar)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'U')}&background=random'">`
                 : escHtml((user.name || user.email || 'U').charAt(0).toUpperCase()))
-            : icon('person', 'font-size:26px;color:rgba(255,255,255,0.3)');
+            : `<dotlottie-player src="/icons/panda.lottie" background="transparent" speed="1" style="width:100%;height:100%;transform:scale(1.85);" loop autoplay></dotlottie-player>`;
 
         const userName = user ? escHtml(user.name || user.email || 'Người dùng') : 'Khách';
         const userBadge = user ? 'Thành viên Vàng' : 'Chưa đăng nhập';
@@ -87,7 +87,7 @@
         <div id="mm-drawer-scroll">
 
             <!-- 1. Trang Chủ -->
-            <a href="index.html" class="mm-nav-full mm-glass ${CURRENT_PAGE === 'index.html' ? 'mm-active' : ''}">
+            <a href="/" class="mm-nav-full mm-glass ${CURRENT_PAGE === 'index.html' ? 'mm-active' : ''}">
                 ${icon('home', CURRENT_PAGE === 'index.html' ? 'color:#FFD700;font-size:24px;' : 'font-size:24px;color:#aaabad;')}
                 <span class="mm-nav-full-text">Trang Chủ</span>
                 <div style="margin-left:auto;">${icon('chevron_right', 'font-size:18px;color:rgba(255,215,0,0.4);')}</div>
@@ -103,10 +103,7 @@
                 <div class="mm-dropdown-panel-blue">
                     <div class="mm-dropdown-panel-blue-scroll">
                         <div class="mm-grid-2" id="mmPhimDropGrid">
-                            <a href="phim-theo-quoc-gia.html" class="mm-card-item mm-glass">
-                                ${icon('public', 'font-size:24px;color:#aaabad;')}
-                                <span class="mm-card-label">Tất Cả</span>
-                            </a>
+
                             <!-- Danh sách quốc gia loading -->
                         </div>
                     </div>
@@ -131,29 +128,26 @@
 
             <!-- 3-6. Grid cột -->
             <div class="mm-grid-2">
-                <a href="danh-sach.html" class="mm-card-item mm-glass color-blue">
+                <a href="/danh-sach" class="mm-card-item mm-glass color-blue">
                     ${icon('view_list', 'font-size:22px;')}
                     <span class="mm-card-label">Danh Sách</span>
                 </a>
-                <a href="search.html" class="mm-card-item mm-glass color-green" style="position:relative;">
+                <a href="/search" class="mm-card-item mm-glass color-green" style="position:relative;">
                     <div class="mm-badge-new">Mới</div>
                     ${icon('explore', 'font-size:22px;')}
                     <span class="mm-card-label">Khám Phá</span>
                 </a>
-                <a href="pricing.html" class="mm-card-item mm-glass color-orange">
+                <a href="/pricing" class="mm-card-item mm-glass color-orange">
                     ${icon('payments', 'font-size:22px;')}
                     <span class="mm-card-label">Gói Cước</span>
                 </a>
+                <a href="/lich-chieu" class="mm-card-item mm-glass" style="background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.3);">
+                    ${icon('event', 'font-size:22px;color:#a78bfa;')}
+                    <span class="mm-card-label" style="color:#a78bfa;">Lịch Chiếu</span>
+                </a>
             </div>
 
-            <!-- 7. Phim X (conditional) -->
-            ${isPhimXEnabled() ? `
-            <a href="phim-x.html" class="mm-nav-full mm-nav-filmx" style="gap:16px;">
-                <div class="mm-filmx-icon-wrap">
-                    ${icon('18_up_rating', 'font-size:20px;color:#ff7351;')}
-                </div>
-                <span style="font-family:inherit;font-size:18px;font-weight:700;color:rgba(255,115,81,0.9);">Phim X</span>
-            </a>` : ''}
+
 
             <!-- UPGRADE BANNER -->
             <div class="mm-upgrade-banner mm-glass">
@@ -164,7 +158,7 @@
                         <span class="mm-upgrade-title">Nâng cấp trải nghiệm</span>
                     </div>
                     <p class="mm-upgrade-desc">Xem phim không quảng cáo, chất lượng HD và tốc độ tải nhanh hơn.</p>
-                    <a href="pricing.html" class="mm-upgrade-btn" style="display:block; text-align:center; text-decoration:none; box-sizing:border-box;">NÂNG CẤP NGAY</a>
+                    <a href="/pricing" class="mm-upgrade-btn" style="display:block; text-align:center; text-decoration:none; box-sizing:border-box;">NÂNG CẤP NGAY</a>
                 </div>
             </div>
 
@@ -174,14 +168,14 @@
                 <div class="mm-footer-row">
                     <span class="mm-footer-version">A Phim</span>
                     <div class="mm-footer-links">
-                        <a href="profile.html" class="mm-footer-link">
+                        <a href="/profile" class="mm-footer-link">
                             ${icon('settings', 'font-size:16px;')} Cài đặt
                         </a>
                         ${user
-                ? `<button class="mm-footer-link danger" onclick="try{authService.logout()}catch(e){window.location.href='login.html'}">
+                ? `<button class="mm-footer-link danger" onclick="try{authService.logout()}catch(e){window.location.href = '/login'}">
                                    ${icon('logout', 'font-size:16px;')} Đăng xuất
                                </button>`
-                : `<a href="login.html" onclick="if(window.showAuthModal){event.preventDefault(); if(window.closeMobileMenu) window.closeMobileMenu(); window.showAuthModal('login'); return false;}" class="mm-footer-link" style="color:#fcd576; font-weight:700; background: rgba(252,213,118,0.1); padding: 6px 12px; border-radius: 20px;">
+                : `<a href="/login" onclick="if(window.showAuthModal){event.preventDefault(); if(window.closeMobileMenu) window.closeMobileMenu(); window.showAuthModal('login'); return false;}" class="mm-footer-link" style="color:#fcd576; font-weight:700; background: rgba(252,213,118,0.1); padding: 6px 12px; border-radius: 20px;">
                                    ${icon('login', 'font-size:16px;')} Đăng nhập
                                </a>`
             }
@@ -260,12 +254,7 @@
                 'chau-phi': 'globe', 'nam-phi': 'za', 'ukraina': 'ua', 'a-rap-xe-ut': 'sa'
             };
 
-            let html = `
-                <a href="phim-theo-quoc-gia.html" class="mm-card-item mm-glass">
-                    <span style="font-size: 20px; line-height: 1;">🌍</span>
-                    <span class="mm-card-label" style="margin-left: 4px;">Tất Cả</span>
-                </a>
-            `;
+            let html = '';
 
             html += countries.map(c => {
                 const code = flagCodes[c.slug] || 'globe';
@@ -274,7 +263,7 @@
                     : `<img src="https://flagcdn.com/16x12/${code}.png" alt="${code}" style="width:16px;height:12px;object-fit:cover;border-radius:2px;">`;
 
                 return `
-                    <a href="phim-theo-quoc-gia.html?country=${c.slug}" class="mm-card-item mm-glass">
+                    <a href="/phim-theo-quoc-gia?country=${c.slug}" class="mm-card-item mm-glass">
                         ${iconHtml}
                         <span class="mm-card-label" style="margin-left: 4px;">${c.name}</span>
                     </a>
@@ -302,15 +291,11 @@
                 { slug: 'short-drama', name: 'Short Drama' }
             ];
 
-            let htmlLoai = `
-                <a href="categories.html" class="mm-card-item mm-glass">
-                    <span class="mm-card-label" style="font-weight: 700;">Tất Cả Thể Loại</span>
-                </a>
-            `;
+            let htmlLoai = '';
 
             htmlLoai += categories.map(c => {
                 return `
-                    <a href="categories.html?category=${c.slug}" class="mm-card-item mm-glass">
+                    <a href="/categories?category=${c.slug}" class="mm-card-item mm-glass">
                         <span class="mm-card-label">${c.name}</span>
                     </a>
                 `;

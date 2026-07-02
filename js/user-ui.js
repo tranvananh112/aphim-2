@@ -14,6 +14,13 @@ function updateUserUI() {
     const authContainer = document.getElementById('authContainer');
     if (!authContainer) return;
 
+    if (!document.querySelector('script[src*="dotlottie-player.mjs"]')) {
+        const s = document.createElement('script');
+        s.src = "https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs";
+        s.type = "module";
+        document.head.appendChild(s);
+    }
+
     if (user) {
         const userId = user._id || user.id || user.email;
         const avatarKey = userId ? `avatar_${userId}` : 'user_avatar';
@@ -25,7 +32,7 @@ function updateUserUI() {
 
         // 2. Render Avatar với hệ thống Frame (Sử dụng trực tiếp container làm wrap)
         const avatarHtml = `
-        <div class="shop-frame-wrap ${frameClass} size-xs" style="position:relative; flex-shrink:0; overflow: visible !important;">
+        <div class="shop-frame-wrap ${frameClass} size-xs nav-user-avatar-wrap" style="position:relative; flex-shrink:0; overflow: visible !important;">
             <img src="${savedAvatar}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; position:relative; z-index:1;" onerror="this.src='https://ui-avatars.com/api/?name=${user.name}&background=random'"/>
         </div>
     `;
@@ -86,7 +93,7 @@ function updateUserUI() {
             <div id="userNavProfile" class="flex items-center" style="position: relative; z-index: 50;">
                 ${notificationBell}
                 <div class="relative group nav-profile-dropdown" style="padding: 4px 0; overflow: visible !important;">
-                    <a href="profile.html" class="nav-profile-pill-v2 flex items-center gap-2.5 px-3 py-1.5 rounded-full transition-all duration-300 group cursor-pointer" 
+                    <a href="/profile" class="nav-profile-pill-v2 flex items-center gap-2.5 px-3 py-1.5 rounded-full transition-all duration-300 group cursor-pointer" 
                        style="text-decoration:none; overflow: visible !important; position: relative;">
                         ${avatarHtml}
                         <span class="hidden md:inline text-[13px] font-bold" style="color: #000 !important; white-space:nowrap; max-width:100px; overflow:hidden; text-overflow:ellipsis;">
@@ -128,7 +135,7 @@ function updateUserUI() {
 
         // CHIẾN THUẬT: Dọn dẹp triệt để mọi phần tử Profile cũ/lỗi để tránh nhân bản
         // 1. Xóa mọi thẻ Profile độc lập nằm ngoài container
-        document.querySelectorAll('.nav-profile-dropdown, a[href="profile.html"]').forEach(el => {
+        document.querySelectorAll('.nav-profile-dropdown, a[href="/profile"]').forEach(el => {
             if (!el.closest('#authContainer')) {
                 el.remove();
             }
@@ -137,6 +144,7 @@ function updateUserUI() {
         // 2. Cập nhật tất cả các container có ID là authContainer (phòng trường hợp trùng ID)
         const containers = document.querySelectorAll('#authContainer');
         containers.forEach(container => {
+            container.style.setProperty('overflow', 'visible', 'important');
             container.innerHTML = '';
             container.insertAdjacentHTML('afterbegin', profileLink);
         });
@@ -152,12 +160,13 @@ function updateUserUI() {
                onclick="if(window.showAuthModal){event.preventDefault();event.stopImmediatePropagation();window.showAuthModal('login');return false;}"
                class="nav-auth-btn" 
                style="display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 6px;">
-                <span class="material-icons-round" style="font-size:22px; font-weight:700; -webkit-text-stroke:0.5px currentColor; display:flex; align-items:center; justify-content:center; line-height:1; margin-left:-4px;">person</span>
+                <dotlottie-player src="/icons/panda.lottie" background="transparent" speed="1" style="width: 40px; height: 40px; transform: scale(1.85); margin: -10px -4px -10px -12px;" loop autoplay></dotlottie-player>
                 <span class="auth-btn-text">Đăng Nhập</span>
             </a>
         `;
         const containers = document.querySelectorAll('#authContainer');
         containers.forEach(container => {
+            container.style.setProperty('overflow', 'visible', 'important');
             container.innerHTML = loginBtnHtml;
         });
     }
@@ -396,22 +405,29 @@ const TOAST_ICONS = {
                 align-items: center !important;
                 justify-content: center !important;
                 padding: 0 !important;
-                width: 38px !important;
-                height: 38px !important;
+                width: 2.25rem !important;
+                height: 2.25rem !important;
                 min-width: unset !important;
                 gap: 0 !important;
                 position: relative !important;
+                background: rgba(0, 0, 0, 0.4) !important;
+                border: 2px solid #eab308 !important;
+                border-radius: 50% !important;
+                box-shadow: none !important;
+                box-sizing: border-box !important;
             }
-            .nav-auth-btn .material-icons-round {
-                font-size: 20px !important;
+            .nav-auth-btn .material-icons-round,
+            .nav-auth-btn dotlottie-player {
                 position: absolute !important;
                 top: 50% !important;
                 left: 50% !important;
-                transform: translate(-50%, -50%) !important;
+                transform: translate(-50%, -50%) scale(1.85) !important;
+                margin: 0 !important;
+            }
+            .nav-auth-btn .material-icons-round {
+                font-size: 1.25rem !important;
                 line-height: 1 !important;
-                /* Làm icon đậm hơn */
-                -webkit-text-stroke: 0.6px currentColor !important;
-                font-weight: 700 !important;
+                color: #eab308 !important;
             }
             /* Search bar mở rộng khi button thu nhỏ */
             .mobile-inline-search,

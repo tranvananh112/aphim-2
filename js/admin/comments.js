@@ -38,7 +38,7 @@ function getAdminToken() {
 function checkAdminAuth() {
     const token = getAdminToken();
     if (!token) {
-        window.location.href = '../login.html';
+        window.location.href = '/admin/login.html';
     }
 }
 
@@ -104,7 +104,7 @@ async function loadComments() {
 
         if (!response.ok) {
             if (response.status === 401) {
-                window.location.href = '../login.html';
+                window.location.href = '/admin/login.html';
                 return;
             }
             throw new Error('Failed to load comments');

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const backendToken = localStorage.getItem('cinestream_admin_token');
     const localToken = sessionStorage.getItem('cinestream_admin_token');
     if (!backendToken && !localToken) {
-        window.location.href = 'login.html';
+        window.location.href = '/admin/login.html';
         return;
     }
 

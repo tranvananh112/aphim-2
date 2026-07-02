@@ -1,4 +1,4 @@
-// Load categories for dropdown menu (Zero-latency version)
+﻿// Load categories for dropdown menu (Zero-latency version)
 function loadCategoriesDropdown() {
     try {
         const dropdown = document.getElementById('categoryDropdown');
@@ -70,7 +70,7 @@ function loadCategoriesDropdown() {
                        border-radius: 0;
                        text-decoration: none;
                    "
-                   onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff';"
+                   onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.color='#ffd700';"
                    onmouseout="this.style.background='';this.style.color='rgba(255,255,255,0.88)';"
                 >
                     <span style="overflow:hidden;text-overflow:ellipsis;">${cat.name}</span>
@@ -105,3 +105,4 @@ if (document.readyState === 'loading') {
 } else {
     loadCategoriesDropdown();
 }
+

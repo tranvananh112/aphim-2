@@ -379,7 +379,49 @@
     transform: scale(1.04);
 }
 
+.responsive-thumb-width { width: 62px; }
+@media (min-width: 768px) { .responsive-thumb-width { width: 75px; } }
+@media (min-width: 1024px) { .responsive-thumb-width { width: 88px; } }
 
+/* Mobile specific styling for circular thumbnails */
+@media (max-width: 767px) {
+    .hero-thumb-item {
+        border-radius: 50% !important;
+        border-width: 1.5px;
+        opacity: 0.7;
+        width: 38px !important;
+        height: 38px !important;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .hero-thumb-item.hero-thumb-active {
+        border-radius: 50% !important;
+        border-width: 2px !important;
+        transform: scale(1.1) translateY(0) !important;
+    }
+    .hero-thumb-item:hover {
+        transform: scale(1.1) translateY(0);
+    }
+    .hero-thumb-poster {
+        border-radius: 50% !important;
+        aspect-ratio: 1 / 1 !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-width: 100% !important;
+    }
+    .hero-thumb-poster img {
+        border-radius: 50% !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+    .responsive-thumb-width { 
+        width: 100% !important; 
+    }
+}
 
 
 /* ── Cursor grab khi kéo ── */
@@ -406,4 +448,66 @@ main.hero-grabbing * {
         box-shadow: 0 0 35px rgba(252, 211, 77, 0.9), 0 0 0 14px rgba(252, 211, 77, 0), 0 4px 20px rgba(0, 0, 0, 0.4);
         transform: scale(1.04);
     }
+}
+
+/* ── Giới hạn mô tả phim để tránh tràn vùng căn giữa (justify-center) ──
+   Nếu description quá dài, nội dung hero sẽ overflow và bị đẩy xuống dưới */
+#heroDescription {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.6;
+}
+@media (min-width: 768px) {
+    #heroDescription {
+        -webkit-line-clamp: 2;
+        max-height: calc(1.6em * 2);
+    }
+}
+@media (min-width: 1280px) {
+    #heroDescription {
+        -webkit-line-clamp: 3;
+        max-height: calc(1.6em * 3);
+    }
+}
+
+/* ── Desktop: justify-start — Logo tiêu đề giới hạn chiều cao ──
+   Ngăn logo quá to đẩy play button xuống khỏi vùng hiển thị ── */
+@media (min-width: 768px) {
+    /* Đẩy content xuống thêm bên dưới navbar */
+    #heroContent {
+        padding-top: 12rem !important;   /* tablet: 192px */
+    }
+    #heroTitleImg {
+        max-height: 80px !important;
+        width: auto !important;
+    }
+    /* Giảm space-y-6 trên desktop để content gọn hơn */
+    #heroContent .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 1rem !important;   /* 16px thay vì 24px */
+    }
+}
+@media (min-width: 1024px) {
+    #heroContent {
+        padding-top: 13rem !important;   /* desktop lg: 208px */
+    }
+}
+@media (min-width: 1280px) {
+    #heroTitleImg {
+        max-height: 90px !important;
+    }
+    #heroContent .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 1.25rem !important;
+    }
+}
+/* Missing Tailwind arbitrary classes for Hero Banner */
+.max-w-\[1600px\] { max-width: 1600px; }
+.pb-\[180px\] { padding-bottom: 180px; }
+@media (min-width: 768px) {
+  .md\:pb-\[230px\] { padding-bottom: 230px; }
+  .md\:text-\[72px\] { font-size: 72px !important; line-height: 1 !important; }
+}
+@media (min-width: 1024px) {
+  .lg\:text-\[84px\] { font-size: 84px !important; line-height: 1 !important; }
 }

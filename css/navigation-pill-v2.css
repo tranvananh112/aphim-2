@@ -366,3 +366,55 @@ html {
 .nav-pill.active::after {
     filter: blur(2px);
 }
+
+/* Added text-gradients from Node CSS (premium-ui.css) */
+.text-gradient-gold {
+    background: linear-gradient(to right, #e8b94f, #f59e0b);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+.text-gradient-blue {
+    background: linear-gradient(to right, #0ea5e9, #3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+.text-gradient-red {
+    background: linear-gradient(to right, #ea580c, #ef4444);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+.text-gradient-green {
+    background: linear-gradient(to right, #10b981, #14b8a6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+.text-gradient-purple {
+    background: linear-gradient(to right, #9333ea, #c084fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+.text-gradient-pink {
+    background: linear-gradient(to right, #ec4899, #f43f5e);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+.text-gradient-crimson {
+    background: linear-gradient(to right, #dc2626, #b91c1c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+.text-gradient-orange {
+    background: linear-gradient(to right, #f59e0b, #d97706);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+}
+
+.font-nunito { font-family: 'Nunito', sans-serif; }

@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const axios = require('axios');const app = express();
@@ -543,21 +543,17 @@ app.get('/search', (req, res) => {
 });
 
 // Admin routes
-app.get('/admin/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin', 'dashboard.html'));
+const adminPages = [
+    'login', 'dashboard', 'movies', 'users', 'payments', 
+    'banners', 'categories', 'comments', 'settings', 
+    'subscriptions', 'supporters', 'chat', 'partner'
+];
+adminPages.forEach(page => {
+    app.get([`/admin/${page}`, `/admin/${page}.html`], (req, res) => {
+        res.sendFile(path.join(__dirname, 'admin', `${page}.html`));
+    });
 });
-
-app.get('/admin/movies', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin', 'movies.html'));
-});
-
-app.get('/admin/users', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin', 'users.html'));
-});
-
-app.get('/admin/payments', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin', 'payments.html'));
-});
+app.get('/admin', (req, res) => res.redirect(301, '/admin/dashboard'));
 
 // 404 handler
 app.use((req, res) => {

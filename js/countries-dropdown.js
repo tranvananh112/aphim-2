@@ -1,4 +1,4 @@
-// Kịch bản để load động Dropdown danh sách các quốc gia (Menu Phim)
+﻿// Kịch bản để load động Dropdown danh sách các quốc gia (Menu Phim)
 async function loadCountriesDropdown() {
     try {
         const dropdown = document.getElementById('countryDropdown');
@@ -91,7 +91,7 @@ async function loadCountriesDropdown() {
                        border-radius: 0;
                        text-decoration: none;
                    "
-                   onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff';"
+                   onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.color='#ffd700';"
                    onmouseout="this.style.background='';this.style.color='rgba(255,255,255,0.88)';"
                 >
                     ${iconHtml}
@@ -127,3 +127,4 @@ if (document.readyState === 'loading') {
 } else {
     loadCountriesDropdown();
 }
+

@@ -1,4 +1,4 @@
-/* ==========================================================
+﻿/* ==========================================================
    A PHIM — Desktop Navigation v2 (SofaFlix-inspired)
    - Always fully transparent, no dark on scroll
    - h-14 (56px) height
@@ -66,13 +66,13 @@
         display: flex;
         align-items: center;
         gap: 0;
-        background: linear-gradient(90deg, rgba(242, 242, 13, 0.1) 0%, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0) 80%, rgba(242, 242, 13, 0.1) 100%), rgba(10, 10, 15, 0.4) !important;
-        border: 1px solid rgba(242, 242, 13, 0.2) !important;
+        background: linear-gradient(90deg, rgba(242, 242, 13, 0.15) 0%, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0) 80%, rgba(242, 242, 13, 0.15) 100%), rgba(10, 10, 15, 0.45) !important;
+        border: 1px solid rgba(242, 242, 13, 0.4) !important;
         border-radius: 999px;
         padding: 6px 8px 6px 6px;
-        backdrop-filter: blur(24px) saturate(150%) !important;
-        -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), inset 0 0 15px rgba(242, 242, 13, 0.05) !important;
+        backdrop-filter: blur(28px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(242, 242, 13, 0.15), inset 0 0 20px rgba(242, 242, 13, 0.15) !important;
         transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
     }
 
@@ -278,13 +278,13 @@
         position: relative;
         display: flex;
         align-items: center;
-        width: 320px;
+        width: 248px;
         height: 38px;
         background: rgba(255, 255, 255, 0.07);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 999px;
         overflow: hidden;
-        margin-left: 12px;
+        margin: 0 12px 0 0;
         flex-shrink: 0;
         transition:
             width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
@@ -295,7 +295,7 @@
     }
 
     .nav-search-v2:focus-within {
-        width: 420px;
+        width: 310px;
         border-color: rgba(242, 242, 13, 0.45);
         background: rgba(0, 0, 0, 0.55);
         box-shadow: 0 0 0 3px rgba(242, 242, 13, 0.1), 0 8px 24px rgba(0,0,0,0.35);
@@ -325,6 +325,7 @@
         font-weight: 400;
         padding: 0 14px 0 0;
         height: 100%;
+        text-overflow: ellipsis;
     }
 
     .nav-search-v2 input::placeholder {
@@ -442,3 +443,9 @@
         display: none !important;
     }
 }
+
+
+@media (max-width: 1279.98px) { nav#mainNav .desktop-search-moved { display: none !important; } }
+@media (min-width: 1280px) { nav#mainNav .desktop-search-moved { display: flex !important; } }
+
+
