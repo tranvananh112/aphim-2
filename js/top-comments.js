@@ -143,31 +143,36 @@ function renderFeaturedComments(movies) {
     if (!container) return;
     if (!movies || movies.length === 0) return;
     
-    container.innerHTML = movies.map(m => {
+    container.innerHTML = movies.map((m, i) => {
         const user = FAKE_USERS[Math.floor(Math.random() * FAKE_USERS.length)];
         const text = FAKE_COMMENTS[Math.floor(Math.random() * FAKE_COMMENTS.length)];
         const thumbUrl = `https://img.ophim.live/uploads/movies/${m.thumb_url || m.poster_url}`;
+        const avatarUrl = `https://i.pravatar.cc/150?img=${i + 10}`;
+        const genderIcons = ['all_inclusive', 'female', 'male'];
+        const gender = genderIcons[Math.floor(Math.random() * genderIcons.length)];
         
         return `
-        <a href="movie-detail.html?slug=${m.slug}" class="tc-featured-card cursor-pointer" style="background-image: url('${thumbUrl}')">
-            <!-- decorative blur -->
-            <div class="tc-featured-card-blur" style="background: ${getRandomColor()}"></div>
-            
-            <img src="${thumbUrl}" alt="${m.name}" class="tc-featured-movie" onerror="this.src='https://placehold.co/45x65/1e293b/ffffff?text=?'"/>
+        <a href="/phim/${m.slug}" class="tc-featured-card cursor-pointer">
+            <div class="tc-featured-bg-blur" style="background-image: url('${thumbUrl}')"></div>
+            <div class="tc-featured-bg-overlay"></div>
+            <img src="${thumbUrl}" alt="${m.name}" class="tc-featured-movie" onerror="this.src='https://placehold.co/40x60/1e293b/ffffff?text=?'"/>
             
             <div class="tc-featured-card-content">
                 <div class="tc-featured-user">
                     <div class="tc-avatar-large">
-                        <span class="material-icons-round">person</span>
+                        <img src="${avatarUrl}" alt="${user}" onerror="this.style.display='none'">
                     </div>
-                    <div class="tc-featured-name">${user}</div>
+                    <div class="tc-featured-name">
+                        ${Math.random() > 0.5 ? '<span class="border border-[#10b981] text-white rounded px-1 text-[10px] mr-1 flex items-center justify-center bg-transparent">ROX</span>' : ''}
+                        ${user} <span class="material-icons-round gender-icon text-[14px] ml-1">${gender}</span>
+                    </div>
                 </div>
                 <div class="tc-featured-text">${text}</div>
                 
                 <div class="tc-metrics">
-                    <div class="tc-metric"><span class="material-icons-round">thumb_up</span> ${Math.floor(Math.random() * 50)}</div>
-                    <div class="tc-metric"><span class="material-icons-round">thumb_down</span> 0</div>
-                    <div class="tc-metric"><span class="material-icons-round">chat_bubble_outline</span> ${Math.floor(Math.random() * 10)}</div>
+                    <div class="tc-metric"><span class="material-icons-round">arrow_circle_up</span> ${Math.floor(Math.random() * 50)}</div>
+                    <div class="tc-metric"><span class="material-icons-round">arrow_circle_down</span> 0</div>
+                    <div class="tc-metric"><span class="material-icons-round">chat</span> ${Math.floor(Math.random() * 10)}</div>
                 </div>
             </div>
         </a>
@@ -190,9 +195,9 @@ function renderMovieList(elementId, items, displayMode = 'views') {
             : `<div class="tc-list-meta" style="color:#ef4444;"><span class="material-icons-round" style="font-size:11px;vertical-align:-1px;">star</span> 10 / 10</div>`;
 
         return `
-        <a href="movie-detail.html?slug=${item.slug}" class="tc-list-item group">
+        <a href="/phim/${item.slug}" class="tc-list-item group">
             <span class="tc-list-rank">${index + 1}.</span>
-            <span class="tc-list-dash">—</span>
+            <span class="tc-list-dash material-icons-round">trending_up</span>
             <img src="${thumbUrl}" class="tc-list-thumbnail" alt="${item.name}" onerror="this.src='https://placehold.co/32x44/1e293b/ffffff?text=?'">
             <div class="tc-list-info">
                 <div class="tc-list-title">${item.name}</div>
@@ -208,19 +213,22 @@ function renderTheLoaiHot() {
     
     const genres = [
         { name: "Chính Kịch", colorCls: "tc-genre-c1", slug: "chinh-kich" },
-        { name: "Tình Cảm", colorCls: "tc-genre-c2", slug: "tinh-cam" },
-        { name: "Lãng Mạn", colorCls: "tc-genre-c3", slug: "lang-man" },
-        { name: "Phim Hài", colorCls: "tc-genre-c4", slug: "phim-hai" },
-        { name: "Hành Động", colorCls: "tc-genre-c5", slug: "hanh-dong" }
+        { name: "Tâm Lý", colorCls: "tc-genre-c2", slug: "tam-ly" },
+        { name: "Tình Cảm", colorCls: "tc-genre-c3", slug: "tinh-cam" },
+        { name: "Hài Hước", colorCls: "tc-genre-c4", slug: "hai-huoc" },
+        { name: "Phiêu Lưu", colorCls: "tc-genre-c5", slug: "phieu-luu" }
     ];
     
-    container.innerHTML = genres.map((g, index) => `
-        <a href="categories.html?category=${g.slug}" class="tc-genre-item hover:opacity-80 transition-opacity">
-            <span class="tc-list-rank">${index + 1}.${index === 3 ? '<span class="material-icons-round text-[12px] text-green-400 ml-1">trending_up</span>' : ''}</span>
-            <span class="tc-list-dash">—</span>
+    container.innerHTML = genres.map((g, index) => {
+        const trendIcon = index === 3 || index === 4 ? 'trending_down' : 'trending_up';
+        const trendColor = index === 3 || index === 4 ? 'text-pink-500' : 'text-green-400';
+        return `
+        <a href="/categories?category=${g.slug}" class="tc-genre-item hover:opacity-80 transition-opacity">
+            <span class="tc-list-rank">${index + 1}.</span>
+            <span class="tc-list-dash material-icons-round text-[14px] ${trendColor}">${trendIcon}</span>
             <span class="tc-genre-pill ${g.colorCls}">${g.name}</span>
         </a>
-    `).join('');
+    `}).join('');
 }
 
 function startRealtimeComments() {
@@ -255,24 +263,27 @@ function createRandomCommentElement() {
     const user = FAKE_USERS[Math.floor(Math.random() * FAKE_USERS.length)];
     const text = FAKE_COMMENTS[Math.floor(Math.random() * FAKE_COMMENTS.length)];
     const movie = MOCK_MOVIES[Math.floor(Math.random() * MOCK_MOVIES.length)];
+    const avatarUrl = `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 50) + 20}`;
+    const genderIcons = ['all_inclusive', 'female', 'male'];
+    const gender = genderIcons[Math.floor(Math.random() * genderIcons.length)];
     
     const slug = generateSlug(movie);
     const el = document.createElement('a');
-    el.href = `movie-detail.html?slug=${slug}`;
+    el.href = `/phim/${slug}`;
     el.className = 'tc-realtime-comment group cursor-pointer';
     el.style.textDecoration = 'none';
     
     el.innerHTML = `
         <div class="tc-realtime-avatar">
-            <span class="material-icons-round">person</span>
+            <img src="${avatarUrl}" alt="${user}" onerror="this.style.display='none'" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
         </div>
         <div class="tc-realtime-content">
             <div class="tc-realtime-top">
-                <span class="tc-realtime-name">${user}</span>
+                <span class="tc-realtime-name">${user} <span class="material-icons-round gender-icon text-[14px]" style="color:#ffd700;">${gender}</span></span>
             </div>
             <div class="tc-realtime-text">${text}</div>
             <div class="tc-realtime-movie group-hover:text-white transition-colors" style="display: flex; align-items: center; gap: 4px;">
-                <span class="material-icons-round">play_arrow</span>
+                <span class="material-icons-round" style="color:#ffd700; font-size: 10px;">play_arrow</span>
                 ${movie}
             </div>
         </div>

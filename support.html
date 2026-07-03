@@ -191,7 +191,7 @@
         <div class="flex items-center gap-4 lg:gap-8">
             <a href="index.html" class="flex items-center gap-3 text-white">
                 <div class="size-8">
-                    <img src="/apple-touch-icon.png" alt="APHIM Logo" class="w-full h-full object-contain" />
+                    <img loading="lazy" src="/apple-touch-icon.png" alt="APHIM Logo" class="w-full h-full object-contain" />
                 </div>
                 <h2 class="text-white text-xl font-bold leading-tight tracking-[-0.015em]">APHIM.IO.VN</h2>
             </a>
@@ -229,7 +229,7 @@
                             <div class="relative group/qr cursor-pointer" onclick="downloadQR()">
                                 <div
                                     class="bg-white p-4 rounded-3xl w-full max-w-[320px] aspect-square shadow-2xl flex items-center justify-center relative overflow-hidden z-10 mx-auto">
-                                    <img alt="VietQR MB Bank Dynamic" class="w-full h-full object-contain"
+                                    <img loading="lazy" alt="VietQR MB Bank Dynamic" class="w-full h-full object-contain"
                                         id="dynamic-qr-code"
                                         src="https://api.vietqr.io/image/970422-048889019999-a1Gm36d.jpg?accountName=TRAN%20VAN%20ANH&amount=20000&addInfo=APHIM%20UNG%20HO" />
                                 </div>
@@ -420,7 +420,7 @@
                     <div
                         class="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary flex items-center justify-center bg-black/50 shadow-[0_0_20px_rgba(252,213,118,0.4)] overflow-hidden transition-all duration-300 flex-shrink-0"
                         style="margin-right: 16px !important; flex-shrink: 0 !important;">
-                        <img src="/apple-touch-icon.png" alt="A Phim Logo"
+                        <img loading="lazy" src="/apple-touch-icon.png" alt="A Phim Logo"
                             class="w-8 h-8 md:w-10 md:h-10 object-contain group-hover:scale-110 transition-transform" />
                     </div>
                     <div class="flex flex-col">
@@ -560,7 +560,7 @@
                 <button onclick="aphimCloseGuide()" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;cursor:pointer;color:#aaa;font-size:1rem;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">?</button>
             </div>
             <div style="padding:14px;overflow-y:auto;max-height:78vh;">
-                <img src="/quangcao/HD_cai_app.png" alt="Huong dan cai dat" style="width:100%;height:auto;border-radius:8px;display:block;"/>
+                <img loading="lazy" src="/quangcao/HD_cai_app.png" alt="Huong dan cai dat" style="width:100%;height:auto;border-radius:8px;display:block;"/>
             </div>
         </div>
     </div>
@@ -616,7 +616,7 @@
         <div class="chat-body" id="chatBody">
             <!-- SCREEN 1: WELCOME -->
             <div class="chat-screen chat-screen-welcome active" id="screenWelcome">
-                <div class="welcome-glow"><img src="/apple-touch-icon.png" alt="A Phim"
+                <div class="welcome-glow"><img loading="lazy" src="/apple-touch-icon.png" alt="A Phim"
                         style="width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.15));">
                 </div>
                 <div>
@@ -839,6 +839,7 @@
     <link rel="stylesheet" href="/css/inline-ad.css?v=15">
     <script src="/js/catfish-banner.js?v=18" defer></script>
     <!-- ====== End Catfish Banner ====== -->
+<script src="/js/movie-slider.js" defer></script>
 </body>
 
 </html>
