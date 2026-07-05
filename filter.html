@@ -191,7 +191,7 @@
 
                     <!-- Nav Links � flat, no pill -->
                     <nav-links class="flex items-center" style="gap:2px;">
-                        <a href="index.html" class="nav-flat-link active">Trang Ch?</a>
+                        <a href="index.html" class="nav-flat-link active">Trang Chủ</a>
 
                         <!-- Phim Dropdown -->
                         <div class="nav-flat-dropdown">
@@ -200,7 +200,7 @@
                                 <span class="material-icons-round nav-caret">expand_more</span>
                             </button>
                             <div class="nav-dropdown-panel" id="countryDropdown" style="min-width:680px;">
-                                <div class="p-4 text-center text-gray-400 text-sm">�ang t?i...</div>
+                                <div class="p-4 text-center text-gray-400 text-sm">�Đang tải...</div>
                             </div>
                         </div>
 
@@ -277,26 +277,26 @@
                                             style="display:flex;align-items:center;justify-content:center;padding:11px 16px;color:rgba(255,255,255,0.95);font-size:0.82rem;font-weight:700;border-top:1px solid rgba(255,255,255,0.08);text-decoration:none;transition:background 0.18s,color 0.18s;grid-column:span 3;"
                                             onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff';"
                                             onmouseout="this.style.background='';this.style.color='rgba(255,255,255,0.95)';">??
-                                            Phim Chi?u R?p</a>
+                                            Phim Chiếu Rạp</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Th? Lo?i Dropdown -->
+                        <!-- Thể Loại Dropdown -->
                         <div class="nav-flat-dropdown">
                             <button class="nav-flat-link" type="button">
-                                Th? Lo?i
+                                Thể Loại
                                 <span class="material-icons-round nav-caret">expand_more</span>
                             </button>
                             <div class="nav-dropdown-panel" id="categoryDropdown" style="min-width:680px;">
-                                <div class="p-4 text-center text-gray-400 text-sm">�ang t?i...</div>
+                                <div class="p-4 text-center text-gray-400 text-sm">�Đang tải...</div>
                             </div>
                         </div>
 
                         <a href="search.html" class="nav-flat-link">Kh�m Ph�</a>
                         <a href="pricing.html" class="nav-flat-link">G�i Cu?c</a>
-                        <a href="phim-x.html" class="nav-flat-link nav-flat-link--danger">?? Phim X</a>
+                        <a href="phim-x.html" class="nav-flat-link nav-flat-link--danger">🔞 Phim X</a>
                     </nav-links>
                 </div>
             </div>
@@ -338,7 +338,7 @@
                 <span class="text-[13px] font-semibold pr-1">Quay Lại</span>
             </button>
             <h1 class="text-4xl md:text-5xl font-bold mb-4">B? L?c Phim</h1>
-            <p class="text-gray-400 text-lg">Tm phim theo th? lo?i, qu?c gia, nam pht hnh</p>
+            <p class="text-gray-400 text-lg">Tìm phim theo thể loại, quốc gia, năm phát hành</p>
         </div>
 
         <!-- Filter Section -->
@@ -350,29 +350,29 @@
                     <select id="filterList"
                         class="w-full bg-background-dark border border-white/20 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none">
                         <option value="">-- Ch?n danh s�ch --</option>
-                        <option value="phim-moi-cap-nhat">Phim m?i c?p nh?t</option>
-                        <option value="phim-bo">Phim b?</option>
-                        <option value="phim-le">Phim l?</option>
+                        <option value="phim-moi-cap-nhat">Phim mới c?p nh?t</option>
+                        <option value="phim-bo">Phim bộ</option>
+                        <option value="phim-le">Phim lẻ</option>
                         <option value="hoat-hinh">Ho?t h�nh</option>
                         <option value="tv-shows">TV Shows</option>
                     </select>
                 </div>
 
-                <!-- Th? lo?i -->
+                <!-- Thể loại -->
                 <div>
-                    <label class="block text-sm font-medium mb-2 text-gray-300">Th? lo?i</label>
+                    <label class="block text-sm font-medium mb-2 text-gray-300">Thể loại</label>
                     <select id="filterCategory"
                         class="w-full bg-background-dark border border-white/20 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none">
-                        <option value="">-- Ch?n th? lo?i --</option>
+                        <option value="">-- Chọn thể loại --</option>
                     </select>
                 </div>
 
-                <!-- Qu?c gia -->
+                <!-- Quốc gia -->
                 <div>
-                    <label class="block text-sm font-medium mb-2 text-gray-300">Qu?c gia</label>
+                    <label class="block text-sm font-medium mb-2 text-gray-300">Quốc gia</label>
                     <select id="filterCountry"
                         class="w-full bg-background-dark border border-white/20 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none">
-                        <option value="">-- Ch?n qu?c gia --</option>
+                        <option value="">-- Chọn quốc gia --</option>
                     </select>
                 </div>
 
@@ -381,7 +381,7 @@
                     <label class="block text-sm font-medium mb-2 text-gray-300">Nam ph�t h�nh</label>
                     <select id="filterYear"
                         class="w-full bg-background-dark border border-white/20 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none">
-                        <option value="">-- Ch?n nam --</option>
+                        <option value="">-- Chọn năm --</option>
                     </select>
                 </div>
             </div>
@@ -411,7 +411,7 @@
         <!-- Loading -->
         <div id="loading" class="hidden text-center py-20">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-            <p class="text-gray-400">�ang t?i...im...</p>
+            <p class="text-gray-400">�Đang tải...im...</p>
         </div>
 
         <!-- Movies Grid -->
@@ -810,8 +810,8 @@
                     <div class="support-icon-wrap">
                         <span class="material-icons">support_agent</span>
                     </div>
-                    <h3 class="support-title">H? tr? tr?c tuy?n</h3>
-                    <p class="support-desc">�?i ngu h? tr? c?a A Phim lu�n s?n s�ng gi?i d�p m?i th?c m?c c?a b?n.</p>
+                    <h3 class="support-title">Hỗ trợ tr?c tuy?n</h3>
+                    <p class="support-desc">�?i ngu hỗ trợ c?a A Phim lu�n s?n s�ng gi?i d�p m?i th?c m?c c?a b?n.</p>
                     <div class="support-info-cards">
                         <div class="support-info-card">
                             <span class="material-icons">schedule</span>
@@ -828,9 +828,9 @@
                     </div>
                     <button class="support-start-btn" id="supportStartTawk">
                         <span class="material-icons">chat</span>
-                        B?t d?u chat h? tr?
+                        B?t d?u chat hỗ trợ
                     </button>
-                    <p class="support-note">Nh?n d? m? c?a s? chat v?i nh�n vi�n h? tr?</p>
+                    <p class="support-note">Nh?n d? m? c?a s? chat v?i nh�n vi�n hỗ trợ</p>
                 </div>
             </div>
         </div>

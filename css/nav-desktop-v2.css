@@ -1,4 +1,4 @@
-﻿/* ==========================================================
+/* ==========================================================
    A PHIM — Desktop Navigation v2 (SofaFlix-inspired)
    - Always fully transparent, no dark on scroll
    - h-14 (56px) height
@@ -8,7 +8,7 @@
    ========================================================== */
 
 /* ── Core Nav: Always Transparent ── */
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
     nav {
         background: transparent !important;
         backdrop-filter: none !important;
@@ -36,7 +36,7 @@
 }
 
 /* ── Desktop Nav Layout ── */
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
 
     /* Remove the old pill wrapper if any remain */
     .desktop-pill-wrapper {
@@ -48,7 +48,7 @@
         backdrop-filter: none !important;
     }
 
-    /* ── Desktop Pill Container (Transparent by default, Solid on scroll) ── */
+    /* ✨ Desktop Pill Container ✨ */
     nav#mainNav:not(.scrolled) .desktop-nav-pill {
         display: flex;
         align-items: center;
@@ -59,20 +59,21 @@
         padding: 6px 8px 6px 6px;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
-        transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+        box-shadow: none !important;
+        transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
     }
 
     nav#mainNav.scrolled .desktop-nav-pill {
         display: flex;
         align-items: center;
         gap: 0;
-        background: linear-gradient(90deg, rgba(242, 242, 13, 0.15) 0%, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0) 80%, rgba(242, 242, 13, 0.15) 100%), rgba(10, 10, 15, 0.45) !important;
+        background: linear-gradient(90deg, rgba(242, 242, 13, 0.18) 0%, rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 0) 80%, rgba(242, 242, 13, 0.18) 100%), rgba(10, 10, 15, 0.8) !important;
         border: 1px solid rgba(242, 242, 13, 0.4) !important;
         border-radius: 999px;
         padding: 6px 8px 6px 6px;
-        backdrop-filter: blur(28px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(242, 242, 13, 0.15), inset 0 0 20px rgba(242, 242, 13, 0.15) !important;
+        backdrop-filter: blur(48px) saturate(220%) !important;
+        -webkit-backdrop-filter: blur(48px) saturate(220%) !important;
+        box-shadow: 0 12px 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(242, 242, 13, 0.15) !important;
         transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
     }
 
@@ -94,12 +95,12 @@
         position: relative;
         display: inline-flex;
         align-items: center;
-        gap: 3px;
+        gap: 4px;
         padding: 6px 14px;
-        font-size: 0.82rem;
+        font-size: 0.9rem;
         font-weight: 500;
-        color: rgba(255, 255, 255, 0.82);
-        letter-spacing: 0.02em;
+        color: rgba(255, 255, 255, 0.9);
+        letter-spacing: normal;
         transition: color 0.2s ease;
         border-radius: 0;
         background: transparent !important;
@@ -165,10 +166,11 @@
     }
 
     .nav-flat-dropdown > button.nav-flat-link .nav-caret {
-        font-size: 14px;
+        font-size: 16px;
         transition: transform 0.25s ease;
-        opacity: 0.7;
+        opacity: 0.9;
         line-height: 1;
+        margin-top: 1px;
     }
 
     .nav-flat-dropdown:hover > button.nav-flat-link .nav-caret {
@@ -196,11 +198,11 @@
         transform: translateY(-6px);
         filter: brightness(1) saturate(1);
         transition:
-            opacity 0.25s ease,
-            visibility 0.25s ease,
-            transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-            filter 0.25s ease,
-            box-shadow 0.25s ease;
+            opacity 0.1s ease,
+            visibility 0.1s ease,
+            transform 0.1s cubic-bezier(0.16, 1, 0.3, 1),
+            filter 0.1s ease,
+            box-shadow 0.1s ease;
         z-index: 10000;
     }
 
@@ -241,13 +243,10 @@
     /* Khi dropdown mở: Làm SÁNG menu — phân biệt rõ với nền tối */
     .nav-flat-dropdown:hover > .nav-dropdown-panel {
         /* Tăng độ sáng vừa phải — không quá chói, vẫn nổi bật */
-        filter: brightness(1.10) saturate(1.08) !important;
+        filter: brightness(1.05) saturate(1.05) !important;
         box-shadow:
-            /* Viền xanh nhẹ */
-            0 0 0 1.5px rgba(99, 162, 255, 0.40),
-            /* Glow vừa phải */
-            0 0 35px rgba(59, 130, 246, 0.32),
-            0 0 70px rgba(30, 90, 200, 0.15),
+            /* Viền xám sáng nhẹ giống hình số 1 */
+            0 0 0 1.5px rgba(255, 255, 255, 0.15),
             /* Shadow độ sâu */
             0 24px 60px rgba(0, 0, 0, 0.65) !important;
         /* Scale nhẹ — không quá mạnh */
@@ -255,12 +254,29 @@
         transform-origin: top center;
     }
 
-    /* Dropdown link items — sử dụng inline style từ JS, chỉ đặt fallback nhẹ */
+    /* Đè màu nền khung xanh đá giống hình 1 cho tất cả các dropdown */
+    .nav-dropdown-panel > div {
+        background: #2b3a72 !important; /* Tone màu xanh đậm giống hình 1 */
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+    }
+
+    /* Dropdown link items — Tăng độ đậm và độ sáng chữ giống hình 1 */
     .nav-dropdown-panel a {
         position: relative;
         display: flex;
         align-items: center;
         text-decoration: none;
+        color: rgba(255, 255, 255, 0.88) !important;
+        font-weight: 700 !important; /* Chữ đậm giống hình 1 */
+        font-size: 0.9rem !important;
+        transition: background 0.18s, color 0.18s !important;
+        border-color: rgba(255, 255, 255, 0.08) !important; /* Đồng bộ viền chia ô */
+    }
+
+    .nav-dropdown-panel a span {
+        font-weight: 700 !important;
     }
 
     /* ::before placeholder (không hiển thị nếu JS đã quản lý hover) */
@@ -268,9 +284,30 @@
         content: none;
     }
 
-    /* Fallback hover (bị override bởi inline onmouseover từ JS) */
+    /* Hiệu ứng khi di chuột đến: đổi thành màu vàng ấm giống hình 3 */
     .nav-dropdown-panel a:hover {
-        color: #ffffff;
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #ffd700 !important; /* Màu vàng giống hình 3 */
+    }
+
+    /* Fallback cho các trang sử dụng cấu trúc cũ .relative.group > .absolute.top-full */
+    nav .relative.group > .absolute.top-full {
+        background: #2b3a72 !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+    }
+    nav .relative.group > .absolute.top-full a {
+        color: rgba(255, 255, 255, 0.88) !important;
+        font-weight: 700 !important;
+        font-size: 0.82rem !important;
+    }
+    nav .relative.group > .absolute.top-full a span {
+        font-weight: 700 !important;
+    }
+    nav .relative.group > .absolute.top-full a:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #ffd700 !important;
     }
 
     /* ── Desktop Search Bar ── */
@@ -278,13 +315,13 @@
         position: relative;
         display: flex;
         align-items: center;
-        width: 248px;
+        width: 320px;
         height: 38px;
         background: rgba(255, 255, 255, 0.07);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 999px;
         overflow: hidden;
-        margin: 0 12px 0 0;
+        margin-left: 12px;
         flex-shrink: 0;
         transition:
             width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
@@ -295,7 +332,7 @@
     }
 
     .nav-search-v2:focus-within {
-        width: 310px;
+        width: 420px;
         border-color: rgba(242, 242, 13, 0.45);
         background: rgba(0, 0, 0, 0.55);
         box-shadow: 0 0 0 3px rgba(242, 242, 13, 0.1), 0 8px 24px rgba(0,0,0,0.35);
@@ -321,7 +358,7 @@
         outline: none !important;
         box-shadow: none !important;
         color: #fff;
-        font-size: 0.82rem;
+        font-size: 0.95rem;
         font-weight: 400;
         padding: 0 14px 0 0;
         height: 100%;
@@ -330,24 +367,23 @@
 
     .nav-search-v2 input::placeholder {
         color: rgba(255, 255, 255, 0.38);
-        font-size: 0.8rem;
+        font-size: 0.9rem;
     }
 
-    /* ── Auth / Login Button ── */
+    /* ✨ Auth / Login Button ✨ */
     .nav-auth-btn {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 7px 18px;
-        font-size: 0.8rem;
+        padding: 8px 20px; /* Reduced padding to match nav pill proportionally */
+        font-size: 0.95rem;
         font-weight: 700;
         letter-spacing: 0.04em;
         color: #000;
         background: #f2f20d;
         border-radius: 999px;
-        transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-        white-space: nowrap;
         box-shadow: 0 0 16px rgba(242, 242, 13, 0.25);
+        transition: all 0.3s ease;
     }
 
     .nav-auth-btn:hover {
@@ -396,9 +432,9 @@
 
 /* ==========================================================
    A PHIM — Navigation Responsive Override (SofaFlix-inspired Breakpoint)
-   Forces layout transition to mobile view below 1200px instead of 1024px.
+   Forces layout transition to mobile view below 1280px instead of 1024px.
    ========================================================== */
-@media (max-width: 1199.98px) {
+@media (max-width: 1279.98px) {
     /* 1. Hide Desktop Navigation Container */
     nav#mainNav div.hidden.lg\:flex {
         display: none !important;
@@ -421,7 +457,7 @@
     }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
     /* 1. Force Show Desktop Navigation Container */
     nav#mainNav div.hidden.lg\:flex {
         display: flex !important;
@@ -444,30 +480,32 @@
     }
 }
 
-
-@media (max-width: 1279.98px) { nav#mainNav .desktop-search-moved { display: none !important; } }
-@media (min-width: 1280px) { nav#mainNav .desktop-search-moved { display: flex !important; } }
-
-
-
-/* Giao diện khung màu xanh dịu mắt */
-.nav-dropdown-panel > div {
-    background: #2b3a72 !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+/* Responsive adjustments for up to 1536px (125% zoom) */
+@media (max-width: 1536px) {
+    .nav-flat-link {
+        padding: 6px 10px !important;
+        font-size: 0.78rem !important;
+    }
+    .nav-search-v2 {
+        width: 160px !important;
+    }
+    .nav-search-v2:focus-within {
+        width: 220px !important;
+    }
+    .nav-search-v2 input {
+        font-size: 0.78rem !important;
+    }
 }
-.nav-dropdown-panel a {
-    color: rgba(255, 255, 255, 0.88) !important;
-    font-weight: 700 !important;
-    font-size: 0.9rem !important;
-    transition: background 0.18s, color 0.18s !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
-}
-.nav-dropdown-panel a span {
-    font-weight: 700 !important;
-}
-.nav-dropdown-panel a:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-    color: #ffd700 !important;
+
+@media (max-width: 1366px) {
+    .nav-flat-link {
+        padding: 5px 8px !important;
+        font-size: 0.75rem !important;
+    }
+    .nav-search-v2 {
+        width: 140px !important;
+    }
+    .nav-search-v2:focus-within {
+        width: 190px !important;
+    }
 }
