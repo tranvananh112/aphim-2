@@ -800,7 +800,7 @@
             <a href="index.html" class="flex items-center gap-2.5 group flex-shrink-0" style="text-decoration:none;">
                 <div
                     class="w-9 h-9 rounded-full border-2 border-primary flex items-center justify-center bg-black/40 group-hover:bg-primary/20 transition-colors duration-300 overflow-hidden">
-                    <img loading="lazy" src="/apple-touch-icon.png" alt="A Phim Logo"
+                    <img src="/apple-touch-icon.png" alt="A Phim Logo"
                         class="w-5 h-5 object-contain group-hover:scale-110 transition-transform" />
                 </div>
                 <div class="flex flex-col leading-none">
@@ -1841,7 +1841,7 @@
                     <div
                         class="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary flex items-center justify-center bg-black/50 shadow-[0_0_20px_rgba(252,213,118,0.4)] overflow-hidden transition-all duration-300 flex-shrink-0"
                         style="margin-right: 16px !important; flex-shrink: 0 !important;">
-                        <img loading="lazy" src="/apple-touch-icon.png" alt="A Phim Logo"
+                        <img src="/apple-touch-icon.png" alt="A Phim Logo"
                             class="w-8 h-8 md:w-10 md:h-10 object-contain group-hover:scale-110 transition-transform" />
                     </div>
                     <div class="flex flex-col">
@@ -1981,7 +1981,7 @@
                 <button onclick="aphimCloseGuide()" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;cursor:pointer;color:#aaa;font-size:1rem;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">✕</button>
             </div>
             <div style="padding:14px;overflow-y:auto;max-height:78vh;">
-                <img loading="lazy" src="/quangcao/HD_cai_app.png" alt="Huong dan cai dat" style="width:100%;height:auto;border-radius:8px;display:block;"/>
+                <img src="/quangcao/HD_cai_app.png" alt="Huong dan cai dat" style="width:100%;height:auto;border-radius:8px;display:block;"/>
             </div>
         </div>
     </div>
@@ -2234,7 +2234,7 @@
                     <a href="${linkUrl}">
                         <!-- Backdrop -->
                         <div class="action-backdrop-w">
-                            <img loading="lazy" src="${finalBackdrop}" 
+                            <img src="${finalBackdrop}" 
                                  alt="${movie.name}" 
                                  class="group-hover:scale-105 transition-transform duration-500" 
                                  onerror="this.src='https://via.placeholder.com/600x338?text=${encodeURIComponent(movie.name)}'" />
@@ -2243,7 +2243,7 @@
                         
                         <!-- Small Mini Poster Overlay -->
                         <div class="action-small-poster">
-                            <img loading="lazy" src="${finalPoster}" 
+                            <img src="${finalPoster}" 
                                  alt="Mini ${movie.name}" 
                                  onerror="this.src='https://via.placeholder.com/200x300?text=No+Poster'" />
                         </div>
@@ -2335,14 +2335,14 @@
                             <div class="action-premium-card group">
                                 <a href="movie-detail.html?slug=${movie.slug}">
                                     <div class="action-backdrop-w">
-                                        <img loading="lazy" src="${finalBackdrop}" 
+                                        <img src="${finalBackdrop}" 
                                              alt="${movie.name}" 
                                              class="group-hover:scale-105 transition-transform duration-500" 
                                              onerror="this.src='https://via.placeholder.com/600x338?text=${encodeURIComponent(movie.name)}'" />
                                         <div class="backdrop-quality-badge">${movie.lang || movie.quality || 'HD'}</div>
                                     </div>
                                     <div class="action-small-poster">
-                                        <img loading="lazy" src="${finalPoster}" 
+                                        <img src="${finalPoster}" 
                                              alt="Mini ${movie.name}" 
                                              onerror="this.src='https://via.placeholder.com/200x300?text=No+Poster'" />
                                     </div>
@@ -2622,7 +2622,7 @@
         <div class="chat-body" id="chatBody">
             <!-- SCREEN 1: WELCOME -->
             <div class="chat-screen chat-screen-welcome active" id="screenWelcome">
-                <div class="welcome-glow"><img loading="lazy" src="/apple-touch-icon.png" alt="A Phim"
+                <div class="welcome-glow"><img src="/apple-touch-icon.png" alt="A Phim"
                         style="width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.15));">
                 </div>
                 <div>
@@ -3066,7 +3066,6 @@
     #msw-bd-coin3   { background-image: url('https://img.ophim.live/uploads/movies/nha-minh-di-thoi-thumb.jpg'); }
     </style>
     <!-- ====== End Pricing Card Backdrops ====== -->
-<script src="/js/movie-slider.js" defer></script>
 </body>
 
 </html>
