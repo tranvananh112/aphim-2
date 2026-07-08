@@ -307,7 +307,7 @@ function renderMovieInfo(movie, episode) {
                 </div>
                 <div class="flex flex-wrap gap-1.5">
                     ${movie.category.map(cat => `
-                        <a href="/search?category=${cat.slug}" style="border-color: rgba(59,130,246,0.3); color: #93c5fd; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-blue-500/30 transition-colors">
+                        <a href="search.html?category=${cat.slug}" style="border-color: rgba(59,130,246,0.3); color: #93c5fd; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-blue-500/30 transition-colors">
                             ${cat.name}
                         </a>
                     `).join('')}
@@ -327,7 +327,7 @@ function renderMovieInfo(movie, episode) {
                 </div>
                 <div class="flex flex-wrap gap-1.5">
                     ${movie.country.map(c => `
-                        <a href="/search?country=${c.slug}" style="border-color: rgba(168,85,247,0.3); color: #d8b4fe; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-purple-500/30 transition-colors">
+                        <a href="search.html?country=${c.slug}" style="border-color: rgba(168,85,247,0.3); color: #d8b4fe; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-purple-500/30 transition-colors">
                             ${c.name}
                         </a>
                     `).join('')}
@@ -1418,7 +1418,7 @@ function renderRecommendations(movies) {
         const episode = movie.episode_current || 'Tập 1';
         
         return `
-            <a href="/phim/${movie.slug}" class="watch-rec-item group">
+            <a href="movie-detail.html?slug=${movie.slug}" class="watch-rec-item group">
                 <img src="${movieAPI.getImageURL(movie.thumb_url, 300, 85, true)}" alt="${movie.name}" class="watch-rec-thumb" loading="lazy" onerror="this.src='https://via.placeholder.com/60x80?text=No+Image'" />
                 <div class="watch-rec-info">
                     <h4 class="watch-rec-name group-hover:text-red-500 transition-colors">${movie.name}</h4>

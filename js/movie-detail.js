@@ -494,8 +494,8 @@ async function loadMovieGallery(movie) {
                 galleryCount.textContent = `(${backdrops.length} ảnh)`;
                 
                 scrollContainer.innerHTML = backdrops.map((img, index) => `
-                    <div style="flex: 0 0 auto; width: 280px; max-width: 80vw;" class="aspect-video rounded-xl overflow-hidden shadow-lg border border-white/10 group-hover:border-white/30 transition-colors relative cursor-pointer" onclick="openLightbox(window.movieGalleryImageUrls, ${index})">
-                        <img src="https://wsrv.nl/?url=image.tmdb.org/t/p/w780${img.file_path}" alt="Cảnh phim ${movie.name}" loading="lazy" class="w-full h-full object-cover transform transition-transform duration-500 hover:scale-110">
+                    <div style="flex-shrink: 0; width: 280px; aspect-ratio: 16/9; max-width: 80vw;" class="rounded-xl overflow-hidden shadow-lg border border-white/10 group-hover:border-white/30 transition-colors relative cursor-pointer" onclick="openLightbox(window.movieGalleryImageUrls, ${index})">
+                        <img src="https://wsrv.nl/?url=image.tmdb.org/t/p/w780${img.file_path}" alt="Cảnh phim ${movie.name}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" class="transform transition-transform duration-500 hover:scale-110">
                     </div>
                 `).join('');
                 
@@ -621,7 +621,7 @@ function addMovieMetadata(movie) {
                 </div>
                 <div class="flex flex-wrap gap-1.5">
                     ${movie.category.map(cat => `
-                        <a href="/search?category=${cat.slug}" style="border-color: rgba(59,130,246,0.3); color: #93c5fd; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-blue-500/30 transition-colors">
+                        <a href="search.html?category=${cat.slug}" style="border-color: rgba(59,130,246,0.3); color: #93c5fd; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-blue-500/30 transition-colors">
                             ${cat.name}
                         </a>
                     `).join('')}
@@ -641,7 +641,7 @@ function addMovieMetadata(movie) {
                 </div>
                 <div class="flex flex-wrap gap-1.5">
                     ${movie.country.map(c => `
-                        <a href="/search?country=${c.slug}" style="border-color: rgba(168,85,247,0.3); color: #d8b4fe; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-purple-500/30 transition-colors">
+                        <a href="search.html?country=${c.slug}" style="border-color: rgba(168,85,247,0.3); color: #d8b4fe; text-shadow: 0 1px 2px rgba(0,0,0,0.5);" class="px-2.5 py-0.5 border rounded-lg text-[11px] font-medium hover:bg-purple-500/30 transition-colors">
                             ${c.name}
                         </a>
                     `).join('')}

@@ -882,7 +882,7 @@ window.showTab = function (tabName, isInitialOrPop = false) {
         
         // 🚀 NATIVE APP UX: Hide the global main navbar when inside a detailed Sub-Tab
         // This permanently stops all header collisions and allows the Back Header to sit flush with the Safe Area Notch.
-        if (mainNav) mainNav.style.display = 'none';
+        // mainNav.style.display = "none"; // Removed to keep header sticky
         
         // Ensure hero card (banner) is hidden or smaller on mobile detail view to save space
         const heroCard = document.querySelector('.profile-hero-card');
@@ -943,7 +943,7 @@ window.goBackToMenu = function(isInitialOrPop = false) {
         // Show Sidebar, Hero & Restore Main Navbar
         if (sidebar) sidebar.style.display = 'flex';
         if (heroCard) heroCard.style.display = 'block';
-        if (mainNav) mainNav.style.display = ''; // Restore default display stylesheet styles
+        // mainNav.style.display = ""; // Removed to keep header sticky
         
         // Hide all tabs
         document.querySelectorAll('.tab-content').forEach(tab => {

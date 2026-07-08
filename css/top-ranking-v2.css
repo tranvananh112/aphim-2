@@ -55,11 +55,11 @@
     bottom: 8px;
     left: 4px;
     display: flex;
-    gap: 2px;
+    gap: 4px;
     z-index: 10;
 }
 
-.badge-pd, .badge-lt {
+.badge-pd, .badge-lt, .badge-tm {
     font-size: 10px;
     font-weight: 800;
     padding: 3px 6px;
@@ -67,8 +67,9 @@
     text-transform: uppercase;
 }
 
-.badge-pd { background: #6b7280; border-radius: 4px 0 0 4px; }
-.badge-lt { background: #2563eb; border-radius: 0 4px 4px 0; }
+.badge-pd { background: #16a34a; border-radius: 4px; }
+.badge-lt { background: #2563eb; border-radius: 4px; }
+.badge-tm { background: #0ea5e9; border-radius: 4px; }
 
 /* Circle Icon bottom right */
 .ranking-icon-circle {
@@ -95,7 +96,7 @@
 /* Rank 1 Highlight - Much thicker */
 .ranking-item[data-rank="1"] .ranking-poster-w {
     border: 3px solid #ffd700;
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.35);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
     transform: scale(1.02);
 }
 

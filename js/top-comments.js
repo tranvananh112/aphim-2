@@ -152,7 +152,7 @@ function renderFeaturedComments(movies) {
         const gender = genderIcons[Math.floor(Math.random() * genderIcons.length)];
         
         return `
-        <a href="/phim/${m.slug}" class="tc-featured-card cursor-pointer">
+        <a href="movie-detail.html?slug=${m.slug}" class="tc-featured-card cursor-pointer">
             <div class="tc-featured-bg-blur" style="background-image: url('${thumbUrl}')"></div>
             <div class="tc-featured-bg-overlay"></div>
             <img src="${thumbUrl}" alt="${m.name}" class="tc-featured-movie" onerror="this.src='https://placehold.co/40x60/1e293b/ffffff?text=?'"/>
@@ -195,7 +195,7 @@ function renderMovieList(elementId, items, displayMode = 'views') {
             : `<div class="tc-list-meta" style="color:#ef4444;"><span class="material-icons-round" style="font-size:11px;vertical-align:-1px;">star</span> 10 / 10</div>`;
 
         return `
-        <a href="/phim/${item.slug}" class="tc-list-item group">
+        <a href="movie-detail.html?slug=${item.slug}" class="tc-list-item group">
             <span class="tc-list-rank">${index + 1}.</span>
             <span class="tc-list-dash material-icons-round">trending_up</span>
             <img src="${thumbUrl}" class="tc-list-thumbnail" alt="${item.name}" onerror="this.src='https://placehold.co/32x44/1e293b/ffffff?text=?'">
@@ -269,7 +269,7 @@ function createRandomCommentElement() {
     
     const slug = generateSlug(movie);
     const el = document.createElement('a');
-    el.href = `/phim/${slug}`;
+    el.href = `movie-detail.html?slug=${slug}`;
     el.className = 'tc-realtime-comment group cursor-pointer';
     el.style.textDecoration = 'none';
     

@@ -132,7 +132,7 @@
                     ${icon('view_list', 'font-size:22px;')}
                     <span class="mm-card-label">Danh Sách</span>
                 </a>
-                <a href="/search" class="mm-card-item mm-glass color-green" style="position:relative;">
+                <a href="search.html" class="mm-card-item mm-glass color-green" style="position:relative;">
                     <div class="mm-badge-new">Mới</div>
                     ${icon('explore', 'font-size:22px;')}
                     <span class="mm-card-label">Khám Phá</span>
