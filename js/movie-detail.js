@@ -84,9 +84,9 @@ function renderMovieDetail(movie) {
     const titleElement = document.querySelector('h1');
     if (titleElement) {
         // Vietnamese name larger, English name smaller and on one line
-        titleElement.className = 'font-vietnam lg:font-playfair font-extrabold lg:font-normal text-white mb-4 leading-tight tracking-tight lg:tracking-normal drop-shadow-2xl text-center lg:text-left w-full';
+        titleElement.className = 'font-vietnam lg:font-playfair font-extrabold lg:font-normal text-white mb-2 leading-tight tracking-tight lg:tracking-normal drop-shadow-2xl text-center lg:text-left w-full';
         titleElement.innerHTML = `
-            <span class="block text-4xl md:text-5xl lg:text-7xl mb-1">${movie.name}</span>
+            <span class="block text-4xl md:text-5xl lg:text-7xl mb-0">${movie.name}</span>
             <span class="block text-xl md:text-3xl lg:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-bright whitespace-nowrap overflow-hidden text-ellipsis opacity-90 font-bold tracking-wide">
                 ${movie.origin_name}
             </span>
@@ -190,7 +190,7 @@ function renderMovieDetail(movie) {
     const infoContainer = document.querySelector('.movie-info-container') || document.querySelector('.flex.flex-wrap.items-center.gap-4.mb-8');
     if (infoContainer) {
         // Nowrap on mobile - text auto shrinks to fit one line
-        infoContainer.className = 'movie-info-container flex flex-nowrap justify-center lg:justify-start items-center gap-x-2 sm:gap-x-3 md:gap-4 mb-6 md:mb-8 text-[11px] sm:text-sm md:text-base overflow-hidden';
+        infoContainer.className = 'movie-info-container flex flex-nowrap justify-center lg:justify-start items-center gap-x-2 sm:gap-x-3 md:gap-4 mb-3 md:mb-5 text-[11px] sm:text-sm md:text-base overflow-hidden';
 
         const avgRating = ratingService.getAverageRating(movie.slug);
         const ratings = ratingService.getRatings(movie.slug);
@@ -305,8 +305,8 @@ function renderVersions(movie) {
     }
 
     const versionsHTML = `
-        <div class="w-full mt-0 mb-8">
-            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+        <div class="w-full mt-0 mb-5">
+            <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
                 Các bản chiếu
             </h3>
             <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch;">
@@ -608,7 +608,7 @@ function addMovieMetadata(movie) {
 
     // Build metadata cards FIRST
     const metadataHTML = `
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-8 w-full">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 mb-5 w-full">
             <!-- Thể Loại -->
             ${movie.category && movie.category.length > 0 ? `
             <div style="background-color: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1);" class="rounded-xl p-3 shadow-lg hover:bg-white/20 transition-all duration-300">
@@ -744,7 +744,7 @@ function addMovieMetadata(movie) {
         console.log('🎭 Rendering cast section for', movie.actor.length, 'actors:', movie.actor);
 
         const castHTML = `
-            <div class="mt-0 mb-8 w-full max-w-full overflow-hidden" id="cast-section">
+            <div class="mt-0 mb-5 w-full max-w-full overflow-hidden" id="cast-section">
                 <div class="relative w-full max-w-full">
                     <div id="cast-container" class="flex gap-4 overflow-x-auto scrollbar-hide w-full max-w-full" style="scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 8px;">
                         ${movie.actor.slice(0, 10).map((actor, index) => {

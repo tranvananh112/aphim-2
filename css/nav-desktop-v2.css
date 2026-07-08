@@ -374,8 +374,9 @@
     .nav-auth-btn {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 8px 20px; /* Reduced padding to match nav pill proportionally */
+        gap: 4px;
+        padding: 0 12px;
+        height: 40px;
         font-size: 0.95rem;
         font-weight: 700;
         letter-spacing: 0.04em;
@@ -507,5 +508,43 @@
     }
     .nav-search-v2:focus-within {
         width: 190px !important;
+    }
+}
+
+
+/* ── MOBILE: Ẩn chữ "Đăng Nhập", chỉ hiện icon → tiết kiệm diện tích ── */
+@media (max-width: 768px) {
+    .auth-btn-text {
+        display: none !important;
+    }
+    .nav-auth-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: unset !important;
+        gap: 0 !important;
+        position: relative !important;
+        background: transparent !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 50% !important;
+        backdrop-filter: blur(8px) !important;
+        box-shadow: none !important;
+        box-sizing: border-box !important;
+    }
+    .nav-auth-btn .material-icons-round,
+    .nav-auth-btn dotlottie-player {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) scale(1.85) !important;
+        margin: 0 !important;
+    }
+    .nav-auth-btn .material-icons-round {
+        font-size: 1.25rem !important;
+        line-height: 1 !important;
+        color: #eab308 !important;
     }
 }

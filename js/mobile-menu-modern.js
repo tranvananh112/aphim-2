@@ -365,30 +365,6 @@
         buildDrawer();
 
         if (wasOpen) {
-            document.getElementById('mm-overlay').classList.add('open');
-            document.getElementById('mm-drawer').classList.add('open');
-        }
-    }
-
-    /* ── SETUP BUTTON ── */
-    function setupBtn() {
-        const oldBtn = document.getElementById('mobileMenuBtn');
-        if (!oldBtn) return;
-
-        const btn = document.createElement('button');
-        // Giữ lg:hidden để ẩn trên desktop, chỉ hiện trên mobile
-        btn.className = 'mm-burger-btn lg:hidden';
-        btn.id = 'mobileMenuBtn';
-        btn.setAttribute('aria-label', 'Mở menu');
-        btn.innerHTML = `<div class="mm-burger-lines"><span></span><span></span><span></span></div>`;
-        btn.addEventListener('click', openMenu);
-        oldBtn.replaceWith(btn);
-    }
-
-    /* ── SUPPRESS OLD MENU ── */
-    function suppressOldMenu() {
-        const oldMenu = document.getElementById('mobileMenu');
-        if (!oldMenu) return;
         oldMenu.style.cssText = 'display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;';
         oldMenu.classList.add('hidden');
         oldMenu.setAttribute('aria-hidden', 'true');
@@ -422,7 +398,59 @@
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        
+    window.updateMobileMenuUser = function() {
+        const user = getCurrentUser();
+        const userWrap = document.querySelector('.mm-user-wrap');
+        if (!userWrap) return;
+        
+        const userName = user ? (user.name || 'Người dùng') : 'Khách';
+        const userBadge = user ? 'Thành viên Vàng' : 'Chưa đăng nhập';
+        let avatar = '/images/default-avatar.png';
+        
+        if (user) {
+            const userId = user._id || user.id || user.email;
+            const avatarKey = userId ? `avatar_${userId}` : 'user_avatar';
+            avatar = localStorage.getItem(avatarKey) || user.avatar || user.photoURL || avatar;
+        }
+
+        userWrap.innerHTML = `
+            <div class="mm-avatar-wrap">
+                <div class="mm-avatar-img">
+                    <img src="${esc(avatar)}" onerror="this.src='/images/default-avatar.png'" alt="Avatar">
+                </div>
+                ${user ? '<div class="mm-avatar-dot"></div>' : ''}
+            </div>
+            <div class="mm-user-info">
+                <div class="mm-user-name">${esc(userName)}</div>
+                <div class="mm-user-badge">${userBadge}</div>
+            </div>
+        `;
+        
+        // Update logout/login button at bottom
+        const footerDiv = document.querySelector('.mm-footer-div');
+        if (footerDiv && footerDiv.nextElementSibling) {
+            footerDiv.nextElementSibling.outerHTML = user 
+                ? `<a href="#" onclick="try{authService.logout();window.location.reload()}catch(e){window.location.href='login.html'}" class="mm-card-item mm-glass" style="margin-top:0;">
+                    <span class="material-icons-round" style="color:#ef4444; margin-right:12px;">logout</span>
+                    <span style="color:#ef4444; font-weight:600;">Đăng xuất</span>
+                  </a>`
+                : `<a href="login.html" class="mm-card-item mm-glass" style="margin-top:0;">
+                    <span class="material-icons-round" style="color:#10b981; margin-right:12px;">login</span>
+                    <span style="color:#10b981; font-weight:600;">Đăng nhập</span>
+                  </a>`;
+        }
+    };
+    
+    document.addEventListener('auth:profileSynced', window.updateMobileMenuUser);
+    document.addEventListener('auth:logout', window.updateMobileMenuUser);
+    
+    // Call it once if drawer exists
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(window.updateMobileMenuUser, 500);
+    });
+
+    document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
     }

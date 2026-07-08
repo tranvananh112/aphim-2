@@ -494,8 +494,8 @@
     <link rel="stylesheet" href="css/navigation-modern.css?v=13">
     <link rel="stylesheet" href="css/navigation-pill-v2.css?v=13">
     <link rel="stylesheet" href="css/navigation-smooth.css?v=13">
-    <link rel="stylesheet" href="css/sticky-nav.css?v=13">
-    <link rel="stylesheet" href="css/nav-desktop-v2.css?v=15">
+    <link rel="stylesheet" href="css/sticky-nav.css?v=1783524185484">
+    <link rel="stylesheet" href="css/nav-desktop-v2.css?v=7266">
     <link rel="stylesheet" href="css/material-icons-fix.css?v=13">
     <link rel="stylesheet" href="css/dropdown-z-index-fix.css?v=13">
     <link rel="stylesheet" href="css/top-movies.css?v=13">
@@ -791,6 +791,7 @@
     <!-- Lottie Web — dùng cho icon chuyên mục -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
     <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.14/dist/dotlottie-wc.js" type="module"></script>
+    <link rel="stylesheet" href="css/bottom-nav.css?v=138">
 </head>
 
 <body class="bg-background-dark text-gray-100 font-display min-h-screen">
@@ -971,15 +972,23 @@
 
                 <!-- Auth Container -->
                 <div id="authContainer" class="flex items-center" style="overflow: visible !important;">
-                    <a href="login.html"
-                        onclick="if(window.showAuthModal){event.preventDefault();event.stopImmediatePropagation();window.showAuthModal('login');return false;}"
-                        class="nav-auth-btn hidden lg:inline-flex">
-                        <dotlottie-player src="/icons/panda.lottie" background="transparent" speed="1" style="width: 40px; height: 40px; transform: scale(1.85); margin: -10px -4px -10px -12px;" loop autoplay></dotlottie-player>
-                        <span class="auth-btn-text">Đăng Nhập</span>
-                    </a>
+
+                    <div class="flex items-center">
+                        <div class="relative flex items-center" style="cursor:pointer; z-index: 60; margin-right: 12px;" onclick="if(window.showAuthModal){event.preventDefault();event.stopImmediatePropagation();window.showAuthModal('login');}else{alert('Vui lòng đăng nhập để xem thông báo!');}">
+                            <div class="rounded-full hover:bg-white/10 transition-all active:scale-90 relative" style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: transparent; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+                                <span class="material-icons-round text-white text-[20px]">notifications</span>
+                            </div>
+                        </div>
+                        <a href="login.html"
+                            onclick="if(window.showAuthModal){event.preventDefault();event.stopImmediatePropagation();window.showAuthModal('login');return false;}"
+                            class="nav-auth-btn hidden lg:inline-flex" style="display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 6px;">
+                            <dotlottie-player src="/icons/panda.lottie" background="transparent" speed="1" style="width: 40px; height: 40px; transform: scale(2.2); margin: 0; padding: 0;" loop autoplay></dotlottie-player>
+                            <span class="auth-btn-text">Đăng Nhập</span>
+                        </a>
+                    </div>
                 </div>
                 <!-- Mobile Menu Button -->
-                <button id="mobileMenuBtn" class="lg:hidden text-white p-1">
+                <button id="mobileMenuBtn" class="lg:hidden text-white p-1" style="display:none !important;">
                     <span class="material-icons-round">menu</span>
                 </button>
             </div>
@@ -995,11 +1004,11 @@
     <script src="js/categories-dropdown.js?v=13"></script>
     <script src="js/countries-dropdown.js?v=13"></script>
     <script src="js/dropdown-hover-fix.js?v=13"></script>
-    <script src="js/mobile-menu-modern.js?v=40"></script>
+    <script src="js/mobile-menu-modern.js?v=1783519898815"></script>
     <script src="js/nav-instant-suggest.js?v=5"></script>
 
     <!-- Sticky Navigation -->
-    <script src="js/sticky-nav.js?v=17"></script>
+    <script src="js/sticky-nav.js?v=1783523710052"></script>
     <script src="js/nav-active-indicator.js?v=13"></script>
 
     <script>
@@ -2995,6 +3004,7 @@
 <link rel="stylesheet" href="css/mobile-search-overlay.css?v=110">
 <script src="js/mobile-search-overlay.js?v=111" defer></script>
 
+    <script src="js/bottom-nav.js?v=1783518514270" defer></script>
 </body>
 
 </html>

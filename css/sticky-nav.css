@@ -33,11 +33,11 @@ nav > div {
 
 /* Scrolled state — Glassmorphism cao cấp */
 nav.scrolled {
-    background: rgba(5, 5, 8, 0.82) !important;
-    backdrop-filter: blur(32px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
-    box-shadow: var(--shadow-nav, 0 1px 40px rgba(0, 0, 0, 0.55)) !important;
-    border-bottom: 1px solid rgba(232, 185, 79, 0.07) !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-bottom: none !important;
 }
 
 /* Hidden — ẩn khi scroll xuống (MOBILE ONLY) */
