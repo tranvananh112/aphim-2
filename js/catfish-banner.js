@@ -18,11 +18,6 @@
             enabled: true,
             sessionKey: 'aphim_catfish_closed_v4'  // per-page sessionStorage key
         },
-        catfishTop: {
-            enabled: false,
-            sessionKey: 'aphim_catfish_top_closed_v1'
-        },
-
         popup: {
             enabled: false, // Đã tắt theo yêu cầu để tránh gây khó chịu
             showAfterMs: 800,         // Delay trước khi popup hiện (ms)
@@ -362,7 +357,6 @@
     ───────────────────────────────────────────────────────── */
     function boot() {
         initCatfish();
-        initCatfishTop();
         initPopup();
     }
 

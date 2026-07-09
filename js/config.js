@@ -39,7 +39,7 @@ const API_CONFIG = {
     BACKEND_URL: chosenBackend + '/api',
 
     // Default Ophim API (primary)
-    OPHIM_URL: 'https://aphim.io.vn/v1/api',
+    OPHIM_URL: 'https://ophim1.com/v1/api',
 
     // Default Ophim17 API (secondary - more movies)
     OPHIM17_URL: 'https://ophim17.cc',

@@ -79,7 +79,7 @@
 
     <link rel="stylesheet" href="css/tailwind.min.css?v=13">
 
-    <link rel="stylesheet" href="css/sticky-nav.css?v=1783524185488">
+    <link rel="stylesheet" href="css/sticky-nav.css?v=1783524185460">
 
 
 
@@ -144,7 +144,7 @@
 
 
 
-    <link rel="stylesheet" href="css/nav-desktop-v2.css?v=7269">
+    <link rel="stylesheet" href="css/nav-desktop-v2.css?v=7241">
     <script src="js/material-icons-loader.js?v=13"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons"
         rel="stylesheet">
@@ -217,7 +217,7 @@
             </div>
 
             <!-- ZONE 2: Desktop Search + Links (hidden on mobile) -->
-            <div class="hidden lg:flex items-center flex-1 justify-center ml-14">
+            <div class="hidden lg:flex items-center justify-center flex-none mx-4" style="white-space: nowrap;">
                 <!-- Dark pill wrapper (like SofaFlix) -->
                 <div id="desktopNavPill" class="desktop-nav-pill">
 
@@ -341,14 +341,14 @@
                         <a href="search.html" class="nav-flat-link">Khám Phá</a>
                         <a href="pricing.html" class="nav-flat-link">Gói Cước</a>
                         <a href="lich-chieu.html" class="nav-flat-link">Lịch Chiếu</a>
-                        <a href="phim-x.html" class="nav-flat-link nav-flat-link--danger">🔞 Phim X</a>
-                    </nav-links>
+                        </nav-links>
                 </div>
             </div>
 
 
             <!-- ZONE 3: Right — Auth + Mobile Toggle -->
-            <div class="flex items-center gap-3 flex-shrink-0 ml-4">
+            <div class="flex-1 flex justify-end">
+                <div class="flex items-center gap-3 flex-shrink-0 ml-4">
                 
                 <!-- Mobile: Search icon -->
                 <div class="flex items-center gap-2.5 lg:hidden">
@@ -381,6 +381,7 @@
                 <button id="mobileMenuBtn" class="lg:hidden text-white p-1" style="display:none !important;">
                     <span class="material-icons-round">menu</span>
                 </button>
+            </div>
             </div>
             </div>
         </div>
@@ -439,10 +440,26 @@
                                 class="w-1.5 h-6 bg-red-600 rounded-full shadow-[0_0_10px_rgba(236,19,19,0.5)]"></span>
                             Danh sách tập phim
                         </h3>
+                        <div id="server-list-desktop" class="flex flex-wrap gap-2 mb-4 w-full"></div>
+                        
+                        <!-- Thanh tìm kiếm tập phim (Desktop) -->
+                        <div id="episode-search-desktop" class="flex items-center gap-2 mb-4 w-full" style="display: none;">
+                            <div class="relative w-48 sm:w-56">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" style="left: 10px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <input type="text" id="search-episode-input-desktop" placeholder="Tìm tập..." class="w-full bg-white/5 border border-white/10 rounded-lg py-2 pr-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd576]/50 transition-colors" style="padding-left: 32px !important;">
+                            </div>
+                            <button id="sort-episodes-btn-desktop" class="flex-shrink-0 bg-white/5 border border-white/10 rounded-lg w-[38px] h-[38px] flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+                                <span class="material-icons-round text-[18px]">swap_vert</span>
+                            </button>
+                        </div>
+
                         <!-- Sử dụng flex wrap để linh hoạt hoặc grid -->
-                        <div class="grid grid-cols-2 xl:grid-cols-3 gap-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar"
-                            id="episodes-desktop">
-                            <!-- JS will render episodes here -->
+                        <div class="max-h-[400px] overflow-y-auto custom-scrollbar pr-2 pb-2">
+                            <div class="grid grid-cols-2 xl:grid-cols-3 gap-2" id="episodes-desktop">
+                                <!-- JS will render episodes here -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -500,9 +517,25 @@
                             <span class="w-1 h-6 bg-red-600 rounded-full shadow-[0_0_10px_rgba(236,19,19,0.5)]"></span>
                             Danh sách tập phim
                         </h3>
-                        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-[300px] overflow-y-auto pr-1"
-                            id="episodes-mobile">
-                            <!-- JS will render episodes here -->
+                        <div id="server-list-mobile" class="flex flex-wrap gap-2 mb-4 w-full"></div>
+                        
+                        <!-- Thanh tìm kiếm tập phim (Mobile) -->
+                        <div id="episode-search-mobile" class="flex items-center gap-2 mb-4 w-full" style="display: none;">
+                            <div class="relative w-48 sm:w-56">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" style="left: 10px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <input type="text" id="search-episode-input-mobile" placeholder="Tìm tập..." class="w-full bg-white/5 border border-white/10 rounded-lg py-2 pr-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#fcd576]/50 transition-colors" style="padding-left: 32px !important;">
+                            </div>
+                            <button id="sort-episodes-btn-mobile" class="flex-shrink-0 bg-white/5 border border-white/10 rounded-lg w-[38px] h-[38px] flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+                                <span class="material-icons-round text-[18px]">swap_vert</span>
+                            </button>
+                        </div>
+
+                        <div class="max-h-[300px] overflow-y-auto custom-scrollbar pr-1.5 pb-2">
+                            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2" id="episodes-mobile">
+                                <!-- JS will render episodes here -->
+                            </div>
                         </div>
                     </div>
 
@@ -520,28 +553,28 @@
                     </div>
 
                     <!-- THƯ VIỆN HÌNH ẢNH (GALLERY) -->
-                    <div id="movie-gallery-container" class="mb-10 max-w-full text-left w-full hidden">
+                  <div id="movie-gallery-container" class="mb-8 max-w-full text-left w-full hidden">
                         <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
                             <span class="w-1 h-6 bg-red-600 rounded-full"></span>
                             Hình ảnh <span id="movie-gallery-count" class="text-gray-400 text-sm font-normal ml-1"></span>
                         </h3>
-                        <div class="relative w-full group">
-                            <!-- Nút Cuộn Trái -->
-                            <button id="btn-scroll-left" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/60 hover:bg-red-600 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-1/2 shadow-lg backdrop-blur-sm border border-white/20">
-                                <span class="material-icons-round">chevron_left</span>
-                            </button>
-                            
-                            <!-- Container Hình Ảnh (Cuộn ngang) -->
-                            <div id="movie-gallery-scroll" class="flex gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-2 pt-1 scroll-smooth">
-                                <!-- JS Render Images Here -->
-                            </div>
-                            
-                            <!-- Nút Cuộn Phải -->
-                            <button id="btn-scroll-right" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/60 hover:bg-red-600 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1/2 shadow-lg backdrop-blur-sm border border-white/20">
-                                <span class="material-icons-round">chevron_right</span>
-                            </button>
-                        </div>
-                    </div>
+                      <div class="relative w-full group">
+                          <!-- Nút Cuộn Trái -->
+                          <button id="btn-scroll-left" class="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/60 hover:bg-red-600 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-1/2 shadow-lg backdrop-blur-sm border border-white/20">
+                              <span class="material-icons-round">chevron_left</span>
+                          </button>
+                          
+                          <!-- Container Hình ảnh (Cuộn ngang) -->
+                          <div id="movie-gallery-scroll" class="flex gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-2 pt-1 scroll-smooth" style="scrollbar-width: none; -ms-overflow-style: none;">
+                              <!-- JS Render Images Here -->
+                          </div>
+                          
+                          <!-- Nút Cuộn Phải -->
+                          <button id="btn-scroll-right" class="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/60 hover:bg-red-600 rounded-full text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1/2 shadow-lg backdrop-blur-sm border border-white/20">
+                              <span class="material-icons-round">chevron_right</span>
+                          </button>
+                      </div>
+                  </div>
                     
                 </div>
             </div>
@@ -860,17 +893,17 @@
     <script src="js/tmdb-api.js?v=15"></script>
     <script src="js/playlist-service.js"></script>
     <script src="js/playlist-modal.js"></script>
-    <script src="js/movie-detail.js?v=1783525184553"></script>
+    <script src="js/movie-detail.js"></script>
     <script src="js/categories-dropdown.js?v=13"></script>
     <script src="js/countries-dropdown.js?v=13"></script>
 
     <script src="js/dropdown-hover-fix.js?v=13"></script>
 
-    <script src="js/mobile-menu-modern.js?v=1783519898820"></script>
+    <script src="js/mobile-menu-modern.js?v=1783518782846"></script>
     <script src="js/nav-instant-suggest.js?v=5"></script>
 
     <!-- Sticky Navigation -->
-    <script src="js/sticky-nav.js?v=1783523710057"></script>
+    <script src="js/sticky-nav.js?v=1783523710027"></script>
 
 
     <!-- ====== Firebase SDK (Compat CDN) ====== -->
@@ -1032,7 +1065,7 @@
 <link rel="stylesheet" href="css/mobile-search-overlay.css?v=110">
 <script src="js/mobile-search-overlay.js?v=111" defer></script>
 
-    <script src="js/bottom-nav.js?v=1783518514272" defer></script>
+    <script src="js/bottom-nav.js?v=1783518061448" defer></script>
 </body>
 
 </html>
