@@ -18,7 +18,6 @@
     /* will-change: transform, box-shadow; Disabled for scroll performance */
     flex: none;
     width: 100px;
-    scroll-snap-align: start;
 }
 
 @media (min-width: 768px) {
