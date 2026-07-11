@@ -179,9 +179,9 @@ const SEO = {
             "genre": movie.category?.map(c => c.name) || ["Phim mới"],
             "aggregateRating": {
                 "@type": "AggregateRating",
-                "ratingValue": "9.5",
-                "bestRating": "10",
-                "ratingCount": Math.floor(Math.random() * 1000) + 500
+                "ratingValue": (Math.random() * (4.9 - 4.5) + 4.5).toFixed(1),
+                "bestRating": "5",
+                "ratingCount": Math.floor(Math.random() * (25000 - 8000) + 8000)
             }
         };
 
