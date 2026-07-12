@@ -184,7 +184,7 @@
     // -- INIT ALL SLIDERS --
     function init() {
         // Select all horizontal sliders/scrollers
-        const sliders = document.querySelectorAll('.overflow-x-auto, .snap-x, .scrollbar-hide, #heroThumbnails, .tc-featured-wrapper');
+        const sliders = document.querySelectorAll('.overflow-x-auto, .snap-x, .scrollbar-hide, #heroThumbnails');
 
         sliders.forEach(function(slider) {
             // Skip elements that are not sliders (like small nav bars or pagination)
@@ -205,11 +205,13 @@
 
     // Re-init after dynamic content loads
     window.refreshMovieSliders = function() {
-        const sliders = document.querySelectorAll('.overflow-x-auto, .snap-x, .scrollbar-hide, #heroThumbnails, .tc-featured-wrapper');
+        const sliders = document.querySelectorAll('.overflow-x-auto, .snap-x, .scrollbar-hide, #heroThumbnails');
         sliders.forEach(function(slider) {
             delete slider.dataset.sliderInit;
         });
         init();
     };
 })();
+
+
 
