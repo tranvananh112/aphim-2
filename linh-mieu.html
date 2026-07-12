@@ -2902,55 +2902,7 @@
     <script src="/js/catfish-banner.js?v=18" defer></script>
     <!-- ====== End Catfish Banner ====== -->
 
-    <!-- ====== MOBILE SWIPE GUARD — Phân biệt vuốt ngang vs nhấn chọn ====== -->
-    <script>
-    (function() {
-        var SWIPE_THRESHOLD = 8; // px — nếu ngón tay di chuyển > 8px = đang vuốt, không phải nhấn
-        document.addEventListener('DOMContentLoaded', function() {
-            var sliders = document.querySelectorAll('.overflow-x-auto, .snap-x, .scrollbar-hide');
-            sliders.forEach(function(slider) {
-                var startX = 0, startY = 0, isSwiping = false;
-                slider.addEventListener('touchstart', function(e) {
-                    startX = e.touches[0].clientX;
-                    startY = e.touches[0].clientY;
-                    isSwiping = false;
-                    // Đánh dấu tạm thời cho slider: đang chuẩn bị
-                    slider.setAttribute('data-swipe', 'pending');
-                }, { passive: true });
-                slider.addEventListener('touchmove', function(e) {
-                    var dx = Math.abs(e.touches[0].clientX - startX);
-                    var dy = Math.abs(e.touches[0].clientY - startY);
-                    if (dx > SWIPE_THRESHOLD || dy > SWIPE_THRESHOLD) {
-                        isSwiping = true;
-                        slider.setAttribute('data-swipe', 'swiping');
-                    }
-                }, { passive: true });
-                slider.addEventListener('touchend', function() {
-                    if (isSwiping) {
-                        // Đang vuốt — block tất cả click trong 300ms
-                        slider.setAttribute('data-swipe', 'done');
-                        setTimeout(function() {
-                            slider.removeAttribute('data-swipe');
-                        }, 300);
-                    } else {
-                        slider.removeAttribute('data-swipe');
-                    }
-                    isSwiping = false;
-                }, { passive: true });
-                // Chặn click nếu đang trong trạng thái vuốt
-                slider.addEventListener('click', function(e) {
-                    if (slider.getAttribute('data-swipe') === 'done') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                }, true);
-            });
-        });
-    })();
-    </script>
-    <!-- ====== End Mobile Swipe Guard ====== -->
-
-<!-- A PHIM Floating Side Dock -->
+    <!-- A PHIM Floating Side Dock -->
 <link rel="stylesheet" href="/css/floating-dock.css?v=5">
 
 <div class="floating-dock-container" id="floatingDock">
