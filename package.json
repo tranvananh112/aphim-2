@@ -4,10 +4,11 @@
     "description": "Website xem phim trực tuyến với giao diện hiện đại",
     "main": "server.js",
     "scripts": {
-        "start": "node server.js",
+        "start": "cd backend && npm start",
+        "start:frontend": "node server.js",
         "dev": "nodemon server.js",
         "proxy": "node proxy-server.js",
-        "start-all": "concurrently \"npm start\" \"npm run proxy\"",
+        "start-all": "concurrently \"npm run start:frontend\" \"npm run proxy\"",
         "build": "cd backend && npm install",
         "build:css": "cross-env BROWSERSLIST_IGNORE_OLD_DATA=true node node_modules/tailwindcss/lib/cli.js -i css/tailwind-input.css -o css/tailwind.min.css --minify",
         "watch:css": "cross-env BROWSERSLIST_IGNORE_OLD_DATA=true node node_modules/tailwindcss/lib/cli.js -i css/tailwind-input.css -o css/tailwind.min.css --watch"
