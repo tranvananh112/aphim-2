@@ -400,9 +400,12 @@
             if (typeof EventTarget !== 'undefined') {
                 const originalAddEventListener = EventTarget.prototype.addEventListener;
                 EventTarget.prototype.addEventListener = function (type, listener, options) {
+                    // Chỉ ép passive nếu chưa được set rõ ràng
+                    // (cho phép section-swipe.js dùng passive:false để chặn cuộn trang khi lướt ngang)
                     if (type === 'touchstart' || type === 'touchmove' || type === 'wheel' || type === 'mousewheel') {
                         if (typeof options === 'boolean') options = { capture: options, passive: true };
                         else if (typeof options === 'object' && options.passive === undefined) options.passive = true;
+                        // Nếu options.passive đã set rõ (true hoặc false) → giữ nguyên
                     }
                     return originalAddEventListener.call(this, type, listener, options);
                 };
@@ -524,11 +527,24 @@
             flex-shrink: 0;
             margin-bottom: 20px;
             transition: transform 0.3s ease;
-            scroll-snap-align: start;
         }
 
-        .action-premium-card:hover {
-            transform: translateY(-5px);
+        /* Chỉ hover trên desktop có chuột, mobile không dùng :hover */
+        @media (hover: hover) {
+            .action-premium-card:hover { transform: translateY(-5px); }
+        }
+
+        /* Tắt hiệu ứng sáng xanh khi chạm trên mobile */
+        .action-premium-card,
+        .action-premium-card a,
+        .action-premium-card img,
+        #romanceContainer, #comedyContainer, #dramaContainer,
+        #actionMoviesContainer, #adventureContainer, #animationContainer,
+        #topMoviesContainer, #comingSoonContainer, #latestMoviesGrid,
+        #mythologyRankingContainer, #vietnamMoviesGrid, #sofaflixContainer {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
         }
 
         .action-backdrop-w {

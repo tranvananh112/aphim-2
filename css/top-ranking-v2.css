@@ -5,8 +5,15 @@
 /* ── Container: align-items: flex-start, KHÔNG dùng items-end ── */
 #topMoviesContainer,
 #comingSoonContainer,
-[id$="Container"].flex {
+[id$="Container"].flex,
+[id$="Grid"].flex {
     align-items: flex-start !important;
+    scroll-snap-type: x mandatory;
+}
+
+[id$="Container"] > div,
+[id$="Grid"] > div {
+    scroll-snap-align: start;
 }
 
 /* ── Ranking Item: cố định chiều cao ── */
