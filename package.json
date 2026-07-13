@@ -8,6 +8,7 @@
         "dev": "nodemon server.js",
         "proxy": "node proxy-server.js",
         "start-all": "concurrently \"npm start\" \"npm run proxy\"",
+        "build": "cd backend && npm install",
         "build:css": "cross-env BROWSERSLIST_IGNORE_OLD_DATA=true node node_modules/tailwindcss/lib/cli.js -i css/tailwind-input.css -o css/tailwind.min.css --minify",
         "watch:css": "cross-env BROWSERSLIST_IGNORE_OLD_DATA=true node node_modules/tailwindcss/lib/cli.js -i css/tailwind-input.css -o css/tailwind.min.css --watch"
     },
