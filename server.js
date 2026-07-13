@@ -580,28 +580,29 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
+    const domain = process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : `http://localhost:${PORT}`;
     console.log(`
-╔═══════════════════════════════════════════════════════════╗
-║                                                           ║
-║   🎬 CineStream Server đang chạy!                        ║
-║                                                           ║
-║   🌐 URL: http://localhost:${PORT}                        ║
-║   📁 Thư mục: ${__dirname}                    
-║                                                           ║
-║   📄 Các trang có sẵn:                                   ║
-║   • http://localhost:${PORT}/                             ║
-║   • http://localhost:${PORT}/login                        ║
-║   • http://localhost:${PORT}/movie-detail                 ║
-║   • http://localhost:${PORT}/watch                        ║
-║   • http://localhost:${PORT}/pricing                      ║
-║   • http://localhost:${PORT}/profile                      ║
-║   • http://localhost:${PORT}/search                       ║
-║   • http://localhost:${PORT}/admin/dashboard              ║
-║                                                           ║
-║   ⏹️  Nhấn Ctrl+C để dừng server                         ║
-║                                                           ║
-╚═══════════════════════════════════════════════════════════╝
+╭────────────────────────────────────────────────────────────╮
+│                                                            │
+│   🎬 CineStream Server đang chạy!                        │
+│                                                            │
+│   🌐 URL: ${domain}                        │
+│   📁 Thư mục: ${__dirname}                    
+│                                                            │
+│   👉 Các trang có sẵn:                                   │
+│   • ${domain}/                             │
+│   • ${domain}/login                        │
+│   • ${domain}/movie-detail                 │
+│   • ${domain}/watch                        │
+│   • ${domain}/pricing                      │
+│   • ${domain}/profile                      │
+│   • ${domain}/search                       │
+│   • ${domain}/admin/dashboard              │
+│                                                            │
+│   ⏹️  Nhấn Ctrl+C để dừng server                         │
+│                                                            │
+╰────────────────────────────────────────────────────────────╯
     `);
 });
 
