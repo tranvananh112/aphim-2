@@ -8,8 +8,8 @@
         "dev": "nodemon server.js",
         "proxy": "node proxy-server.js",
         "start-all": "concurrently \"npm start\" \"npm run proxy\"",
-        "build:css": "node node_modules/tailwindcss/lib/cli.js -i css/tailwind-input.css -o css/tailwind.min.css --minify",
-        "watch:css": "node node_modules/tailwindcss/lib/cli.js -i css/tailwind-input.css -o css/tailwind.min.css --watch"
+        "build:css": "cross-env BROWSERSLIST_IGNORE_OLD_DATA=true node node_modules/tailwindcss/lib/cli.js -i css/tailwind-input.css -o css/tailwind.min.css --minify",
+        "watch:css": "cross-env BROWSERSLIST_IGNORE_OLD_DATA=true node node_modules/tailwindcss/lib/cli.js -i css/tailwind-input.css -o css/tailwind.min.css --watch"
     },
     "keywords": [
         "movie",
@@ -28,6 +28,7 @@
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.11",
         "concurrently": "^8.2.2",
+        "cross-env": "^10.1.0",
         "nodemon": "^3.0.1",
         "tailwindcss": "^3.4.19"
     }
