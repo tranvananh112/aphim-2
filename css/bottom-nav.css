@@ -179,7 +179,7 @@
 
 #bn-sheet {
     position: fixed;
-    left: 12px; right: 12px; margin: 0 auto; width: auto;
+    left: 50%;
     bottom: 86px;
     width: calc(100% - 24px);
     max-width: 420px;
@@ -194,7 +194,7 @@
     box-shadow:
         0 12px 40px rgba(0, 0, 0, 0.6),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transform: translateY(120%);
+    transform: translate(-50%, 120%);
     transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), visibility 0.4s;
     will-change: transform;
     overflow: hidden;
@@ -204,7 +204,7 @@
     visibility: hidden;  /* Ẩn hoàn toàn khi chưa open */
 }
 #bn-sheet.open {
-    transform: translateY(0);
+    transform: translate(-50%, 0);
     visibility: visible;
 }
 

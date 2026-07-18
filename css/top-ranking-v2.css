@@ -5,15 +5,8 @@
 /* ── Container: align-items: flex-start, KHÔNG dùng items-end ── */
 #topMoviesContainer,
 #comingSoonContainer,
-[id$="Container"].flex,
-[id$="Grid"].flex {
+[id$="Container"].flex {
     align-items: flex-start !important;
-    scroll-snap-type: x mandatory;
-}
-
-[id$="Container"] > div,
-[id$="Grid"] > div {
-    scroll-snap-align: start;
 }
 
 /* ── Ranking Item: cố định chiều cao ── */
@@ -255,13 +248,4 @@
 [id$="Grid"] > div:last-child,
 .ranking-item:last-child {
     margin-right: 0 !important;
-}
-
-/* Mouse Drag Cursor */
-.overflow-x-auto.scrollbar-hide {
-    cursor: grab;
-}
-.overflow-x-auto.scrollbar-hide:active,
-.overflow-x-auto.scrollbar-hide.active {
-    cursor: grabbing;
 }

@@ -12,12 +12,14 @@
     opacity: 0;
     pointer-events: none !important;
     visibility: hidden !important;
+    display: none !important;
     transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 #mm-overlay.open {
     opacity: 1;
     pointer-events: auto !important;
     visibility: visible !important;
+    display: block !important;
     /* FIX: bỏ backdrop-filter blur → đắt tiền render trên mobile */
 }
 

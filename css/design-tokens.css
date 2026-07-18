@@ -7,7 +7,7 @@
 :root {
 
   /* ── BASE BACKGROUNDS (PERFECT BRIGHT GRAY) ────────────────── */
-  --bg-void:          #1f222b;     /* Xám sáng nhẹ nữa            */
+  --bg-void:          #1e2130;     /* Nền navy premium (đồng bộ)   */
   --bg-deep:          #2a2e39;     /* Nền chính sáng lý tưởng      */
   --bg-surface:       #343946;     /* Card bề mặt                 */
   --bg-elevated:      #3f4555;     /* Hover state                 */

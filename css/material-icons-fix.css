@@ -33,6 +33,9 @@
 .material-symbols-outlined:not(.material-icons-loaded) {
     /* Show a placeholder instead of text */
     font-size: 0 !important;
+    color: transparent !important;
+    overflow: hidden !important;
+    text-shadow: none !important;
     width: 18px;
     height: 18px;
     display: inline-block;

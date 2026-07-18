@@ -163,6 +163,11 @@ function renderMovieInfo(movie, episode) {
 
     const titleElement = document.querySelector('h1');
     if (titleElement) {
+        titleElement.style.background = 'linear-gradient(135deg, #FFF6CC 0%, #FCD576 40%, #E6A817 75%, #C48600 100%)';
+        titleElement.style.webkitBackgroundClip = 'text';
+        titleElement.style.webkitTextFillColor = 'transparent';
+        titleElement.style.backgroundClip = 'text';
+        titleElement.style.filter = 'drop-shadow(0 2px 8px rgba(230,168,23,0.35))';
         titleElement.textContent = movie.name;
     }
 
@@ -290,7 +295,13 @@ function renderMovieInfo(movie, episode) {
     }
 
     const sidebarName = document.getElementById('sidebar-movie-name');
-    if (sidebarName) sidebarName.textContent = movie.name;
+    if (sidebarName) {
+        sidebarName.textContent = movie.name;
+        sidebarName.style.background = 'linear-gradient(135deg, #FFF6CC 0%, #FCD576 40%, #E6A817 75%, #C48600 100%)';
+        sidebarName.style.webkitBackgroundClip = 'text';
+        sidebarName.style.webkitTextFillColor = 'transparent';
+        sidebarName.style.backgroundClip = 'text';
+    }
 
     const sidebarOrigin = document.getElementById('sidebar-movie-origin');
     if (sidebarOrigin) sidebarOrigin.textContent = `${movie.origin_name} (${movie.year})`;
@@ -805,7 +816,7 @@ function renderPlayerPlaceholder(episode) {
 
                 <!-- Movie Title & Episode Name (Premium layout with extra top margin) -->
                 <div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3 mt-1.5">
-                    <h3 class="text-white font-extrabold text-base sm:text-2xl md:text-3xl tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] max-w-[65vw] sm:max-w-[450px] md:max-w-[600px] truncate leading-tight">
+                    <h3 class="font-extrabold text-base sm:text-2xl md:text-3xl tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] max-w-[65vw] sm:max-w-[450px] md:max-w-[600px] truncate leading-tight" style="background: linear-gradient(135deg, #FFF6CC 0%, #FCD576 40%, #E6A817 75%, #C48600 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 2px 8px rgba(230,168,23,0.35));">
                         ${movieName}
                     </h3>
                     <span class="text-[#fcd576] font-bold text-xs sm:text-sm md:text-base tracking-wide drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] whitespace-nowrap">
@@ -1585,7 +1596,7 @@ function renderRecommendations(movies) {
         const episode = movie.episode_current || 'Tập 1';
         
         return `
-            <a href="/phim/${movie.slug}" class="watch-rec-item group">
+            <a href="movie-detail.html?slug=${movie.slug}" class="watch-rec-item group">
                 <img src="${movieAPI.getImageURL(movie.thumb_url, 300, 85, true)}" alt="${movie.name}" class="watch-rec-thumb" loading="lazy" onerror="this.src='https://via.placeholder.com/60x80?text=No+Image'" />
                 <div class="watch-rec-info">
                     <h4 class="watch-rec-name group-hover:text-red-500 transition-colors">${movie.name}</h4>
