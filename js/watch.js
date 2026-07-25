@@ -2338,3 +2338,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+const style = document.createElement('style');
+style.innerHTML = '#mpbFs, #mab-fs, #fullscreenBtn { display: none !important; }';
+document.head.appendChild(style);
