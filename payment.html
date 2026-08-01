@@ -320,109 +320,124 @@
         }
     </script>
 
-    <main class="flex-grow pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold mb-4">Thanh Toán</h1>
-            <p class="text-gray-400" id="planName">Đang tải...</p>
+    <main class="flex-grow pt-36 pb-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full flex flex-col items-center justify-center min-h-[70vh]">
+        <!-- 404 DISPLAY INTERFACE -->
+        <div class="text-center flex flex-col items-center justify-center my-auto py-8">
+            <!-- 404 Cat Lottie -->
+            <dotlottie-wc src="/icons/404-cat.lottie" style="width: 320px; height: 320px; max-width: 100%; margin-bottom: -10px;" autoplay loop></dotlottie-wc>
+            
+            <h1 class="text-3xl font-extrabold mb-2 text-white">404 - Không tìm thấy trang</h1>
+            <p class="text-xl mb-8 mt-2 text-gray-400 font-medium">Rất tiếc, không tìm thấy trang này!</p>
+            <a href="/" class="px-8 py-3 bg-[#fcd576] text-black font-bold rounded-xl hover:bg-yellow-500 transition-all shadow-[0_4px_12px_rgba(252,213,118,0.3)] hover:-translate-y-1">
+                Về trang chủ
+            </a>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-8">
-            <!-- Thông tin gói -->
-            <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
-                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span class="material-icons text-primary">receipt</span>
-                    Chi Tiết Đơn Hàng
-                </h2>
+        <!-- ORIGINAL PAYMENT CODE (PRESERVED INTACT, HIDDEN FROM DISPLAY) -->
+        <div style="display: none !important;">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold mb-4">Thanh Toán</h1>
+                <p class="text-gray-400" id="planName">Đang tải...</p>
+            </div>
 
-                <!-- Thông tin user -->
-                <div id="userInfo" class="mb-4"></div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Thông tin gói -->
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="material-icons text-primary">receipt</span>
+                        Chi Tiết Đơn Hàng
+                    </h2>
 
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Gói dịch vụ:</span>
-                        <span class="font-medium" id="planNameDetail">-</span>
+                    <!-- Thông tin user -->
+                    <div id="userInfo" class="mb-4"></div>
+
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Gói dịch vụ:</span>
+                            <span class="font-medium" id="planNameDetail">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Thời hạn:</span>
+                            <span class="font-medium" id="planDuration">-</span>
+                        </div>
+                        <div class="border-t border-white/10 pt-3 mt-3"></div>
+                        <div class="flex justify-between text-lg">
+                            <span class="font-bold">Tổng cộng:</span>
+                            <span class="font-bold text-primary" id="totalAmount">-</span>
+                        </div>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-400">Thời hạn:</span>
-                        <span class="font-medium" id="planDuration">-</span>
-                    </div>
-                    <div class="border-t border-white/10 pt-3 mt-3"></div>
-                    <div class="flex justify-between text-lg">
-                        <span class="font-bold">Tổng cộng:</span>
-                        <span class="font-bold text-primary" id="totalAmount">-</span>
+
+                    <div class="mt-6 p-4 bg-primary/10 border border-primary/30 rounded-lg">
+                        <h3 class="font-bold text-primary mb-2 flex items-center gap-2">
+                            <span class="material-icons text-sm">info</span>
+                            Hướng Dẫn Thanh Toán
+                        </h3>
+                        <ol class="text-xs text-gray-300 space-y-1 list-decimal list-inside">
+                            <li>Quét mã QR bằng ứng dụng ngân hàng</li>
+                            <li>Kiểm tra thông tin chuyển khoản</li>
+                            <li>Xác nhận thanh toán</li>
+                            <li>Nhấn nút "Đã Thanh Toán" bên dưới</li>
+                        </ol>
                     </div>
                 </div>
 
-                <div class="mt-6 p-4 bg-primary/10 border border-primary/30 rounded-lg">
-                    <h3 class="font-bold text-primary mb-2 flex items-center gap-2">
-                        <span class="material-icons text-sm">info</span>
-                        Hướng Dẫn Thanh Toán
-                    </h3>
-                    <ol class="text-xs text-gray-300 space-y-1 list-decimal list-inside">
-                        <li>Quét mã QR bằng ứng dụng ngân hàng</li>
-                        <li>Kiểm tra thông tin chuyển khoản</li>
-                        <li>Xác nhận thanh toán</li>
-                        <li>Nhấn nút "Đã Thanh Toán" bên dưới</li>
-                    </ol>
+                <!-- QR Code -->
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="material-icons text-primary">qr_code_2</span>
+                        Quét Mã QR
+                    </h2>
+
+                    <div class="bg-white rounded-xl p-4 mb-4">
+                        <img id="qrCode" src="" alt="QR Code" class="w-full h-auto rounded-lg" />
+                    </div>
+
+                    <div class="space-y-2 text-xs text-gray-400 mb-6">
+                        <p><strong>Ngân hàng:</strong> TMCP Quân đội (MB Bank)</p>
+                        <p><strong>Số tài khoản:</strong> 048889019999</p>
+                        <p><strong>Chủ tài khoản:</strong> TRAN VAN ANH</p>
+                        <p><strong>Số tiền:</strong> <span id="amountText" class="text-primary font-bold">-</span></p>
+                        <p><strong>Nội dung:</strong> <span id="contentText" class="text-primary font-bold">-</span></p>
+                    </div>
+
+                    <button id="confirmPaymentBtn"
+                        class="w-full py-3 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                        <span class="material-icons">check_circle</span>
+                        <span>Đã Thanh Toán</span>
+                    </button>
+
+                    <button id="confirmedBtn"
+                        class="w-full py-3 rounded-lg bg-red-600 text-white font-bold hidden items-center justify-center gap-2 cursor-not-allowed">
+                        <span class="material-icons">verified</span>
+                        <span>Đã Xác Nhận Thanh Toán</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- QR Code -->
-            <div class="bg-white/5 border border-white/10 rounded-2xl p-6">
-                <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span class="material-icons text-primary">qr_code_2</span>
-                    Quét Mã QR
-                </h2>
-
-                <div class="bg-white rounded-xl p-4 mb-4">
-                    <img id="qrCode" src="" alt="QR Code" class="w-full h-auto rounded-lg" />
-                </div>
-
-                <div class="space-y-2 text-xs text-gray-400 mb-6">
-                    <p><strong>Ngân hàng:</strong> TMCP Quân đội (MB Bank)</p>
-                    <p><strong>Số tài khoản:</strong> 048889019999</p>
-                    <p><strong>Chủ tài khoản:</strong> TRAN VAN ANH</p>
-                    <p><strong>Số tiền:</strong> <span id="amountText" class="text-primary font-bold">-</span></p>
-                    <p><strong>Nội dung:</strong> <span id="contentText" class="text-primary font-bold">-</span></p>
-                </div>
-
-                <button id="confirmPaymentBtn"
-                    class="w-full py-3 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-                    <span class="material-icons">check_circle</span>
-                    <span>Đã Thanh Toán</span>
-                </button>
-
-                <button id="confirmedBtn"
-                    class="w-full py-3 rounded-lg bg-red-600 text-white font-bold hidden items-center justify-center gap-2 cursor-not-allowed">
-                    <span class="material-icons">verified</span>
-                    <span>Đã Xác Nhận Thanh Toán</span>
-                </button>
+            <!-- Lưu ý -->
+            <div class="mt-8 p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                <h3 class="font-bold text-yellow-500 mb-2 flex items-center gap-2">
+                    <span class="material-icons">warning</span>
+                    Lưu Ý Quan Trọng
+                </h3>
+                <ul class="text-sm text-gray-300 space-y-1 list-disc list-inside">
+                    <li>Vui lòng chuyển khoản đúng số tiền và nội dung để hệ thống tự động kích hoạt</li>
+                    <li>Gói dịch vụ sẽ được kích hoạt trong vòng 5-10 phút sau khi thanh toán</li>
+                    <li>Nếu có vấn đề, vui lòng liên hệ hỗ trợ qua Telegram:
+                        <a href="https://web.telegram.org/k/#@aphimiovn" target="_blank"
+                            class="inline-flex items-center gap-1.5 text-primary hover:text-yellow-400 font-bold transition-all ml-1 underline decoration-primary/30 decoration-2 underline-offset-4 group">
+                            <svg class="w-4 h-4 fill-current group-hover:scale-110 transition-transform"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.11.03-1.84 1.18-5.18 3.44-.49.34-.93.5-1.33.49-.44-.01-1.29-.25-1.92-.45-.73-.24-1.31-.36-1.26-.77.03-.21.32-.42.87-.64 3.41-1.48 5.68-2.46 6.83-2.94 3.25-1.36 3.93-1.59 4.37-1.59.1 0 .31.02.43.09.1.06.18.14.2.25.01.12.01.19.01.37z" />
+                            </svg>
+                            @aphimiovn
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
-
-        <!-- Lưu ý -->
-        <div class="mt-8 p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-            <h3 class="font-bold text-yellow-500 mb-2 flex items-center gap-2">
-                <span class="material-icons">warning</span>
-                Lưu Ý Quan Trọng
-            </h3>
-            <ul class="text-sm text-gray-300 space-y-1 list-disc list-inside">
-                <li>Vui lòng chuyển khoản đúng số tiền và nội dung để hệ thống tự động kích hoạt</li>
-                <li>Gói dịch vụ sẽ được kích hoạt trong vòng 5-10 phút sau khi thanh toán</li>
-                <li>Nếu có vấn đề, vui lòng liên hệ hỗ trợ qua Telegram:
-                    <a href="https://web.telegram.org/k/#@aphimiovn" target="_blank"
-                        class="inline-flex items-center gap-1.5 text-primary hover:text-yellow-400 font-bold transition-all ml-1 underline decoration-primary/30 decoration-2 underline-offset-4 group">
-                        <svg class="w-4 h-4 fill-current group-hover:scale-110 transition-transform"
-                            viewBox="0 0 24 24">
-                            <path
-                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.11.03-1.84 1.18-5.18 3.44-.49.34-.93.5-1.33.49-.44-.01-1.29-.25-1.92-.45-.73-.24-1.31-.36-1.26-.77.03-.21.32-.42.87-.64 3.41-1.48 5.68-2.46 6.83-2.94 3.25-1.36 3.93-1.59 4.37-1.59.1 0 .31.02.43.09.1.06.18.14.2.25.01.12.01.19.01.37z" />
-                        </svg>
-                        @aphimiovn
-                    </a>
-                </li>
-            </ul>
-        </div>
-</main>
+    </main>
 
     <!-- Footer -->
     <!-- [INLINE-AD] APhim Partner Banners -->
