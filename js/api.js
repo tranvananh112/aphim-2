@@ -401,17 +401,17 @@ class MovieAPI {
         if (!imagePath) return '/apple-touch-icon.png';
 
         // Use imageOptimizer.resolveUrl if available — it handles all prefix cases correctly
-        if (typeof imageOptimizer !== 'undefined' && typeof imageOptimizer.resolveUrl === 'function') {
-            return imageOptimizer.resolveUrl(imagePath);
-        }
-
         let fullUrl = imagePath;
         if (!imagePath.startsWith('http')) {
-            // Strip any leading 'uploads/movies/' to prevent double path
             const filename = imagePath.replace(/^uploads\/movies\//, '');
-            fullUrl = `${API_CONFIG.IMAGE_BASE}${filename}`;
+            fullUrl = `${API_CONFIG.IMAGE_BASE || 'https://img.ophim.live/uploads/movies/'}${filename}`;
         }
 
+        // Use imageOptimizer for advanced compression and caching
+        if (typeof imageOptimizer !== 'undefined' && typeof imageOptimizer.optimizeImageUrl === 'function') {
+            return imageOptimizer.optimizeImageUrl(fullUrl, width, quality, isPriority);
+        }
+        
         return fullUrl;
     }
 
