@@ -1874,9 +1874,9 @@ function showError(message) {
     const playerContainer = document.querySelector('.aspect-video');
     if (playerContainer) {
         playerContainer.innerHTML = `
-            <div class="w-full h-full bg-black flex flex-col items-center justify-center p-4 text-center">
-                <dotlottie-wc src="/icons/404-cat.lottie" style="width: 150px; height: 150px; max-width: 100%; margin-bottom: -10px;" autoplay loop></dotlottie-wc>
-                <p class="text-red-400 font-bold text-base sm:text-lg mt-1">${message || 'Không thể phát video này'}</p>
+            <div class="w-full h-full bg-black flex flex-col items-center justify-center text-center overflow-y-auto" style="padding: 12px 16px 80px; box-sizing: border-box;">
+                <dotlottie-wc src="/icons/404-cat.lottie" style="width: 120px; height: 120px; max-width: 100%; flex-shrink:0;" autoplay loop></dotlottie-wc>
+                <p class="text-red-400 font-bold text-base sm:text-lg mt-1" style="flex-shrink:0;">${message || 'Không thể phát video này'}</p>
                 ${altServerHTML}
             </div>
         `;
