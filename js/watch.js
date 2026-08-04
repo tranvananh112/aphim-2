@@ -1616,10 +1616,48 @@ function initializePlayer(episode) {
     }, { once: true });
 }
 
-// Server error handler - show manual switch suggestion (NO auto-switch)
+// Server error handler
 function handleStreamError() {
-    console.warn('⚠️ Stream error detected. Showing manual server switch suggestion.');
-    showError('Không thể phát video từ máy chủ này. Vui lòng thử máy chủ khác.');
+    if (!currentMovie || !currentMovie.episodes || currentMovie.episodes.length <= 1) {
+        showError('Không thể phát video từ máy chủ này. Vui lòng thử lại sau.');
+        return;
+    }
+
+    // Trên mobile, hiển thị nút chọn thủ công (không tự nhảy nguồn để tránh lỗi kẹt player)
+    if (window.innerWidth <= 768) {
+        console.warn('⚠️ Stream error detected on Mobile. Showing manual server switch suggestion.');
+        showError('Không thể phát video từ máy chủ này. Vui lòng thử máy chủ khác.');
+        return;
+    }
+
+    // Trên PC, tự động nhảy sang máy chủ tiếp theo (giống dự án Node)
+    const nextServerIndex = currentServerIndex + 1;
+    if (nextServerIndex < currentMovie.episodes.length) {
+        currentServerIndex = nextServerIndex;
+        const nextServer = currentMovie.episodes[nextServerIndex];
+        console.warn(`🔄 Stream error detected. Switching to backup server: ${nextServer.server_name}`);
+        
+        // Tìm tập tương ứng ở server mới
+        const matchingEpisode = nextServer.server_data.find(ep => ep.name === currentEpisode.name) || nextServer.server_data[0];
+        
+        if (matchingEpisode) {
+            currentEpisode = matchingEpisode;
+            
+            // Render lại danh sách
+            renderEpisodeList(currentMovie.episodes);
+            
+            // Hiển thị thông báo đang chuyển
+            showSeekOverlay(`Đang chuyển: ${nextServer.server_name}...`, true);
+            
+            setTimeout(() => {
+                initializePlayer(currentEpisode);
+            }, 1200);
+        } else {
+            showError('Không tìm thấy tập phim trên server dự phòng.');
+        }
+    } else {
+        showError('Không thể phát video từ tất cả các máy chủ. Vui lòng thử lại sau.');
+    }
 }
 
 // Setup video player controls
