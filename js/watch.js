@@ -1617,40 +1617,10 @@ function initializePlayer(episode) {
     });
 }
 
-// Automatic Server Fallback helper on playback error
+// Server error handler - show manual switch suggestion (NO auto-switch)
 function handleStreamError() {
-    if (!currentMovie || !currentMovie.episodes || currentMovie.episodes.length <= 1) {
-        showError('Không thể phát video từ máy chủ này. Vui lòng thử lại sau.');
-        return;
-    }
-
-    const nextServerIndex = currentServerIndex + 1;
-    if (nextServerIndex < currentMovie.episodes.length) {
-        currentServerIndex = nextServerIndex;
-        const nextServer = currentMovie.episodes[nextServerIndex];
-        console.warn(`🔄 Stream error detected. Switching to backup server: ${nextServer.server_name}`);
-        
-        // Find corresponding episode in the new server
-        const matchingEpisode = nextServer.server_data.find(ep => ep.name === currentEpisode.name) || nextServer.server_data[0];
-        
-        if (matchingEpisode) {
-            currentEpisode = matchingEpisode;
-            
-            // Re-render episode list to match new server data context
-            renderEpisodeList(currentMovie.episodes);
-            
-            // Show custom alert message in seeking container
-            showSeekOverlay(`Đang chuyển: ${nextServer.server_name}...`, true);
-            
-            setTimeout(() => {
-                initializePlayer(currentEpisode);
-            }, 1200);
-        } else {
-            showError('Không tìm thấy tập phim trên server dự phòng.');
-        }
-    } else {
-        showError('Không thể phát video từ tất cả các máy chủ. Vui lòng thử lại sau.');
-    }
+    console.warn('⚠️ Stream error detected. Showing manual server switch suggestion.');
+    showError('Không thể phát video từ máy chủ này. Vui lòng thử máy chủ khác.');
 }
 
 // Setup video player controls
