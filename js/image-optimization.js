@@ -11,11 +11,14 @@ class ImageOptimizer {
 
     // Helper: Normalize image URL to absolute OPhim CDN URL (img.ophim.live)
     resolveUrl(url, fallbackUrl = '') {
-        const raw = url || fallbackUrl;
+        let raw = url || fallbackUrl;
         if (!raw) return 'https://via.placeholder.com/400x600?text=No+Image';
+
+        // Strip any repeated uploads/movies/ prefixes or domain prefix
+        raw = raw.replace(/^(https?:\/\/[^\/]+\/)?(\/)?(uploads\/movies\/)+/i, '');
+        raw = raw.replace(/^uploads\//i, '');
+
         if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
-        if (raw.startsWith('/')) return 'https://img.ophim.live' + raw;
-        if (raw.startsWith('uploads/')) return 'https://img.ophim.live/' + raw;
         return 'https://img.ophim.live/uploads/movies/' + raw;
     }
 

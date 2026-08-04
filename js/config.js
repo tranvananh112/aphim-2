@@ -75,8 +75,17 @@ try {
     const cachedConfigStr = localStorage.getItem('cinestream_public_settings');
     if (cachedConfigStr) {
         const cachedContent = JSON.parse(cachedConfigStr);
-        if (cachedContent.apiBase) API_CONFIG.OPHIM_URL = cachedContent.apiBase;
-        if (cachedContent.apiSecondary) API_CONFIG.OPHIM17_URL = cachedContent.apiSecondary;
+        if (cachedContent.apiBase && !cachedContent.apiBase.includes('apii.online')) {
+            API_CONFIG.OPHIM_URL = cachedContent.apiBase;
+        } else {
+            API_CONFIG.OPHIM_URL = 'https://ophim1.com/v1/api';
+            // Clear broken cached apiBase
+            delete cachedContent.apiBase;
+            localStorage.setItem('cinestream_public_settings', JSON.stringify(cachedContent));
+        }
+        if (cachedContent.apiSecondary && !cachedContent.apiSecondary.includes('apii.online')) {
+            API_CONFIG.OPHIM17_URL = cachedContent.apiSecondary;
+        }
         if (typeof cachedContent.enableMultipleSources === 'boolean') API_CONFIG.USE_MULTIPLE_SOURCES = cachedContent.enableMultipleSources;
         if (cachedContent.watermarkUrl) API_CONFIG.WATERMARK_URL = cachedContent.watermarkUrl;
         if (typeof cachedContent.enableWatermark === 'boolean') API_CONFIG.ENABLE_WATERMARK = cachedContent.enableWatermark;
@@ -97,8 +106,8 @@ try {
         if (data && data.success && data.data) {
             const { content, general } = data.data;
             let configMap = {
-                apiBase: content?.apiBase,
-                apiSecondary: content?.apiSecondary,
+                apiBase: (content?.apiBase && !content.apiBase.includes('apii.online')) ? content.apiBase : 'https://ophim1.com/v1/api',
+                apiSecondary: (content?.apiSecondary && !content.apiSecondary.includes('apii.online')) ? content.apiSecondary : 'https://ophim17.cc',
                 enableMultipleSources: content?.enableMultipleSources,
                 enableWatermark: content?.enableWatermark,
                 watermarkUrl: content?.watermarkUrl,
