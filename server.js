@@ -48,28 +48,28 @@ function queuedFetch(url, options) {
 
 // Trang chủ
 app.get('/', async (req, res) => {
+    let movies = [];
     try {
-        const response = await axios.get('https://ophim1.com/v1/api/danh-sach/phim-moi-cap-nhat?page=1', { timeout: 5000 });
-        const movies = response.data && response.data.data ? response.data.data.items || [] : [];
-        res.render('index', {
-            title: 'APhim | Xem Phim Mới 2026 | Phim Hay Vietsub | Phim Full HD Miễn Phí',
-            currentPage: 'home',
-            movies: movies,
-            metaDescription: 'APhim - Website xem phim trực tuyến chất lượng Full HD miễn phí. Kho phim mới khổng lồ, phim chiếu rạp, phim lẻ, phim bộ được cập nhật thường xuyên 2026.',
-            canonicalUrl: 'https://aphim.top/',
-            ogTitle: 'APhim | Xem Phim Mới 2026 | Phim Hay Vietsub',
-            ogImage: 'https://aphim.top/android-chrome-512x512.png',
-            ogUrl: 'https://aphim.top/'
-        });
-    } catch (error) {
-        console.error('Lỗi lấy dữ liệu trang chủ:', error.message);
-        res.render('index', {
-            title: 'APhim | Xem Phim Mới 2026 | Phim Hay Vietsub | Phim Full HD Miễn Phí',
-            currentPage: 'home',
-            movies: [],
-            canonicalUrl: 'https://aphim.top/'
-        });
+        const response = await axios.get('https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1', { timeout: 5000 });
+        movies = response.data && response.data.items ? response.data.items : (response.data && response.data.data ? response.data.data.items || [] : []);
+    } catch (e) {
+        try {
+            const response2 = await axios.get('https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=1', { timeout: 5000 });
+            movies = response2.data && response2.data.items ? response2.data.items : (response2.data && response2.data.data ? response2.data.data.items || [] : []);
+        } catch (err) {
+            console.error('Lỗi lấy dữ liệu trang chủ:', err.message);
+        }
     }
+    res.render('index', {
+        title: 'APhim | Xem Phim Mới 2026 | Phim Hay Vietsub | Phim Full HD Miễn Phí',
+        currentPage: 'home',
+        movies: movies,
+        metaDescription: 'APhim - Website xem phim trực tuyến chất lượng Full HD miễn phí. Kho phim mới khổng lồ, phim chiếu rạp, phim lẻ, phim bộ được cập nhật thường xuyên 2026.',
+        canonicalUrl: 'https://aphim.top/',
+        ogTitle: 'APhim | Xem Phim Mới 2026 | Phim Hay Vietsub',
+        ogImage: 'https://aphim.top/android-chrome-512x512.png',
+        ogUrl: 'https://aphim.top/'
+    });
 });
 
 // Trang chi tiết phim (SEO-friendly URL: /phim/:slug)

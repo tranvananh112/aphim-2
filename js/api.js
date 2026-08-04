@@ -325,6 +325,77 @@ class MovieAPI {
         }
     }
 
+    // Get home movies (alias to getMovieList)
+    async getHome() {
+        try {
+            return await this.getMovieList(1);
+        } catch (e) {
+            console.warn('Error in getHome:', e);
+            return null;
+        }
+    }
+
+    // Get movies from multiple sources / category
+    async getMoviesFromMultipleSources(page = 1, categoryOrList = 'phim-bo') {
+        try {
+            let endpoint = `/danh-sach/${categoryOrList}?page=${page}`;
+            if (categoryOrList.startsWith('the-loai/') || categoryOrList.startsWith('quoc-gia/')) {
+                endpoint = `/${categoryOrList}?page=${page}`;
+            } else if (!categoryOrList.includes('/')) {
+                const mainCategories = ['hanh-dong', 'tinh-cam', 'hai-huoc', 'vien-tuong', 'vo-thuat', 'kinh-di', 'tam-ly', 'than-thoai', 'hoat-hinh', 'phieu-luu', 'chieu-rap'];
+                if (mainCategories.includes(categoryOrList)) {
+                    endpoint = `/the-loai/${categoryOrList}?page=${page}`;
+                } else {
+                    endpoint = `/danh-sach/${categoryOrList}?page=${page}`;
+                }
+            }
+            const res = await this.fetchWithFallback(endpoint);
+            const rawData = await res.json();
+            return this.normalizeResponse(rawData);
+        } catch (err) {
+            console.warn('Error in getMoviesFromMultipleSources:', err);
+            return null;
+        }
+    }
+
+    // Get all categories
+    async getCategories() {
+        try {
+            const res = await this.fetchWithFallback('/the-loai');
+            const rawData = await res.json();
+            return this.normalizeResponse(rawData);
+        } catch (err) {
+            console.warn('Error fetching categories:', err);
+            return null;
+        }
+    }
+
+    // Get all countries
+    async getCountries() {
+        try {
+            const res = await this.fetchWithFallback('/quoc-gia');
+            const rawData = await res.json();
+            return this.normalizeResponse(rawData);
+        } catch (err) {
+            console.warn('Error fetching countries:', err);
+            return null;
+        }
+    }
+
+    // Get movie gallery images
+    async getMovieImages(slug) {
+        try {
+            const detail = await this.getMovieDetail(slug);
+            const item = detail?.data?.item || detail?.movie;
+            if (item && item.images && Array.isArray(item.images)) {
+                return { status: 'success', images: item.images };
+            }
+            return { status: 'success', images: [] };
+        } catch (err) {
+            return { status: false, images: [] };
+        }
+    }
+
     // Get image URL
     getImageURL(imagePath, width = 400, quality = 80, isPriority = false) {
         if (!imagePath) return '/apple-touch-icon.png';
