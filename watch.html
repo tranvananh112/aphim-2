@@ -1565,8 +1565,7 @@
         // ════ Hàm fullscreen 3 tầng: native → webkit → CSS pseudo ════
         function getPlayerEl() {
             // Chỉ fullscreen phần video, không kèm action bar
-            return document.querySelector('#player-and-controls .relative.aspect-video,
-                                          #player-and-controls > div:first-child') ||
+            return document.querySelector('#player-and-controls .relative.aspect-video, #player-and-controls > div:first-child') ||
                    document.querySelector('.aspect-video');
         }
 
