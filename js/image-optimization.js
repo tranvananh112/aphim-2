@@ -24,37 +24,7 @@ class ImageOptimizer {
             }
         }
 
-        // Use wsrv.nl proxy for advanced compression and resizing
-        // This dramatically reduces image size from MBs to KBs
-        if (!url.includes('localhost') && !url.includes('127.0.0.1')) {
-            let targetWidth = width;
-            let targetQuality = quality;
-
-            if (!this.isMobile) {
-                // Trên Desktop: Dùng quality 85-90 là cực nét rồi, tránh 100% tốn dung lượng
-                targetQuality = Math.min(quality || 85, 90);
-                if (targetQuality < 80) targetQuality = 85;
-                // Nếu width gốc nhỏ hơn 800 thì ép lên 800 để khỏi vỡ hạt trên màn hình to
-                targetWidth = Math.max(width, 800);
-                if (isPriority) {
-                    targetWidth = Math.max(width, 1920); // Banner chính thì chơi nguyên con HD
-                    targetQuality = 90;
-                }
-            } else {
-                // Trên Mobile: Nén mạnh hơn để load nhanh
-                if (isPriority) {
-                    targetWidth = Math.max(width, 1200); 
-                    targetQuality = Math.max(quality || 90, 90); 
-                } else {
-                    targetWidth = Math.min(width, 600);
-                    targetQuality = Math.min(quality || 75, 75);
-                }
-            }
-            
-            // Format: https://wsrv.nl/?url=URL&w=WIDTH&q=QUALITY&output=webp
-            return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${targetWidth}&q=${targetQuality}&output=webp&il`;
-        }
-
+        // Bỏ qua wsrv.nl vì server proxy này hiện tại đang bị quá tải/chặn ở VN dẫn tới treo ảnh load mãi không xong
         return url;
     }
 
@@ -70,18 +40,8 @@ class ImageOptimizer {
             url = `https://img.ophim.live/uploads/movies/${url}`;
         }
 
-        // Desktop: không cần progressive, load thẳng full
-        if (!this.isMobile || (!url.includes('ophim') && !url.includes('opstream'))) {
-            return { placeholder: null, full: url };
-        }
-
-        const enc = encodeURIComponent(url);
-        return {
-            // Placeholder: 20px wide, quality 20, blur nhẹ → ~300-500 bytes
-            placeholder: `https://wsrv.nl/?url=${enc}&w=20&q=20&output=webp&blur=2`,
-            // Full: 600px wide, quality 82, interlaced webp
-            full: `https://wsrv.nl/?url=${enc}&w=600&q=82&output=webp&il`
-        };
+        // Tạm thời tắt wsrv.nl vì proxy này đang treo, trả về ảnh gốc luôn
+        return { placeholder: null, full: url };
     }
 
     // ─────────────────────────────────────────────────────────────────
