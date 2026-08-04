@@ -399,7 +399,7 @@ async function loadMoviesFromOphim(keyword = '', page = 1) {
 
         const data = await response.json();
 
-        if (data.status === 'success' && data.data?.items) {
+        if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data?.items) {
             let newMovies = data.data.items;
             
             const pagination = data.data.params?.pagination || data.data.paginate || data.data.pagination || {};
@@ -1021,12 +1021,12 @@ async function previewCatBg(input, previewId, apiPath = null) {
         img.src = 'https://via.placeholder.com/80x45?text=Loading';
         if (apiPath) {
             try {
-                const response = await fetch(`https://ophim1.com/v1/api/${apiPath}?page=1&limit=1`, {
+                const response = await movieAPI.fetchWithFallback(`/${apiPath}?page=1&limit=1`, {
                     method: 'GET',
                     headers: { 'accept': 'application/json' }
                 });
                 const data = await response.json();
-                if (data.status === 'success' && data.data && data.data.items && data.data.items.length > 0) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items && data.data.items.length > 0) {
                     const thumbUrl = data.data.items[0].thumb_url;
                     img.src = thumbUrl.startsWith('http') ? thumbUrl : `https://img.ophim.live/uploads/movies/${thumbUrl}`;
                 } else {

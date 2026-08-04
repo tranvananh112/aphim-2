@@ -197,7 +197,7 @@
     if (typeof window !== 'undefined') {
         setTimeout(async () => {
             try {
-                const res = await fetch('https://ophim1.com/v1/api/quoc-gia/viet-nam');
+                const res = await movieAPI.fetchWithFallback('/quoc-gia/viet-nam');
                 const data = await res.json();
                 if (data?.data?.items?.length > 0) {
                     const latestMovie = data.data.items[0];

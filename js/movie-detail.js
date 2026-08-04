@@ -59,29 +59,221 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 // Load movie detail from API
 async function loadMovieDetail(slug) {
-    try {
-        const response = await movieAPI.getMovieDetail(slug);
+    let ophimOk = false;
 
-        if (response && response.status === 'success' && response.data) {
-            currentMovie = response.data.item;
+    // Check if initialMovie from SSR is available
+    if (window.initialMovie && (window.initialMovie.slug === slug || !slug)) {
+        currentMovie = window.initialMovie;
+        if (window.initialEpisodes && window.initialEpisodes.length > 0) {
+            currentMovie.episodes = window.initialEpisodes;
+        }
+        renderMovieDetail(currentMovie);
+        if (currentMovie.episodes) renderEpisodes(currentMovie.episodes);
+        setupFavoriteButton();
+        setupRatingSystem();
+        loadRatingsAndComments(currentMovie.slug);
+
+        setTimeout(() => {
+            document.querySelector('.movie-content-zone')?.classList.add('loaded');
+        }, 50);
+
+        ophimOk = true;
+    } else {
+        try {
+            const response = await movieAPI.getMovieDetail(slug);
+
+            if (response && (response.status === 'success' || response.status === true || response.status) && response.data) {
+                currentMovie = response.data.item;
+                renderMovieDetail(currentMovie);
+                renderEpisodes(currentMovie.episodes);
+                setupFavoriteButton();
+                setupRatingSystem();
+                loadRatingsAndComments(slug);
+
+                // Fade in content smoothly on mobile after render
+                setTimeout(() => {
+                    document.querySelector('.movie-content-zone')?.classList.add('loaded');
+                }, 50);
+
+                ophimOk = true;
+            } else {
+                console.warn('⚠️ [Detail] OPhim không có phim này, thử nguồn phụ (VSMOV)...');
+            }
+        } catch (error) {
+            console.warn('⚠️ [Detail] OPhim lỗi:', error.message, '→ thử VSMOV...');
+        }
+    }
+
+    // Luôn luôn thử VSMOV:
+    // - Nếu OPhim OK: merge thêm server phụ
+    // - Nếu OPhim thất bại: dùng VSMOV làm nguồn chính
+    await fetchAndMergeSecondaryServersDetail(slug, !ophimOk);
+}
+
+// 🔄 Helper fetch nguồn phụ thông minh: Thử proxy server-side trước, nếu fail thì gọi thẳng phimapi.com (có CORS)
+async function getSecondaryEpisodes(slug) {
+    let proxyUrl = `/api/vsmov/${encodeURIComponent(slug)}`;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        if (window.location.port !== '3000') {
+            proxyUrl = `http://localhost:3000/api/vsmov/${encodeURIComponent(slug)}`;
+        }
+    }
+
+    try {
+        const res = await fetch(proxyUrl);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.status && data.episodes && data.episodes.length > 0) {
+                return data;
+            }
+        }
+    } catch (e) {
+        console.warn('⚠️ Proxy fetch failed, trying direct phimapi.com:', e.message);
+    }
+
+    try {
+        const directUrl = `https://phimapi.com/phim/${encodeURIComponent(slug)}`;
+        const res = await fetch(directUrl);
+        if (res.ok) {
+            const json = await res.json();
+            if (json && json.episodes && json.episodes.length > 0) {
+                return {
+                    status: true,
+                    source: 'phimapi.com',
+                    episodes: json.episodes,
+                    movie: json.movie || null
+                };
+            }
+        }
+    } catch (e) {
+        console.warn('⚠️ Direct phimapi.com fetch failed:', e.message);
+    }
+
+    try {
+        const nguonCUrl = `https://phim.nguonc.com/api/film/${encodeURIComponent(slug)}`;
+        const res = await fetch(nguonCUrl);
+        if (res.ok) {
+            const json = await res.json();
+            if (json && json.status === 'success' && json.movie && json.movie.episodes) {
+                const mappedEps = json.movie.episodes.map(s => ({
+                    server_name: s.server_name || 'Vietsub',
+                    server_data: (s.items || []).map(it => ({
+                        name: it.name && !it.name.toLowerCase().includes('tập') ? `Tập ${it.name}` : (it.name || 'Tập 1'),
+                        slug: it.slug || `tap-${it.name}`,
+                        link_embed: it.embed || '',
+                        link_m3u8: it.m3u8 || ''
+                    }))
+                }));
+                return {
+                    status: true,
+                    source: 'nguonc.com',
+                    episodes: mappedEps,
+                    movie: {
+                        name: json.movie.name,
+                        origin_name: json.movie.original_name,
+                        thumb_url: json.movie.thumb_url,
+                        poster_url: json.movie.poster_url,
+                        content: json.movie.description,
+                        quality: json.movie.quality,
+                        lang: json.movie.language
+                    }
+                };
+            }
+        }
+    } catch (e) {
+        console.warn('⚠️ Direct NguonC fetch failed:', e.message);
+    }
+
+    return null;
+}
+
+// 🔄 Fetch và merge các server phụ
+async function fetchAndMergeSecondaryServersDetail(slug, isPrimary = false) {
+    try {
+        const data = await getSecondaryEpisodes(slug);
+
+        if (!data || !data.status || !data.episodes || data.episodes.length === 0) {
+            console.warn('⚠️ [Detail] Không có dữ liệu nguồn phụ');
+            if (isPrimary) showError('Phim này chưa có nguồn phát — vui lòng thử lại sau');
+            return;
+        }
+
+        // ── CASE 1: OPhim thất bại → dùng nguồn phụ làm nguồn chính ─────────────
+        if (isPrimary) {
+            const meta = data.movie || {};
+            currentMovie = {
+                name:            meta.name            || slug,
+                origin_name:     meta.origin_name     || '',
+                year:            meta.year            || '',
+                thumb_url:       meta.thumb_url        || meta.poster_url || '',
+                poster_url:      meta.poster_url       || meta.thumb_url  || '',
+                content:         meta.content         || '',
+                type:            meta.type            || 'series',
+                status:          meta.status          || 'ongoing',
+                time:            meta.time            || '',
+                quality:         meta.quality         || 'HD',
+                lang:            meta.lang            || 'Vietsub',
+                episode_current: meta.episode_current || '',
+                episode_total:   meta.episode_total   || '',
+                category:        meta.category        || [],
+                country:         meta.country         || [],
+                director:        meta.director        || [],
+                actor:           meta.actor           || [],
+                slug:            meta.slug            || slug,
+                tmdb:            meta.tmdb            || {},
+                imdb:            meta.imdb            || {},
+                episodes: data.episodes.map((s, idx) => ({
+                    ...s,
+                    original_server_name: s.original_server_name || s.server_name,
+                    server_name: `Nguồn ${idx + 1}`
+                }))
+            };
+
+            console.log('✅ [Detail] Dùng nguồn phụ làm nguồn chính:', currentMovie.name);
             renderMovieDetail(currentMovie);
             renderEpisodes(currentMovie.episodes);
             setupFavoriteButton();
             setupRatingSystem();
             loadRatingsAndComments(slug);
-            
-            // Fade in content smoothly on mobile after render
             setTimeout(() => {
                 document.querySelector('.movie-content-zone')?.classList.add('loaded');
             }, 50);
-        } else {
-            showError('Không thể tải thông tin phim');
+            return;
         }
-    } catch (error) {
-        console.error('Error loading movie detail:', error);
-        showError('Đã xảy ra lỗi khi tải thông tin phim');
+
+        // ── CASE 2: OPhim OK → merge thêm server phụ ───────────────────────
+        if (!currentMovie) return;
+        if (!currentMovie.episodes) currentMovie.episodes = [];
+
+        currentMovie.episodes.forEach((s, idx) => {
+            if (!s.original_server_name) s.original_server_name = s.server_name;
+            s.server_name = `Nguồn ${idx + 1}`;
+        });
+
+        let added = 0;
+        data.episodes.forEach((server) => {
+            if (server.server_data && server.server_data.length > 0) {
+                const svrNum = currentMovie.episodes.length + 1;
+                const origName = server.original_server_name || server.server_name;
+                currentMovie.episodes.push({
+                    ...server,
+                    original_server_name: origName,
+                    server_name: `Nguồn ${svrNum}`
+                });
+                added++;
+            }
+        });
+
+        if (added > 0) {
+            console.log(`✅ [Detail] Đã thêm ${added} máy chủ mới`);
+            renderEpisodes(currentMovie.episodes);
+        }
+    } catch (err) {
+        console.warn('⚠️ [Detail] Nguồn phụ thất bại:', err.message);
+        if (isPrimary) showError('Đã xảy ra lỗi khi tải thông tin phim');
     }
 }
+
 
 // Render movie detail
 function renderMovieDetail(movie) {
@@ -420,13 +612,16 @@ function renderVersions(movie) {
     wrapper.innerHTML = versionsHTML;
 
     
-    const mobileEpisodesWrapper = document.getElementById('episodes-mobile')?.parentElement;
+    const mobileEpisodesWrapper = document.getElementById('episodes-mobile')?.closest('.block.lg\\:hidden') || document.getElementById('episodes-mobile')?.parentElement;
+    const heroAd = document.getElementById('movie-detail-hero-ad');
+    
     if (window.innerWidth < 1024 && mobileEpisodesWrapper) {
-        // TrÃªn mobile, SVAP nÄƒm dÆ°á»›i danh sÃ¡ch táºp phim
+        // Trên mobile, Danh sách tập phim nằm trên, Các bản chiếu nằm ngay bên dưới danh sách tập phim
         mobileEpisodesWrapper.after(wrapper);
     } else {
-        // TrÃªn desktop, SVAP náº±m ngay dÆ°á»›i nÃºt Xem Ngay
-        actionsContainer.after(wrapper);
+        // Trên desktop, Các bản chiếu nằm ngay dưới cụm nút Xem Ngay
+        const targetAnchor = heroAd || actionsContainer;
+        targetAnchor.after(wrapper);
     }
 }
 
@@ -536,13 +731,8 @@ async function loadMovieGallery(movie) {
     if (!galleryContainer || !scrollContainer) return;
 
     try {
-        const url = `https://ophim1.com/v1/api/phim/${movie.slug}/images`;
-        const options = {method: 'GET', headers: {accept: 'application/json'}};
-        
-        const res = await fetch(url, options);
-        if (!res.ok) return;
-        
-        const json = await res.json();
+        const json = await movieAPI.getMovieImages(movie.slug);
+        if (!json) return;
         
         if (json.success && json.data && json.data.images && json.data.images.length > 0) {
             const backdrops = json.data.images.filter(img => img.type === 'backdrop' || img.aspect_ratio > 1);
@@ -875,6 +1065,19 @@ let currentServerIndexDetail = 0;
 window.episodeSearchTermDetail = window.episodeSearchTermDetail || '';
 window.episodeSortOrderDetail = window.episodeSortOrderDetail || 'asc';
 
+function getLangTagDetail(server, movie) {
+    const raw = (server.original_server_name || server.server_name || '').toLowerCase();
+    if (raw.includes('thuyết minh') || raw.includes('thuyet minh')) return 'Thuyết Minh';
+    if (raw.includes('lồng tiếng') || raw.includes('long tieng')) return 'Lồng Tiếng';
+    if (raw.includes('vietsub')) return 'Vietsub';
+    if (movie && movie.lang) {
+        const mLang = movie.lang.toLowerCase();
+        if (mLang.includes('thuyết minh') || mLang.includes('thuyet minh')) return 'Thuyết Minh';
+        if (mLang.includes('lồng tiếng') || mLang.includes('long tieng')) return 'Lồng Tiếng';
+    }
+    return 'Vietsub';
+}
+
 // Render episodes
 function renderEpisodes(episodes) {
     if (!episodes || episodes.length === 0) return;
@@ -887,6 +1090,11 @@ function renderEpisodes(episodes) {
         const desktopServerContainer = document.getElementById('server-list-desktop');
         const mobileServerContainer = document.getElementById('server-list-mobile');
         
+        episodes.forEach((s, idx) => {
+            if (!s.original_server_name) s.original_server_name = s.server_name;
+            s.server_name = `Nguồn ${idx + 1}`;
+        });
+
         const labelHTML = `
             <div class="flex items-center gap-2 mr-2 flex-shrink-0">
                 <span class="material-icons-round text-white text-[16px]">dns</span>
@@ -898,41 +1106,42 @@ function renderEpisodes(episodes) {
             const isActive = index === currentServerIndexDetail;
             const totalEps = server.server_data ? server.server_data.length : 0;
             const epText = totalEps === 1 ? 'Full' : `${totalEps} tập`;
-            
-            // Default colors for index > 1
-            let activeBorder = 'border-blue-500';
-            let activeBg = 'bg-blue-500/10';
-            let activeText = 'text-blue-500';
-            let inactiveBorder = 'border-blue-500';
-            let inactiveHover = 'hover:bg-blue-500/5';
-            
-            if (index === 0) { // Server 1 (Ophim)
-                activeBorder = 'border-yellow-500';
-                activeBg = 'bg-yellow-500/15';
-                activeText = 'text-yellow-500';
-                inactiveBorder = 'border-yellow-500';
-                inactiveHover = 'hover:bg-yellow-500/5';
-            } else if (index === 1) { // Server 2 (VSMOV)
-                activeBorder = 'border-green-500';
-                activeBg = 'bg-green-500/15';
-                activeText = 'text-green-500';
-                inactiveBorder = 'border-green-500';
-                inactiveHover = 'hover:bg-green-500/5';
+            const langTag = getLangTagDetail(server, currentMovie);
+            const serverName = `${langTag} N${index + 1}`;
+
+            let borderColor = 'border-blue-500';
+            let activeBg = 'bg-blue-500/20';
+            let sepColor = 'text-blue-400';
+
+            if (index === 0) { // Nguồn 1: Vàng
+                borderColor = 'border-yellow-500';
+                activeBg = 'bg-yellow-500/20';
+                sepColor = 'text-yellow-400';
+            } else if (index === 1) { // Nguồn 2: Xanh lá
+                borderColor = 'border-green-500';
+                activeBg = 'bg-green-500/20';
+                sepColor = 'text-green-400';
             }
 
-            const borderClass = isActive ? activeBorder : inactiveBorder;
-            const bgClass = isActive ? activeBg : 'bg-transparent';
-            const textClass = isActive ? activeText : 'text-gray-400';
-            const hoverClass = isActive ? '' : `${inactiveHover} hover:text-gray-200`;
-
-            return `
-                <button onclick="changeServerDetail(${index})"
-                    class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all duration-200 border ${borderClass} ${bgClass} ${hoverClass}">
-                    <span class="${isActive ? 'font-bold text-white' : 'font-medium ' + textClass}">${server.server_name}</span>
-                    <span class="${activeText} mx-0.5">|</span>
-                    <span class="${isActive ? 'text-gray-200 font-semibold' : 'text-gray-500'}">${epText}</span>
-                </button>
-            `;
+            if (isActive) {
+                return `
+                    <button onclick="changeServerDetail(${index})"
+                        class="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 border-2 ${borderColor} ${activeBg} text-white shadow-md cursor-pointer">
+                        <span class="text-white font-bold">${serverName}</span>
+                        <span class="${sepColor} font-bold">|</span>
+                        <span class="text-gray-200 font-medium">${epText}</span>
+                    </button>
+                `;
+            } else {
+                return `
+                    <button onclick="changeServerDetail(${index})"
+                        class="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 border ${borderColor}/60 bg-black/20 hover:bg-white/10 text-gray-300 hover:text-white cursor-pointer">
+                        <span>${serverName}</span>
+                        <span class="text-gray-500">|</span>
+                        <span class="text-gray-400">${epText}</span>
+                    </button>
+                `;
+            }
         }).join('');
         
         const serverHtml = labelHTML + buttonsHTML;
@@ -1000,6 +1209,19 @@ window.changeServerDetail = function(index) {
     
     currentServerIndexDetail = index;
     renderEpisodes(currentMovie.episodes);
+
+    // Cập nhật lại nút Xem Ngay chính khi người dùng đổi máy chủ trên movie-detail
+    const watchBtn = document.getElementById('watchNowBtn') || document.querySelector('a[href*="/watch"]') || document.querySelector('a[href*="/xem-phim"]');
+    if (watchBtn && currentMovie.episodes[index]?.server_data && currentMovie.episodes[index].server_data.length > 0) {
+        const firstEp = currentMovie.episodes[index].server_data[0];
+        const cleanSlug = firstEp.slug.replace(/^tap-/, '');
+        const isHtmlEnv = window.location.pathname.includes('.html');
+        if (isHtmlEnv) {
+            watchBtn.href = `/watch.html?slug=${currentMovie.slug}&episode=tap-${cleanSlug}&server=${index}`;
+        } else {
+            watchBtn.href = `/xem-phim/${currentMovie.slug}/tap-${cleanSlug}?server=${index}`;
+        }
+    }
 };
 
 // Setup favorite button

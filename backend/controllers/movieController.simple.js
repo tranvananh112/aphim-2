@@ -24,7 +24,7 @@ exports.getMovies = async (req, res) => {
         const response = await axios.get(`${OPHIM_BASE}/danh-sach/phim-moi-cap-nhat?page=${page}`);
         const data = response.data;
 
-        if (data.status === 'success') {
+        if ((data && (data.status === 'success' || data.status === true || data.status))) {
             const result = {
                 success: true,
                 data: {
@@ -75,7 +75,7 @@ exports.getMovie = async (req, res) => {
         const response = await axios.get(`${OPHIM_BASE}/phim/${slug}`);
         const data = response.data;
 
-        if (data.status === 'success') {
+        if ((data && (data.status === 'success' || data.status === true || data.status))) {
             const result = {
                 success: true,
                 data: data.data.item
@@ -124,7 +124,7 @@ exports.searchMovies = async (req, res) => {
         });
         const data = response.data;
 
-        if (data.status === 'success') {
+        if ((data && (data.status === 'success' || data.status === true || data.status))) {
             res.json({
                 success: true,
                 data: {
@@ -158,7 +158,7 @@ exports.getFeaturedMovies = async (req, res) => {
         const response = await axios.get(`${OPHIM_BASE}/danh-sach/phim-moi-cap-nhat?page=1`);
         const data = response.data;
 
-        if (data.status === 'success') {
+        if ((data && (data.status === 'success' || data.status === true || data.status))) {
             res.json({
                 success: true,
                 data: data.data.items.slice(0, limit)
@@ -189,7 +189,7 @@ exports.getStreamURL = async (req, res) => {
         const response = await axios.get(`${OPHIM_BASE}/phim/${slug}`);
         const data = response.data;
 
-        if (data.status === 'success') {
+        if ((data && (data.status === 'success' || data.status === true || data.status))) {
             const movie = data.data.item;
             let streamURL = null;
 

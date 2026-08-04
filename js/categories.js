@@ -88,12 +88,12 @@ async function loadCategoryMovies(categorySlug, page = 1) {
         }
 
         // Fetch movies
-        const response = await fetch(`https://ophim1.com/v1/api/the-loai/${categorySlug}?page=${page}`);
+        const response = await movieAPI.fetchWithFallback(`/the-loai/${categorySlug}?page=${page}`);
         const data = await response.json();
 
         loading.classList.add('hidden');
 
-        if (data.status === 'success' && data.data.items) {
+        if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data.items) {
             renderMovies(data.data.items);
             renderPagination(data.data.params.pagination);
         } else {
@@ -119,7 +119,10 @@ function renderMovies(movies) {
     const moviesGrid = document.getElementById('moviesGrid');
 
     const html = movies.map(movie => {
-        const posterUrl = `https://img.ophim.live/uploads/movies/${movie.poster_url}`;
+        const rawImg = movie.thumb_url || movie.poster_url || '';
+        const posterUrl = (typeof imageOptimizer !== 'undefined' && rawImg)
+            ? imageOptimizer.optimizeImageUrl(rawImg, 400, 80)
+            : (rawImg.startsWith('http') ? rawImg : `https://img.ophim.live/uploads/movies/${rawImg}`);
         const quality = movie.quality || 'HD';
         const year = movie.year || '';
         const hiddenUI = window.getHiddenMovieOverlay ? window.getHiddenMovieOverlay(movie.slug) : { badge: '', imgClass: '', containerClass: '' };

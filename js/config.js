@@ -41,17 +41,23 @@ const API_CONFIG = {
     // Default Ophim API (primary)
     OPHIM_URL: 'https://ophim1.com/v1/api',
 
-    // Default Ophim17 API (secondary - more movies)
+    // Default Ophim17 API (secondary - mirror)
     OPHIM17_URL: 'https://ophim17.cc',
 
+    // Backup PhimAPI (unblocked mirror)
+    
+
     ENDPOINTS: {
-        MOVIE_LIST: '/danh-sach/phim-moi-cap-nhat',
+        HOME: '/home',
+        MOVIE_LIST: '/danh-sach/phim-bo',
         MOVIE_DETAIL: '/phim',
         SEARCH: '/tim-kiem',
         CATEGORY: '/the-loai',
-        COUNTRY: '/quoc-gia'
+        COUNTRY: '/quoc-gia',
+        YEAR: '/nam-phat-hanh'
     },
     IMAGE_BASE: 'https://img.ophim.live/uploads/movies/',
+    IMAGE_BASE_BACKUP: 'https://img.ophim1.com/uploads/movies/',
     STREAM_BASE: 'https://vip.opstream13.com',
 
     // Use backend or direct Ophim FOR MOVIES

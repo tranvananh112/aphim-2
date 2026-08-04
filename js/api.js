@@ -26,35 +26,70 @@ class MovieAPI {
         }
     }
 
-    // Wrapper to fetch from primary URL or fallback mirrors on failure (bypasses ISP blocks on 4G)
+    // Standardize & normalize API response for all endpoints across OPhim and PhimAPI
+    normalizeResponse(data) {
+        if (!data) return null;
+        const items = data.data?.items || data.items || [];
+        const item = data.data?.item || data.item || null;
+        const isSuccess = ((data && (data.status === 'success' || data.status === true || data.status)) || data.status === true || data.status);
+        return {
+            status: isSuccess ? 'success' : false,
+            data: {
+                items,
+                item,
+                params: data.data?.params || data.params,
+                seoOnPage: data.data?.seoOnPage || data.seoOnPage,
+                sections: data.data?.sections || data.sections
+            }
+        };
+    }
+
+    // Wrapper to fetch from primary OPhim URL or fallback OPhim mirrors (ophim1.com -> ophim17.cc -> ophim10.cc)
     async fetchWithFallback(endpoint, options = {}) {
-        const bases = [
-            this.ophimURL,
-            'https://ophim17.cc/v1/api',
-            'https://ophim10.cc/v1/api',
-            'https://ophim1.com/v1/api'
+        let cleanEndpoint = endpoint || '';
+        if (cleanEndpoint.startsWith('http')) {
+            return this.fetchWithTimeout(cleanEndpoint, options);
+        }
+
+        if (cleanEndpoint.startsWith('/v1/api')) {
+            cleanEndpoint = cleanEndpoint.substring('/v1/api'.length);
+        }
+        if (!cleanEndpoint.startsWith('/')) {
+            cleanEndpoint = '/' + cleanEndpoint;
+        }
+
+        const paramStr = cleanEndpoint.includes('?') ? cleanEndpoint.substring(cleanEndpoint.indexOf('?')) : '';
+        const basePath = cleanEndpoint.includes('?') ? cleanEndpoint.substring(0, cleanEndpoint.indexOf('?')) : cleanEndpoint;
+
+        let urlsToTry = [
+            `/v1/api${basePath}${paramStr}`,
+            `https://phimapi.com${basePath}${paramStr}`,
+            `https://ophim1.com/v1/api${basePath}${paramStr}`,
+            `https://ophim17.cc/v1/api${basePath}${paramStr}`,
+            `https://ophim10.cc/v1/api${basePath}${paramStr}`
         ];
-        
-        const uniqueBases = Array.from(new Set(bases.filter(Boolean)));
+
+        if (basePath.includes('phim-moi-cap-nhat') || basePath === '/home') {
+            urlsToTry.unshift(`/v1/api/danh-sach/phim-moi-cap-nhat${paramStr}`);
+            urlsToTry.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
+            urlsToTry.unshift(`https://ophim1.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
+        }
+
+        const uniqueUrls = Array.from(new Set(urlsToTry.filter(Boolean)));
         let lastError = null;
 
-        for (const base of uniqueBases) {
-            const url = endpoint.startsWith('http') ? endpoint : `${base}${endpoint}`;
+        for (const url of uniqueUrls) {
             try {
                 const response = await this.fetchWithTimeout(url, options);
                 if (response.ok) {
                     return response;
                 }
-                console.warn(`⚠️ API response not OK from ${base}: ${response.status}`);
             } catch (err) {
-                console.warn(`❌ API fetch failed from ${base}:`, err.message);
                 lastError = err;
             }
-            if (endpoint.startsWith('http')) {
-                break;
-            }
         }
-        throw lastError || new Error('All API mirrors failed');
+
+        throw lastError || new Error('All OPhim API mirrors failed');
     }
 
     // Helper to filter out hidden movies from list responses
@@ -166,48 +201,7 @@ class MovieAPI {
                 });
                 const ophimData = await response.json();
                 
-                // Cào thêm dữ liệu từ VSMOV (nếu có)
-                try {
-                    const vsResponse = await this.fetchWithTimeout(`https://vsmov.com/api/phim/${slug}`, { timeout: 8000 });
-                    if (vsResponse.ok) {
-                        const vsData = await vsResponse.json();
-                        // Nếu VSMOV có trả về episodes
-                        if (vsData && vsData.status && vsData.episodes && vsData.episodes.length > 0) {
-                            // Hỗ trợ cấu trúc Ophim V1 API (data.item)
-                            if (ophimData.data && ophimData.data.item) {
-                                if (!ophimData.data.item.episodes) ophimData.data.item.episodes = [];
-                                
-                                ophimData.data.item.episodes.forEach(s => {
-                                    if (s.server_name) s.server_name = s.server_name.replace(/ #\d+/g, '').trim();
-                                });
-
-                                vsData.episodes.forEach(vsServer => {
-                                    if (vsServer.server_data && vsServer.server_data.length > 0) {
-                                        if (vsServer.server_name) vsServer.server_name = vsServer.server_name.replace(/ #\d+/g, '').trim();
-                                        ophimData.data.item.episodes.push(vsServer);
-                                    }
-                                });
-                            } 
-                            // Hỗ trợ cấu trúc Ophim cũ (không có data.item)
-                            else if (ophimData.movie) {
-                                if (!ophimData.episodes) ophimData.episodes = [];
-                                
-                                ophimData.episodes.forEach(s => {
-                                    if (s.server_name) s.server_name = s.server_name.replace(/ #\d+/g, '').trim();
-                                });
-
-                                vsData.episodes.forEach(vsServer => {
-                                    if (vsServer.server_data && vsServer.server_data.length > 0) {
-                                        if (vsServer.server_name) vsServer.server_name = vsServer.server_name.replace(/ #\d+/g, '').trim();
-                                        ophimData.episodes.push(vsServer);
-                                    }
-                                });
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.warn('⚠️ Lỗi gọi API VSMOV (bỏ qua và tiếp tục với Ophim):', e.message);
-                }
+                
                 
                 return ophimData;
             }
@@ -227,7 +221,7 @@ class MovieAPI {
                 console.log('Backend search response:', data);
 
                 // Check both success and status fields
-                if (data.success || data.status === 'success') {
+                if (data.success || (data && (data.status === 'success' || data.status === true || data.status))) {
                     return this.filterHiddenMovies(data); // Return the whole response
                 }
                 return null;
@@ -335,14 +329,16 @@ class MovieAPI {
     getImageURL(imagePath, width = 400, quality = 80, isPriority = false) {
         if (!imagePath) return '/apple-touch-icon.png';
 
-        let fullUrl = imagePath;
-        if (!imagePath.startsWith('http')) {
-            fullUrl = `${API_CONFIG.IMAGE_BASE}${imagePath}`;
+        // Use imageOptimizer.resolveUrl if available — it handles all prefix cases correctly
+        if (typeof imageOptimizer !== 'undefined' && typeof imageOptimizer.resolveUrl === 'function') {
+            return imageOptimizer.resolveUrl(imagePath);
         }
 
-        // Use global imageOptimizer if available to compress image
-        if (typeof imageOptimizer !== 'undefined' && typeof imageOptimizer.optimizeImageUrl === 'function') {
-            return imageOptimizer.optimizeImageUrl(fullUrl, width, quality, isPriority);
+        let fullUrl = imagePath;
+        if (!imagePath.startsWith('http')) {
+            // Strip any leading 'uploads/movies/' to prevent double path
+            const filename = imagePath.replace(/^uploads\/movies\//, '');
+            fullUrl = `${API_CONFIG.IMAGE_BASE}${filename}`;
         }
 
         return fullUrl;
@@ -358,7 +354,7 @@ class MovieAPI {
 
             console.log('Categories API response:', data);
 
-            if (data.status === 'success' && data.data) {
+            if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data) {
                 // Check if data.data.items exists (new format)
                 if (data.data.items && Array.isArray(data.data.items)) {
                     console.log('Categories array from items:', data.data.items);
@@ -497,7 +493,7 @@ class MovieAPI {
             results.forEach((result, index) => {
                 if (result.status === 'fulfilled' && result.value) {
                     const data = result.value;
-                    if (data.status === 'success' && data.data && data.data.items) {
+                    if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                         allMovies = allMovies.concat(data.data.items);
 
                         // Use params from first source
@@ -533,6 +529,86 @@ class MovieAPI {
             return await this.getMovieList(page);
         }
     }
+    // Get Home Page Multi-Section Data
+    async getHome() {
+        try {
+            const response = await this.fetchWithFallback('/home', {
+                headers: { 'accept': 'application/json' }
+            });
+            const data = await response.json();
+            return this.filterHiddenMovies(data);
+        } catch (error) {
+            console.error('Error fetching home data:', error);
+            return null;
+        }
+    }
+
+    // Get Movie Images (TMDB Posters / Backdrops)
+    async getMovieImages(slug) {
+        try {
+            const response = await this.fetchWithFallback(`/phim/${slug}/images`, {
+                headers: { 'accept': 'application/json' }
+            });
+            return await response.json();
+        } catch (error) {
+            console.error(`Error fetching images for ${slug}:`, error);
+            return null;
+        }
+    }
+
+    // Get Movie Peoples (TMDB Cast & Directors)
+    async getMoviePeoples(slug) {
+        try {
+            const response = await this.fetchWithFallback(`/phim/${slug}/peoples`, {
+                headers: { 'accept': 'application/json' }
+            });
+            return await response.json();
+        } catch (error) {
+            console.error(`Error fetching peoples for ${slug}:`, error);
+            return null;
+        }
+    }
+
+    // Get Movie Keywords (TMDB Tags)
+    async getMovieKeywords(slug) {
+        try {
+            const response = await this.fetchWithFallback(`/phim/${slug}/keywords`, {
+                headers: { 'accept': 'application/json' }
+            });
+            return await response.json();
+        } catch (error) {
+            console.error(`Error fetching keywords for ${slug}:`, error);
+            return null;
+        }
+    }
+
+    // Get List of Release Years
+    async getYears() {
+        try {
+            const response = await this.fetchWithFallback('/nam-phat-hanh', {
+                headers: { 'accept': 'application/json' }
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching release years:', error);
+            return null;
+        }
+    }
+
+    // Get Movies by Release Year
+    async getMoviesByYear(year, page = 1) {
+        try {
+            const response = await this.fetchWithFallback(`/nam-phat-hanh/${year}?page=${page}`, {
+                headers: { 'accept': 'application/json' }
+            });
+            const data = await response.json();
+            return this.filterHiddenMovies(data);
+        } catch (error) {
+            console.error(`Error fetching movies for year ${year}:`, error);
+            return null;
+        }
+    }
+
     // --- SEO Utilities ---
     // Inject Canonical Tag to fix Google Search Console Duplicate Errors
     // Inject Canonical Tag to fix Google Search Console Duplicate Errors
@@ -607,6 +683,10 @@ class MovieAPI {
 
 // Initialize API
 const movieAPI = new MovieAPI();
+if (typeof window !== 'undefined') {
+    window.movieAPI = movieAPI;
+    window.MovieAPI = MovieAPI;
+}
 
 // 🚀 Auto-inject Canonical Tag on every page load
 document.addEventListener('DOMContentLoaded', () => {

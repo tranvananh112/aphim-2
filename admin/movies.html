@@ -673,7 +673,7 @@
                 const data = await response.json();
                 console.log('API Response:', data);
 
-                if (data && data.status === 'success' && data.data && data.data.items) {
+                if (data && (data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                     allMovies = data.data.items;
 
                     // ─ ─Fix: H trợ cả 2 format API và tự động tính số trang ─ 
@@ -1055,7 +1055,7 @@
             observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
-    <script src="js/bottom-nav.js?v=1783518514290" defer></script>
+    <script src="js/bottom-nav.js?v=1783518061476" defer></script>
     <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 </body>
 

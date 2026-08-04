@@ -873,7 +873,7 @@
 
                 loadingEl.style.display = 'none';
 
-                if (data.status === 'success' && data.data?.items?.length) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data?.items?.length) {
                     const items = data.data.items;
                     allPreviewMovies = items; // lưu trữ local array
 
@@ -1006,7 +1006,7 @@
         // ─ ─Load genres from API ─ 
         async function loadGenres() {
             try {
-                const res = await fetch('https://ophim1.com/v1/api/the-loai', { headers: { accept: 'application/json' } });
+                const res = await movieAPI.fetchWithFallback('/the-loai', { headers: { accept: 'application/json' } });
                 const data = await res.json();
 
                 document.getElementById('genreLoading').style.display = 'none';
@@ -1014,7 +1014,7 @@
                 grid.style.display = 'grid';
 
                 let genres = [];
-                if (data && data.status === 'success' && data.data) {
+                if (data && (data && (data.status === 'success' || data.status === true || data.status)) && data.data) {
                     // H trợ cả 2 cấu trúc API có thể trả về: data.data.items hoặc data.data là mảng
                     genres = Array.isArray(data.data.items) ? data.data.items : (Array.isArray(data.data) ? data.data : []);
                 }
@@ -1316,7 +1316,7 @@
             observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
-    <script src="js/bottom-nav.js?v=1783518514288" defer></script>
+    <script src="js/bottom-nav.js?v=1783518061473" defer></script>
     <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 </body>
 

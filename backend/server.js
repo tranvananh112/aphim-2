@@ -59,6 +59,15 @@ app.use('/api/', (req, res, next) => {
     return apiLimiter(req, res, next);
 });
 
+const path = require('path');
+
+// Serve static admin files & project assets
+app.use('/admin', express.static(path.join(__dirname, '../admin')));
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, '../admin/login.html'));
+});
+app.use(express.static(path.join(__dirname, '../')));
+
 // Routes
 // API Health Check
 app.get('/api/health', (req, res) => {

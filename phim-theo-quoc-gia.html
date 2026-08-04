@@ -594,6 +594,11 @@
 
 
     <!-- Country Pagination Logic - INLINE -->
+    <!-- Load API scripts BEFORE inline script so movieAPI is available -->
+    <script src="js/config.js?v=15"></script>
+    <script src="js/api.js?v=15"></script>
+    <script src="js/image-optimization.js?v=13"></script>
+
     <script>
         let currentCountry = '';
         let currentCountryName = '';
@@ -640,7 +645,7 @@
                 const data = await response.json();
                 console.log(`${countryName} movies data:`, data);
 
-                if (data.status === 'success' && data.data && data.data.items) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                     const movies = data.data.items;
                     const params = data.data.params || {};
                     const pagination = params.pagination || {};
@@ -687,8 +692,18 @@
             movieCount.textContent = `${movies.length} phim (Trang ${currentPage}/${totalPages} - Tổng: ${totalItems.toLocaleString()} phim)`;
 
             moviesList.innerHTML = movies.map(movie => {
-                const thumbUrl = movie.thumb_url || movie.poster_url || '';
-                const posterUrl = thumbUrl ? `https://img.ophim.live/uploads/movies/${thumbUrl}` : 'https://via.placeholder.com/200x300?text=No+Image';
+                // Fix poster URL - API returns 'uploads/movies/filename.jpg' or full URL
+                const rawImg = movie.thumb_url || movie.poster_url || '';
+                let posterUrl;
+                if (!rawImg) {
+                    posterUrl = 'https://via.placeholder.com/200x300?text=No+Image';
+                } else if (rawImg.startsWith('http')) {
+                    posterUrl = rawImg;
+                } else {
+                    // Strip any leading 'uploads/movies/' to avoid duplicating the path
+                    const filename = rawImg.replace(/^uploads\/movies\//, '');
+                    posterUrl = `https://img.ophim.live/uploads/movies/${filename}`;
+                }
                 const year = movie.year || 'N/A';
                 const quality = movie.quality || movie.lang || '';
                 const episodeCurrent = movie.episode_current || 'N/A';
@@ -704,7 +719,7 @@
                                  alt="${movie.name}"
                                  class="w-full h-full object-cover ${hiddenUI.imgClass}"
                                  loading="lazy"
-                                 onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
+                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/200x300?text=No+Image'">
                             
                             ${hiddenUI.badge}
                             
@@ -914,9 +929,6 @@
     </script>
 
     <!-- Load additional scripts -->
-    <script src="js/image-optimization.js?v=13"></script>
-    <script src="js/config.js?v=15"></script>
-    <script src="js/api.js?v=15"></script>
     <script src="js/auth.js?v=38"></script>
     <script src="js/premium-ad-blocker.js?v=1"></script>
     <script src="js/auth-modal.js?v=13"></script>

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!sidebar) return;
 
     try {
-        const response = await fetch('https://ophim1.com/v1/api/danh-sach/phim-moi-cap-nhat?page=1&limit=100');
+        const response = await movieAPI.fetchWithFallback('/danh-sach/phim-moi-cap-nhat?page=1&limit=100');
         const result = await response.json();
         
         if (!result.data || !result.data.items) return;

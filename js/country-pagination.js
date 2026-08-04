@@ -31,24 +31,20 @@ async function loadCountryMovies(countrySlug, countryName, page = 1) {
 
         console.log(`Loading ${countryName} movies - Page ${page}...`);
 
-        const url = `https://ophim1.com/v1/api/quoc-gia/${countrySlug}?page=${page}`;
-        console.log('Fetching from:', url);
-
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: { 'accept': 'application/json' }
-        });
+        const response = await movieAPI.fetchWithFallback(`/quoc-gia/${countrySlug}?page=${page}`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
+        const rawData = await response.json();
+        const data = movieAPI.normalizeResponse(rawData);
+        const items = data?.data?.items || [];
         console.log(`${countryName} movies data:`, data);
 
-        if (data.status === 'success' && data.data && data.data.items) {
-            const movies = data.data.items;
-            const params = data.data.params || {};
+        if (items && items.length > 0) {
+            const movies = items;
+            const params = data.data?.params || {};
             const pagination = params.pagination || {};
 
             // Calculate pagination from API data
@@ -63,13 +59,6 @@ async function loadCountryMovies(countrySlug, countryName, page = 1) {
                 totalPages = 18; // Default estimate
                 totalItems = movies.length * totalPages;
             }
-
-            console.log('Pagination:', pagination);
-            console.log('=== PAGINATION DEBUG ===');
-            console.log('totalItems:', totalItems);
-            console.log('itemsPerPage:', itemsPerPage);
-            console.log('Calculated totalPages:', totalPages);
-            console.log('========================');
 
             renderMovies(movies, countryName);
             showPagination();
@@ -98,6 +87,10 @@ function renderMovies(movies, countryName) {
         const hasCustomLink = !!movieLinks[movie.slug];
         const linkUrl = hasCustomLink ? `watch-simple.html?slug=${movie.slug}` : `movie-detail.html?slug=${movie.slug}`;
         const hiddenUI = window.getHiddenMovieOverlay ? window.getHiddenMovieOverlay(movie.slug) : { badge: '', imgClass: '', containerClass: '' };
+        const rawImg = movie.thumb_url || movie.poster_url || '';
+        const posterUrl = (typeof imageOptimizer !== 'undefined' && rawImg)
+            ? imageOptimizer.optimizeImageUrl(rawImg, 400, 80)
+            : (rawImg.startsWith('http') ? rawImg : `https://img.ophim.live/uploads/movies/${rawImg}`);
 
         return `
             <a href="${linkUrl}"
@@ -105,9 +98,9 @@ function renderMovies(movies, countryName) {
                 <div class="aspect-[2/3] w-full overflow-hidden relative">
                     <img alt="${movie.name}"
                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${hiddenUI.imgClass}"
-                        src="https://img.ophim.live/uploads/movies/${movie.thumb_url}"
+                        src="${posterUrl}"
                         loading="lazy"
-                        onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" />
+                        onerror="this.onerror=null; this.src='https://via.placeholder.com/400x600?text=No+Image'" />
                     ${hiddenUI.badge}
                     ${!hiddenUI.badge ? `
                     <div class="absolute top-2 left-2 bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded">

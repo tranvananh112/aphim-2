@@ -1,113 +1,387 @@
+require('dotenv').config({ quiet: true }); // Load .env local (nếu có), bỏ qua nếu không tìm thấy
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const axios = require('axios');const app = express();
+const axios = require('axios');
+const fs = require('fs');
+const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ===== VIEW ENGINE: EJS =====
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes requiring SSR MUST be before express.static
-const fs = require('fs');
+// ===== STATIC FILES: Serve từ thư mục gốc =====
+app.use(express.static(__dirname));
 
-app.get(['/movie-detail', '/movie-detail.html'], async (req, res) => {
+// ===== STATIC: Serve icons/ ra đường dẫn root (để Lottie load /icon-*.json) =====
+// VD: GET /icon-phim-bo.json → f:\Wesite Xem Phim Node\icons\icon-phim-bo.json
+app.use(express.static(path.join(__dirname, 'icons')));
+
+// ===== CACHE for API proxies =====
+const apiCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 phút
+function getCached(key) {
+    const entry = apiCache.get(key);
+    if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data;
+    return null;
+}
+function setCache(key, data) {
+    apiCache.set(key, { data, ts: Date.now() });
+}
+let apiQueue = Promise.resolve();
+function queuedFetch(url, options) {
+    apiQueue = apiQueue.then(() =>
+        fetch(url, options).then(async r => ({ status: r.status, text: await r.text() }))
+    );
+    return apiQueue;
+}
+
+// ==========================================
+// ROUTES: PAGES (SSR với EJS)
+// ==========================================
+
+// Trang chủ
+app.get('/', async (req, res) => {
     try {
-        const slug = req.query.slug;
-        let html = await fs.promises.readFile(path.join(__dirname, 'movie-detail.html'), 'utf-8');
-        
-        if (slug) {
-            try {
-                // Fetch SEO data from ophim1
-                const response = await axios.get('https://ophim1.com/phim/' + slug, { timeout: 5000 });
-                const data = response.data;
-                if (data && data.status && data.movie) {
-                    const movie = data.movie;
-                    const isSeries = movie.type === 'series';
-                    const name = movie.name || movie.title || '';
-                    const originName = movie.origin_name || '';
-                    const year = movie.year || new Date().getFullYear();
-                    const genre = (movie.category && movie.category[0]) ? movie.category[0].name : 'Phim mới';
-                    const country = (movie.country && movie.country[0]) ? movie.country[0].name : '';
-                    const eps = movie.episode_total || '?';
-                    const rawContent = movie.content ? movie.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim() : '';
-                    const content = rawContent.substring(0, 100);
-
-                    // 1. Title
-                    const title = 'Phim ' + name + ' Vietsub + Thuyết Minh - Full HD';
-
-                    // 2. Meta description (max 155 chars)
-                    let desc;
-                    if (isSeries) {
-                        desc = name + ' (' + originName + ') là bộ phim ' + genre + ' ' + country + ' ra mắt năm ' + year + ', gồm ' + eps + ' tập. ' + content + '... Xem miễn phí tại APhim.';
-                    } else {
-                        desc = name + ' (' + originName + ') là phim ' + genre + ' ' + country + ' năm ' + year + '. ' + content + '... Xem Vietsub Full HD miễn phí tại APhim.';
-                    }
-                    desc = desc.substring(0, 155);
-
-                    // 3. Open Graph image
-                    const img = movie.thumb_url
-                        ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://img.ophim.live/uploads/movies/' + movie.thumb_url)
-                        : 'https://aphim.io.vn/apple-touch-icon.png';
-                    const pageUrl = 'https://aphim.io.vn/movie-detail.html?slug=' + slug;
-
-                    // 4. JSON-LD Schema
-                    const schema = {
-                        '@context': 'https://schema.org',
-                        '@type': isSeries ? 'TVSeries' : 'Movie',
-                        name: name,
-                        alternateName: originName,
-                        description: desc,
-                        datePublished: (movie.created && movie.created.time) ? movie.created.time : String(year),
-                        genre: Array.isArray(movie.category) ? movie.category.map(function(c) { return c.name; }) : ['Phim mới'],
-                        image: img,
-                        url: pageUrl
-                    };
-                    if (isSeries) {
-                        schema.numberOfEpisodes = parseInt(eps) || 0;
-                    }
-
-                    // Build SSR head block
-                    const seoBlock = '\n    <title>' + title + '</title>\n'
-                        + '    <meta name="description" content="' + desc.replace(/"/g, '&quot;') + '" />\n'
-                        + '    <meta property="og:title" content="' + title.replace(/"/g, '&quot;') + '" />\n'
-                        + '    <meta property="og:description" content="' + desc.replace(/"/g, '&quot;') + '" />\n'
-                        + '    <meta property="og:image" content="' + img + '" />\n'
-                        + '    <meta property="og:url" content="' + pageUrl + '" />\n'
-                        + '    <meta property="og:type" content="video.movie" />\n'
-                        + '    <link rel="canonical" href="' + pageUrl + '" />\n'
-                        + '    <script type="application/ld+json">' + JSON.stringify(schema) + '</script>\n';
-
-                    // Remove existing duplicate tags from static HTML
-                    html = html.replace(/<title>[\s\S]*?<\/title>/, '');
-                    html = html.replace(/<meta\s+name="description"[^>]*>/gi, '');
-                    html = html.replace(/<meta\s+property="og:title"[^>]*>/gi, '');
-                    html = html.replace(/<meta\s+property="og:description"[^>]*>/gi, '');
-                    html = html.replace(/<meta\s+property="og:image"[^>]*>/gi, '');
-                    html = html.replace(/<meta\s+property="og:url"[^>]*>/gi, '');
-                    html = html.replace(/<meta\s+property="og:type"[^>]*>/gi, '');
-                    html = html.replace(/<link\s+rel="canonical"[^>]*>/gi, '');
-
-                    // Inject SSR block right after <head>
-                    html = html.replace('<head>', '<head>' + seoBlock);
-                }
-            } catch (e) {
-                console.error('[SSR] SEO inject failed for slug:', slug, '-', e.message);
-                // Fallback: serve original HTML without SEO injection — better than crashing
-            }
-        }
-
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.send(html);
-    } catch (e) {
-        console.error('[SSR] File read error:', e.message);
-        res.status(500).send('Server Error');
+        const response = await axios.get('https://ophim1.com/v1/api/danh-sach/phim-moi-cap-nhat?page=1', { timeout: 5000 });
+        const movies = response.data && response.data.data ? response.data.data.items || [] : [];
+        res.render('index', {
+            title: 'APhim | Xem Phim Mới 2026 | Phim Hay Vietsub | Phim Full HD Miễn Phí',
+            currentPage: 'home',
+            movies: movies,
+            metaDescription: 'APhim - Website xem phim trực tuyến chất lượng Full HD miễn phí. Kho phim mới khổng lồ, phim chiếu rạp, phim lẻ, phim bộ được cập nhật thường xuyên 2026.',
+            canonicalUrl: 'https://aphim.top/',
+            ogTitle: 'APhim | Xem Phim Mới 2026 | Phim Hay Vietsub',
+            ogImage: 'https://aphim.top/android-chrome-512x512.png',
+            ogUrl: 'https://aphim.top/'
+        });
+    } catch (error) {
+        console.error('Lỗi lấy dữ liệu trang chủ:', error.message);
+        res.render('index', {
+            title: 'APhim | Xem Phim Mới 2026 | Phim Hay Vietsub | Phim Full HD Miễn Phí',
+            currentPage: 'home',
+            movies: [],
+            canonicalUrl: 'https://aphim.top/'
+        });
     }
 });
 
-// ===== IMAGE SITEMAP — giúp Google index poster phim vào Google Images =====
-// Cache sitemap 6 tiếng để tránh gọi API liên tục
+// Trang chi tiết phim (SEO-friendly URL: /phim/:slug)
+app.get('/phim/:slug', async (req, res) => {
+    const slug = req.params.slug;
+    if (slug.endsWith('.html') || slug.includes('.')) {
+        const cleanUrl = req.url.replace('/phim/', '/').replace('.html', '');
+        return res.redirect(301, cleanUrl);
+    }
+    try {
+        const response = await axios.get(`https://ophim1.com/phim/${slug}`, { timeout: 5000 });
+        const data = response.data;
+
+        if (data && data.status && data.movie) {
+            const movie = data.movie;
+            const episodes = data.episodes || [];
+            const name = movie.name || movie.title || '';
+            const originName = movie.origin_name || '';
+            const year = movie.year || new Date().getFullYear();
+            const genre = (movie.category && movie.category[0]) ? movie.category[0].name : 'Phim mới';
+            const country = (movie.country && movie.country[0]) ? movie.country[0].name : '';
+            const eps = movie.episode_total || '?';
+            const rawContent = movie.content ? movie.content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim() : '';
+            const content = rawContent.substring(0, 100);
+
+            // Chuẩn SEO Title: "Xem Phim [Tên Phim] Tập Mới Nhất - Vietsub Thuyết Minh HD [Năm]"
+            const seoEps = movie.episode_current && movie.episode_current.toLowerCase() !== 'full' ? `Tập ${movie.episode_current}` : 'Full HD';
+            const title = `Xem Phim ${name} ${seoEps} - Vietsub Thuyết Minh HD ${year}`;
+            
+            const isSeries = movie.type === 'series';
+            let desc;
+            if (isSeries) {
+                desc = `Xem phim ${name} (${originName}) ${year} Vietsub Thuyết Minh Full HD. Bộ phim ${genre} ${country} siêu hay gồm ${eps} tập. ${content}... Xem phim online chất lượng cao, không quảng cáo tại APhim.`;
+            } else {
+                desc = `Xem phim ${name} (${originName}) ${year} Vietsub Thuyết Minh Full HD. Phim chiếu rạp ${genre} ${country} cực đỉnh. ${content}... Xem phim online chất lượng cao, không quảng cáo tại APhim.`;
+            }
+            desc = desc.substring(0, 155);
+
+            const img = movie.thumb_url
+                ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://img.ophim.live/uploads/movies/' + movie.thumb_url)
+                : 'https://aphim.top/android-chrome-512x512.png';
+            const pageUrl = `https://aphim.top/phim/${slug}`;
+
+            res.render('detail', {
+                title: title,
+                currentPage: 'detail',
+                movie: movie,
+                episodes: episodes,
+                metaDescription: desc,
+                canonicalUrl: pageUrl,
+                ogUrl: pageUrl,
+                ogTitle: title,
+                ogImage: img
+            });
+        } else {
+            res.status(404).render('404', { title: '404 - Không tìm thấy trang' });
+        }
+    } catch (error) {
+        console.error('Lỗi lấy chi tiết phim:', error.message);
+        res.status(404).send('Không tìm thấy phim yêu cầu');
+    }
+});
+
+// Render trang xem phim mặc định khi không có slug
+app.get('/xem-phim', (req, res) => {
+    res.render('watch', {
+        title: 'Xem Phim - APhim',
+        currentPage: 'watch',
+        movie: null,
+        episodes: [],
+        episode: 'tap-1',
+        metaDescription: 'Xem phim online chất lượng cao, miễn phí tại APhim. Cập nhật phim mới mỗi ngày.',
+        canonicalUrl: 'https://aphim.top/xem-phim'
+    });
+});
+
+// Trang xem phim: /xem-phim/:slug/:episode
+app.get('/xem-phim/:slug/:episode?', async (req, res) => {
+    let { slug, episode } = req.params;
+    if (slug.endsWith('.html') || slug.includes('.')) {
+        const realSlug = req.query.slug;
+        const realEp = req.query.episode || req.query.ep || '1';
+        if (realSlug) {
+            return res.redirect(301, `/xem-phim/${realSlug}/tap-${realEp}`);
+        } else {
+            return res.redirect(301, '/');
+        }
+    }
+
+    // Handle malformed URL containing query symbols in slug (e.g. tieu-dao-tu-cong-tu&episode=1)
+    if (slug.includes('&') || slug.includes('?') || slug.includes('=')) {
+        const cleanSlug = slug.split(/[&?=]/)[0];
+        let ep = req.query.episode || req.query.ep || '1';
+        const match = slug.match(/episode=([^&]+)/) || slug.match(/ep=([^&]+)/);
+        if (match) {
+            ep = match[1];
+        }
+        return res.redirect(301, `/xem-phim/${cleanSlug}/tap-${ep}`);
+    }
+
+    // Redirect to clean path if queried with ?episode=... instead of path segment
+    if (!episode && (req.query.episode || req.query.ep)) {
+        const ep = req.query.episode || req.query.ep;
+        return res.redirect(301, `/xem-phim/${slug}/tap-${ep}`);
+    }
+    try {
+        const response = await axios.get(`https://ophim1.com/phim/${slug}`, { timeout: 5000 });
+        const data = response.data;
+        const movie = data && data.movie ? data.movie : null;
+        const episodes = data && data.episodes ? data.episodes : [];
+
+        let title = 'Xem Phim - APhim';
+        let metaDescription = 'Xem phim online chất lượng cao, miễn phí tại APhim. Cập nhật phim mới mỗi ngày.';
+        let ogImage = 'https://aphim.top/android-chrome-512x512.png';
+        
+        if (movie) {
+            const name = movie.name || movie.title || '';
+            const year = movie.year || '';
+            let currentEpStr = episode ? episode.replace('-', ' ') : 'tập mới nhất';
+            currentEpStr = currentEpStr.replace(/\b\w/g, l => l.toUpperCase()); // Tap 1
+            
+            title = `Xem Phim ${name} ${currentEpStr} - Vietsub Thuyết Minh HD ${year}`;
+            metaDescription = `Xem phim ${name} ${currentEpStr} Vietsub Thuyết Minh Full HD trực tuyến. Xem ngay không quảng cáo, tải trang siêu tốc tại APhim.`;
+            ogImage = movie.thumb_url ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://img.ophim.live/uploads/movies/' + movie.thumb_url) : ogImage;
+        }
+
+        res.render('watch', {
+            title: title,
+            metaDescription: metaDescription,
+            canonicalUrl: `https://aphim.top/xem-phim/${slug}/${episode || 'tap-1'}`,
+            ogTitle: title,
+            ogImage: ogImage,
+            currentPage: 'watch',
+            movie: movie,
+            episodes: episodes,
+            episode: episode || 'tap-1'
+        });
+    } catch (error) {
+        console.error('Lỗi lấy thông tin phim để xem:', error.message);
+        res.render('watch', {
+            title: 'Xem Phim - APhim',
+            currentPage: 'watch',
+            movie: null,
+            episodes: [],
+            episode: 'tap-1'
+        });
+    }
+});
+
+// Trang tìm kiếm
+app.get('/search', (req, res) => {
+    const keyword = req.query.q || '';
+    res.render('search', {
+        title: 'Tìm Kiếm Phim - APhim',
+        currentPage: 'search',
+        keyword: keyword
+    });
+});
+
+// Trang gói cước
+app.get('/pricing', (req, res) => {
+    res.render('pricing', {
+        title: 'Gói Cước - APhim',
+        currentPage: 'pricing'
+    });
+});
+
+// Trang danh sách phim
+app.get('/danh-sach', (req, res) => {
+    res.render('danh-sach', {
+        title: 'Danh Sách Phim - APhim',
+        currentPage: 'danh-sach'
+    });
+});
+
+// Trang đăng nhập
+app.get('/login', (req, res) => {
+    res.render('login', {
+        title: 'Đăng Nhập - APhim',
+        currentPage: 'login'
+    });
+});
+
+// Legacy redirects (giữ tương thích với URL cũ)
+app.get('/index.html', (req, res) => {
+    res.redirect(301, '/');
+});
+
+app.get(['/movie-detail', '/movie-detail.html'], (req, res) => {
+    const slug = req.query.slug;
+    if (slug) {
+        res.redirect(301, `/phim/${slug}`);
+    } else {
+        res.redirect(301, '/');
+    }
+});
+
+app.get(['/watch', '/watch.html'], (req, res) => {
+    const slug = req.query.slug;
+    const ep = req.query.episode || req.query.ep || '1';
+    if (slug) {
+        res.redirect(301, `/xem-phim/${slug}/tap-${ep}`);
+    } else {
+        res.redirect(301, '/');
+    }
+});
+
+app.get('/search.html', (req, res) => {
+    const q = req.query.q || '';
+    res.redirect(301, q ? `/search?q=${encodeURIComponent(q)}` : '/search');
+});
+
+app.get('/pricing.html', (req, res) => {
+    res.redirect(301, '/pricing');
+});
+
+app.get('/danh-sach.html', (req, res) => {
+    const list = req.query.list || '';
+    res.redirect(301, list ? `/danh-sach?list=${encodeURIComponent(list)}` : '/danh-sach');
+});
+
+app.get('/login.html', (req, res) => {
+    res.redirect(301, '/login');
+});
+
+app.get('/categories', (req, res) => {
+    res.render('categories', { title: 'Thể Loại - APhim', currentPage: 'categories' });
+});
+
+app.get('/filter', (req, res) => {
+    res.render('filter', { title: 'Lọc Phim - APhim', currentPage: 'filter' });
+});
+
+app.get('/hanh-dong', (req, res) => {
+    res.render('hanh-dong', { title: 'Phim Hành Động - APhim', currentPage: 'hanh-dong' });
+});
+
+app.get('/linh-mieu', (req, res) => {
+    res.render('linh-mieu', { title: 'Linh Miêu - APhim', currentPage: 'linh-mieu' });
+});
+
+app.get('/partner', (req, res) => {
+    res.render('partner', { title: 'Đối Tác - APhim', currentPage: 'partner' });
+});
+
+app.get('/payment', (req, res) => {
+    res.render('payment', { title: 'Thanh Toán - APhim', currentPage: 'payment' });
+});
+
+app.get('/phim-theo-quoc-gia', (req, res) => {
+    res.render('phim-theo-quoc-gia', { title: 'Phim Theo Quốc Gia - APhim', currentPage: 'phim-theo-quoc-gia' });
+});
+
+app.get('/phim-x-watch', (req, res) => {
+    res.render('phim-x-watch', { title: 'Xem Phim X - APhim', currentPage: 'phim-x-watch' });
+});
+
+app.get('/phim-x', (req, res) => {
+    res.render('phim-x', { title: 'Phim X - APhim', currentPage: 'phim-x' });
+});
+
+app.get('/profile', (req, res) => {
+    res.render('profile', { title: 'Hồ Sơ - APhim', currentPage: 'profile' });
+});
+
+app.get('/register', (req, res) => {
+    res.render('register', { title: 'Đăng Ký - APhim', currentPage: 'register' });
+});
+
+app.get('/support', (req, res) => {
+    res.render('support', { title: 'Hỗ Trợ - APhim', currentPage: 'support' });
+});
+
+// Legacy redirects for new pages
+app.get('/categories.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/filter.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/hanh-dong.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/linh-mieu.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/partner.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/payment.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/phim-theo-quoc-gia.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/phim-x-watch.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/phim-x.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/profile.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/register.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+app.get('/support.html', (req, res) => res.redirect(301, req.url.replace('.html', '')));
+
+app.get('/tiktok5pgXUVWzUxAifGnSg4nsTciyOtz2bvpK.txt', (req, res) => {
+    res.send('tiktok-developers-site-verification=5pgXUVWzUxAifGnSg4nsTciyOtz2bvpK');
+});
+
+app.get(['/the-thao', '/the-thao.html'], (req, res) => {
+    res.redirect(301, '/pricing');
+});
+
+// Admin routes (vẫn dùng HTML tĩnh)
+app.get('/admin/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin', 'dashboard.html'));
+});
+app.get('/admin/movies', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin', 'movies.html'));
+});
+app.get('/admin/users', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin', 'users.html'));
+});
+app.get('/admin/payments', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin', 'payments.html'));
+});
+
+// ==========================================
+// SITEMAP
+// ==========================================
 let sitemapCache = { xml: null, timestamp: 0 };
 const SITEMAP_TTL = 6 * 60 * 60 * 1000; // 6 giờ
 
@@ -119,7 +393,6 @@ app.get('/sitemap-images.xml', async (req, res) => {
             return res.send(sitemapCache.xml);
         }
 
-        // Lấy nhiều trang phim mới nhất để có đủ ảnh
         const pages = [1, 2, 3, 4, 5];
         const allMovies = [];
 
@@ -132,11 +405,10 @@ app.get('/sitemap-images.xml', async (req, res) => {
             } catch (e) { /* bỏ qua trang lỗi */ }
         }));
 
-        // Tạo từng <url> entry có <image:image>
-        const urlEntries = allMovies.map(function(movie) {
+        const urlEntries = allMovies.map(function (movie) {
             const slug = movie.slug || '';
-            const name = (movie.name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            const pageUrl = 'https://aphim.io.vn/movie-detail.html?slug=' + slug;
+            const name = (movie.name || '').replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
+            const pageUrl = 'https://aphim.top/phim/' + slug;
             const thumb = movie.thumb_url
                 ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://img.ophim.live/uploads/movies/' + movie.thumb_url)
                 : '';
@@ -166,7 +438,7 @@ app.get('/sitemap-images.xml', async (req, res) => {
         sitemapCache = { xml: xml, timestamp: now };
 
         res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-        res.setHeader('Cache-Control', 'public, max-age=21600'); // Browser cache 6h
+        res.setHeader('Cache-Control', 'public, max-age=21600');
         res.send(xml);
     } catch (e) {
         console.error('[Sitemap] Error:', e.message);
@@ -174,49 +446,69 @@ app.get('/sitemap-images.xml', async (req, res) => {
     }
 });
 
-// ===== GENERAL SITEMAP — khai báo các trang tĩnh cho Google =====
 app.get('/sitemap.xml', (req, res) => {
-    const staticPages = ['', 'search', 'pricing', 'danh-sach', 'hanh-dong', 'phim-theo-quoc-gia'];
-    const urls = staticPages.map(function(p) {
-        return '\n    <url><loc>https://aphim.io.vn/' + (p ? p + '.html' : '') + '</loc><changefreq>daily</changefreq><priority>' + (p === '' ? '1.0' : '0.8') + '</priority></url>';
-    }).join('');
-    const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n    <sitemap><loc>https://aphim.io.vn/sitemap-images.xml</loc></sitemap>\n</sitemapindex>';
-    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-    res.send(xml);
+    try {
+        const sitemapPath = path.join(__dirname, 'sitemap.xml');
+        const xml = fs.readFileSync(sitemapPath, 'utf8');
+        res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+        res.send(xml);
+    } catch (e) {
+        res.status(500).send('<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>');
+    }
 });
 
-// Serve static files
-app.use(express.static(__dirname));
+// ==========================================
+// API PROXY CHO OPHIM (cho client-side JS)
+// ==========================================
+app.use('/v1/api', async (req, res) => {
+    let cleanPath = req.path || '/';
+    if (!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    
+    const targets = [
+        `https://ophim1.com/v1/api${cleanPath}`,
+        `https://phimapi.com/v1/api${cleanPath}`,
+        `https://phimapi.com${cleanPath}`,
+        `https://ophim17.cc/v1/api${cleanPath}`,
+        `https://ophim10.cc/v1/api${cleanPath}`
+    ];
 
-// Routes
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    if (cleanPath.includes('phim-moi-cap-nhat') || cleanPath.includes('home')) {
+        targets.unshift(`https://ophim1.com/danh-sach/phim-moi-cap-nhat`);
+        targets.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat`);
+    }
+
+    for (const targetUrl of targets) {
+        try {
+            const response = await axios({
+                method: req.method,
+                url: targetUrl,
+                params: req.query,
+                data: req.method === 'POST' || req.method === 'PUT' ? req.body : undefined,
+                timeout: 6000,
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                },
+                responseType: 'json'
+            });
+
+            if (response.status === 200 && response.data) {
+                return res.status(200).json(response.data);
+            }
+        } catch (error) {
+            // Silently try next mirror
+        }
+    }
+
+    res.status(500).json({ status: false, message: 'All API proxy mirrors failed' });
 });
 
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'login.html'));
-});
+// ==========================================
+// API PROXIES (giữ nguyên từ server cũ)
+// ==========================================
 
-
-
-app.get('/watch', (req, res) => {
-    res.sendFile(path.join(__dirname, 'watch.html'));
-});
-
-app.get(['/pricing', '/pricing.html'], (req, res) => {
-    res.sendFile(path.join(__dirname, 'pricing.html'));
-});
-
-app.get(['/the-thao', '/the-thao.html'], (req, res) => {
-    res.redirect(301, '/pricing');
-});
-
-
-
-// ===== PROXY: iSportsAPI =====
+// iSports API
 const ISPORTS_API_KEY = 'R86CxN79bK1lrAC0';
-
-// Simple in-memory cache to save API usage
 let cacheLivescores = { data: null, timestamp: 0 };
 let cacheChanges = { data: null, timestamp: 0 };
 const ISPORTS_CACHE_TTL = 30000; // 30 seconds
@@ -227,20 +519,12 @@ app.get(['/api/isports/livescores', '/v1/api/isports/livescores'], async (req, r
         if (cacheLivescores.data && (now - cacheLivescores.timestamp < ISPORTS_CACHE_TTL)) {
             return res.status(200).json(cacheLivescores.data);
         }
-
         const url = `http://api.isportsapi.com/sport/football/livescores?api_key=${ISPORTS_API_KEY}`;
         const response = await axios.get(url);
-        
-        // Check for limit error
         if (response.data && response.data.code === 2) {
             console.warn("iSports Limit Reached!");
-            return res.status(200).json({
-                code: 2,
-                message: "API iSports (Trial 200) đã hết hạn mức ngày hôm nay. Vui lòng cung cấp Key mới.",
-                data: []
-            });
+            return res.status(200).json({ code: 2, message: "API iSports (Trial 200) đã hết hạn mức ngày hôm nay. Vui lòng cung cấp Key mới.", data: [] });
         }
-        
         cacheLivescores = { data: response.data, timestamp: now };
         res.status(200).json(response.data);
     } catch (error) {
@@ -261,15 +545,96 @@ app.get(['/api/isports/schedule', '/v1/api/isports/schedule'], async (req, res) 
     }
 });
 
-app.get(['/api/isports/summary', '/v1/api/isports/summary'], async (req, res) => {
-    try {
-        const url = `http://api.isportsapi.com/sport/football/summary?api_key=${ISPORTS_API_KEY}`;
-        const response = await axios.get(url);
-        res.status(200).json(response.data);
-    } catch (error) {
-        console.error("iSports Summary Error:", error.message);
-        res.status(500).json({ error: 'Failed to fetch summary from iSports' });
+// ==========================================
+// VSMOV PROXY: Fetch episodes từ nguồn phụ (server-side, tránh CORS)
+// GET /api/vsmov/:slug → thử phimapi.com, nguonc.com, rồi ophim1.com
+// ==========================================
+const vsmovCache = new Map();
+const VSMOV_CACHE_TTL = 5 * 60 * 1000; // 5 phút
+
+app.get('/api/vsmov/:slug', async (req, res) => {
+    const slug = req.params.slug;
+    if (!slug || slug.length > 200) {
+        return res.status(400).json({ status: false, message: 'Invalid slug' });
     }
+
+    const cacheEntry = vsmovCache.get(slug);
+    if (cacheEntry && Date.now() - cacheEntry.ts < VSMOV_CACHE_TTL) {
+        res.setHeader('X-Cache', 'HIT');
+        return res.json(cacheEntry.data);
+    }
+
+    const mirrors = [
+        {
+            url: `https://phimapi.com/phim/${slug}`,
+            parse: d => ({
+                episodes: d?.episodes,
+                movie: d?.movie
+            })
+        },
+        {
+            url: `https://phim.nguonc.com/api/film/${slug}`,
+            parse: d => {
+                if (!d || !d.movie || !d.movie.episodes) return null;
+                const mappedEps = d.movie.episodes.map(s => ({
+                    server_name: s.server_name || 'Vietsub',
+                    server_data: (s.items || []).map(it => ({
+                        name: it.name && !it.name.toLowerCase().includes('tập') ? `Tập ${it.name}` : (it.name || 'Tập 1'),
+                        slug: it.slug || `tap-${it.name}`,
+                        link_embed: it.embed || '',
+                        link_m3u8: it.m3u8 || ''
+                    }))
+                }));
+                return {
+                    episodes: mappedEps,
+                    movie: {
+                        name: d.movie.name,
+                        origin_name: d.movie.original_name,
+                        thumb_url: d.movie.thumb_url,
+                        poster_url: d.movie.poster_url,
+                        content: d.movie.description,
+                        quality: d.movie.quality,
+                        lang: d.movie.language,
+                        year: d.movie.created ? new Date(d.movie.created).getFullYear() : ''
+                    }
+                };
+            }
+        },
+        {
+            url: `https://ophim1.com/phim/${slug}`,
+            parse: d => ({
+                episodes: d?.data?.item?.episodes || d?.movie?.episodes,
+                movie: d?.data?.item || d?.movie
+            })
+        }
+    ];
+
+    for (const { url, parse } of mirrors) {
+        try {
+            const response = await axios.get(url, {
+                timeout: 8000,
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+
+            const parsed = parse(response.data);
+            const episodes = parsed?.episodes;
+
+            if (episodes && Array.isArray(episodes) && episodes.length > 0) {
+                const movieMeta = parsed?.movie || null;
+                const result = { status: true, source: url, episodes, movie: movieMeta };
+                vsmovCache.set(slug, { data: result, ts: Date.now() });
+                res.setHeader('X-Cache', 'MISS');
+                return res.json(result);
+            }
+        } catch (err) {
+            console.warn(`[VSMOV] Lỗi fetch ${url}:`, err.message);
+        }
+    }
+
+    res.status(200).json({ status: false, episodes: [], message: 'Không tìm thấy nguồn phim phụ' });
 });
 
 app.get(['/api/isports/livetext', '/v1/api/isports/livetext'], async (req, res) => {
@@ -286,19 +651,16 @@ app.get(['/api/isports/livetext', '/v1/api/isports/livetext'], async (req, res) 
 app.get(['/api/isports/changes', '/v1/api/isports/changes'], async (req, res) => {
     try {
         const now = Date.now();
-        if (cacheChanges.data && (now - cacheChanges.timestamp < 10000)) { // 10s for changes
+        if (cacheChanges.data && (now - cacheChanges.timestamp < 10000)) {
             return res.status(200).json(cacheChanges.data);
         }
-
         const url = `http://api.isportsapi.com/sport/football/livescores/changes?api_key=${ISPORTS_API_KEY}`;
         const response = await axios.get(url);
-
         if (response.data && response.data.code === 2) {
-             if (cacheChanges.data) return res.status(200).json(cacheChanges.data);
+            if (cacheChanges.data) return res.status(200).json(cacheChanges.data);
         } else {
             cacheChanges = { data: response.data, timestamp: now };
         }
-
         res.status(200).json(response.data);
     } catch (error) {
         console.error("iSports Changes Error:", error.message);
@@ -319,25 +681,19 @@ app.get(['/api/isports/team/:teamId', '/v1/api/isports/team/:teamId'], async (re
     }
 });
 
-// Image Proxy & Cache Server-side cho Logo iSports
 const isportsLogoCache = {};
-
 app.get(['/api/isports/image/:teamId', '/v1/api/isports/image/:teamId'], async (req, res) => {
     try {
         const teamId = req.params.teamId;
         let logoUrl = isportsLogoCache[teamId];
-        
-        // 1. Phân giải Logo URL nếu chưa có
         if (!logoUrl) {
             const url = `http://api.isportsapi.com/sport/football/team?api_key=${ISPORTS_API_KEY}&teamId=${teamId}`;
             const response = await axios.get(url);
             if (response.data && response.data.data && response.data.data[0] && response.data.data[0].logo) {
                 logoUrl = response.data.data[0].logo;
-                isportsLogoCache[teamId] = logoUrl; // Lưu vào biến RAM
+                isportsLogoCache[teamId] = logoUrl;
             }
         }
-        
-        // 2. Stream ảnh về client lách CORS/403
         if (logoUrl) {
             const imgParams = {
                 responseType: 'arraybuffer',
@@ -350,19 +706,17 @@ app.get(['/api/isports/image/:teamId', '/v1/api/isports/image/:teamId'], async (
             };
             const imgResult = await axios.get(logoUrl, imgParams);
             res.set('Content-Type', 'image/png');
-            res.set('Cache-Control', 'public, max-age=86400'); // Trình duyệt cache 1 ngày
+            res.set('Cache-Control', 'public, max-age=86400');
             res.send(imgResult.data);
         } else {
             res.status(404).send('No logo');
         }
-    } catch(e) {
-        // Fallback im lặng tránh văng server
+    } catch (e) {
         res.status(404).send('Error fetching proxy image');
     }
 });
 
-
-// ===== PROXY: Sportmonks API =====
+// Sportmonks API
 const SPORTMONKS_TOKEN = 'x8HmVIpZZd9bz5AqazZIeygXWXnNsqLIPNokCI1M5lQ4LTzMOGTp3i8ePBCk';
 const FOOTBALL_DATA_TOKEN = '693024976693480792fe9c97125c68ca';
 
@@ -406,7 +760,6 @@ app.get(['/api/fd/matches', '/v1/api/fd/matches'], async (req, res) => {
 app.get(['/api/sportmonks/livescores', '/v1/api/sportmonks/livescores'], async (req, res) => {
     try {
         const url = `https://api.sportmonks.com/v3/football/livescores/inplay?api_token=${SPORTMONKS_TOKEN}&include=participants;scores;periods;events;league.country;round`;
-        
         const response = await axios.get(url);
         res.status(200).json(response.data);
     } catch (error) {
@@ -419,7 +772,6 @@ app.get(['/api/sportmonks/h2h/:t1/:t2', '/v1/api/sportmonks/h2h/:t1/:t2'], async
     try {
         const { t1, t2 } = req.params;
         const url = `https://api.sportmonks.com/v3/football/fixtures/head-to-head/${t1}/${t2}?api_token=${SPORTMONKS_TOKEN}&include=participants;league;scores;state;venue;events`;
-        
         const response = await axios.get(url);
         res.status(200).json(response.data);
     } catch (error) {
@@ -432,7 +784,6 @@ app.get(['/api/sportmonks/fixture/:id', '/v1/api/sportmonks/fixture/:id'], async
     try {
         const { id } = req.params;
         const url = `https://api.sportmonks.com/v3/football/fixtures/${id}?api_token=${SPORTMONKS_TOKEN}&include=participants;league;venue;state;scores;lineups.player;lineups.type;lineups.details.type;metadata.type;coaches`;
-        
         const response = await axios.get(url);
         res.status(200).json(response.data);
     } catch (error) {
@@ -441,168 +792,103 @@ app.get(['/api/sportmonks/fixture/:id', '/v1/api/sportmonks/fixture/:id'], async
     }
 });
 
-// ===== PROXY: Sport Radar Live Score =====
-
-// ===== CACHE: 5 phút để tránh 429 rate limit =====
-const apiCache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 phút
-
-function getCached(key) {
-    const entry = apiCache.get(key);
-    if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data;
-    return null;
-}
-function setCache(key, data) {
-    apiCache.set(key, { data, ts: Date.now() });
-}
-
-// Queue để tránh gọi đồng thời nhiều request
-let apiQueue = Promise.resolve();
-function queuedFetch(url, options) {
-    apiQueue = apiQueue.then(() =>
-        fetch(url, options).then(async r => ({ status: r.status, text: await r.text() }))
-    );
-    return apiQueue;
-}
-
-// Proxy lấy dữ liệu trận đấu (Dùng RapidAPI) - Hỗ trợ cả subpath /v1/api nếu cần
+// RapidAPI Sofascore proxy
 app.get(['/api/sofascore/*', '/v1/api/sofascore/*'], async (req, res) => {
-  try {
-    const targetPath = req.params[0]; // VD: api/v1/sport/football/events/live
-    const cacheKey = targetPath;
-
-    // 1. Kiểm tra Cache
-    const cached = getCached(cacheKey);
-    if (cached) {
-        res.setHeader('X-Cache', 'HIT');
-        return res.status(200).send(cached);
-    } // Trả trực tiếp text từ cache
-
-    // 2. Gọi RapidAPI qua hàng đợi
-    const url = `https://sportapi7.p.rapidapi.com/${targetPath}`;
-    console.log(`[Proxy] Fetching: ${url}`);
-    
-    const result = await queuedFetch(url, {
-        headers: {
-            'x-rapidapi-key': '8e131041e5msheef9200c98e9712p109669jsn30145b3c501d',
-            'x-rapidapi-host': 'sportapi7.p.rapidapi.com',
-            'Accept': 'application/json'
+    try {
+        const targetPath = req.params[0];
+        const cacheKey = targetPath;
+        const cached = getCached(cacheKey);
+        if (cached) {
+            res.setHeader('X-Cache', 'HIT');
+            return res.status(200).send(cached);
         }
-    });
-
-    // 3. Xử lý kết quả
-    if (result.status === 200 && result.text) {
-        setCache(cacheKey, result.text); 
-        res.setHeader('X-Cache', 'MISS');
-        res.setHeader('Content-Type', 'application/json');
-        res.status(200).send(result.text);
-    } else {
-        console.error(`[Proxy] Error ${result.status}:`, result.text);
-        res.status(result.status || 500).json({ error: 'Upstream Error', details: result.text });
+        const url = `https://sportapi7.p.rapidapi.com/${targetPath}`;
+        console.log(`[Proxy] Fetching: ${url}`);
+        const result = await queuedFetch(url, {
+            headers: {
+                'x-rapidapi-key': '8e131041e5msheef9200c98e9712p109669jsn30145b3c501d',
+                'x-rapidapi-host': 'sportapi7.p.rapidapi.com',
+                'Accept': 'application/json'
+            }
+        });
+        if (result.status === 200 && result.text) {
+            setCache(cacheKey, result.text);
+            res.setHeader('X-Cache', 'MISS');
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200).send(result.text);
+        } else {
+            console.error(`[Proxy] Error ${result.status}:`, result.text);
+            res.status(result.status || 500).json({ error: 'Upstream Error', details: result.text });
+        }
+    } catch (error) {
+        console.error("RapidAPI Proxy Error:", error.message);
+        res.status(200).json({ events: [] });
     }
-  } catch (error) {
-    console.error("RapidAPI Proxy Error:", error.message);
-    res.status(200).json({ events: [] }); 
-  }
 });
 
-// Proxy lấy ảnh (Logo đội bóng)
+// Sofascore team image proxy
 app.get('/api/image/team/:id', async (req, res) => {
-  try {
-    const teamId = req.params.id;
-    const imageUrl = `https://api.sofascore.app/api/v1/team/${teamId}/image`;
-    
-    const response = await axios.get(imageUrl, { 
-      responseType: 'arraybuffer',
-      validateStatus: () => true,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://www.sofascore.com/',
-        'Origin': 'https://www.sofascore.com',
-        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
-      }
-    });
-
-    if (response.status === 200) {
-        res.set('Content-Type', 'image/png');
-        res.send(response.data);
-    } else {
-        res.status(404).send('Not Found');
+    try {
+        const teamId = req.params.id;
+        const imageUrl = `https://api.sofascore.app/api/v1/team/${teamId}/image`;
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            validateStatus: () => true,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': 'https://www.sofascore.com/',
+                'Origin': 'https://www.sofascore.com',
+                'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+            }
+        });
+        if (response.status === 200) {
+            res.set('Content-Type', 'image/png');
+            res.send(response.data);
+        } else {
+            res.status(404).send('Not Found');
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch team image' });
     }
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch team image' });
-  }
 });
 
-app.get('/profile', (req, res) => {
-    res.sendFile(path.join(__dirname, 'profile.html'));
-});
-
-app.get('/search', (req, res) => {
-    res.sendFile(path.join(__dirname, 'search.html'));
-});
-
-// Admin routes
-const adminPages = [
-    'login', 'dashboard', 'movies', 'users', 'payments', 
-    'banners', 'categories', 'comments', 'settings', 
-    'subscriptions', 'supporters', 'chat', 'partner'
-];
-adminPages.forEach(page => {
-    app.get([`/admin/${page}`, `/admin/${page}.html`], (req, res) => {
-        res.sendFile(path.join(__dirname, 'admin', `${page}.html`));
+// ==========================================
+// 404 HANDLER
+// ==========================================
+app.use((req, res) => {
+    res.status(404).render('404', {
+        title: '404 - Không tìm thấy trang',
+        currentPage: '404'
     });
 });
-app.get('/admin', (req, res) => res.redirect(301, '/admin/dashboard'));
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).send(`
-        <!DOCTYPE html>
-        <html lang="vi">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>404 - Không tìm thấy trang</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-        </head>
-        <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
-            <div class="text-center">
-                <h1 class="text-6xl font-bold text-yellow-400 mb-4">404</h1>
-                <p class="text-xl mb-8">Không tìm thấy trang</p>
-                <a href="/" class="px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-500 transition-colors">
-                    Về trang chủ
-                </a>
-            </div>
-        </body>
-        </html>
-    `);
-});
-
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-    const domain = process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : `http://localhost:${PORT}`;
+// ==========================================
+// START SERVER
+// ==========================================
+const server = app.listen(PORT, () => {
     console.log(`
-╭────────────────────────────────────────────────────────────╮
-│                                                            │
-│   🎬 CineStream Server đang chạy!                        │
-│                                                            │
-│   🌐 URL: ${domain}                        │
-│   📁 Thư mục: ${__dirname}                    
-│                                                            │
-│   👉 Các trang có sẵn:                                   │
-│   • ${domain}/                             │
-│   • ${domain}/login                        │
-│   • ${domain}/movie-detail                 │
-│   • ${domain}/watch                        │
-│   • ${domain}/pricing                      │
-│   • ${domain}/profile                      │
-│   • ${domain}/search                       │
-│   • ${domain}/admin/dashboard              │
-│                                                            │
-│   ⏹️  Nhấn Ctrl+C để dừng server                         │
-│                                                            │
-╰────────────────────────────────────────────────────────────╯
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║   🎬 APhim Server (Express + EJS) đang chạy!           ║
+║                                                           ║
+║   🌐 URL: http://localhost:${PORT}                        ║
+║                                                           ║
+║   📄 Trang chính (SSR):                                  ║
+║   • http://localhost:${PORT}/                             ║
+║   • http://localhost:${PORT}/phim/:slug                   ║
+║   • http://localhost:${PORT}/xem-phim/:slug/:ep           ║
+║   • http://localhost:${PORT}/search                       ║
+║   • http://localhost:${PORT}/pricing                      ║
+║   • http://localhost:${PORT}/danh-sach                    ║
+║   • http://localhost:${PORT}/login                        ║
+║   • http://localhost:${PORT}/profile                      ║
+║   • http://localhost:${PORT}/admin/dashboard              ║
+║   • http://localhost:${PORT}/sitemap.xml                  ║
+║                                                           ║
+║   🚀 SSR với EJS + Express                               ║
+║   ⏹️  Nhấn Ctrl+C để dừng server                         ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
     `);
 });
 
@@ -613,4 +899,3 @@ process.on('SIGTERM', () => {
         console.log('HTTP server closed');
     });
 });
-

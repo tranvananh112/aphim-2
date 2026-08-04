@@ -17,14 +17,14 @@
 
         try {
             // Fetch from phim-chieu-rap API
-            const response = await fetch('https://ophim1.com/v1/api/danh-sach/phim-chieu-rap?page=1&limit=10', {
+            const response = await movieAPI.fetchWithFallback('/danh-sach/phim-chieu-rap?page=1&limit=10', {
                 method: 'GET',
                 headers: { 'accept': 'application/json' }
             });
 
             const data = await response.json();
 
-            if (data.status === 'success' && data.data && data.data.items) {
+            if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                 renderComingSoonMovies(data.data.items);
             } else {
                 loading.innerHTML = '<p class="text-gray-400">Không thể tải phim chiếu rạp</p>';

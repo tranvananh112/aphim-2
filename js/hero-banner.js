@@ -61,15 +61,15 @@ async function loadHeroBanner() {
     attachSwipeHandler();
 }
 
-// -- Fallback t? ophim API ----------------------------------------
+// -- Fallback từ ophim API ----------------------------------------
 async function loadFallbackBanner() {
     try {
-        const res = await fetch('https://ophim1.com/v1/api/danh-sach/phim-moi-cap-nhat?page=1', {
-            headers: { accept: 'application/json' }
-        });
-        const data = await res.json();
-        if (data.status === 'success' && data.data?.items?.length > 0) {
-            currentAdminBanner = data.data.items[0];
+        const response = await movieAPI.fetchWithFallback('/danh-sach/phim-bo?page=1');
+        const rawData = await response.json();
+        const data = movieAPI.normalizeResponse(rawData);
+        const items = data?.data?.items || [];
+        if (items && items.length > 0) {
+            currentAdminBanner = items[0];
             heroSlides[0] = currentAdminBanner;
             renderHeroBannerContent(currentAdminBanner, false);
         } else {
@@ -81,36 +81,33 @@ async function loadFallbackBanner() {
     }
 }
 
-// -- Convert banner API format ? movie format --------------------
+// -- Convert banner API format -> movie format --------------------
 function convertBannerToMovie(banner) {
+    if (!banner) return null;
+    const poster = banner.posterUrl || banner.poster_url || banner.imageUrl || banner.bannerUrl || banner.image || banner.thumbUrl || banner.thumb_url || '';
+    const thumb = banner.thumbUrl || banner.thumb_url || banner.posterUrl || banner.poster_url || poster;
     return {
-        slug: banner.movieSlug || banner.slug,
-        name: banner.name,
-        origin_name: banner.originName || banner.origin_name,
-        thumb_url: banner.thumbUrl || banner.thumb_url,
-        poster_url: banner.posterUrl || banner.poster_url,
-        content: banner.content,
-        year: banner.year,
-        quality: banner.quality,
-        lang: banner.lang,
-        episode_current: banner.episodeCurrent || banner.episode_current,
+        slug: banner.movieSlug || banner.slug || '',
+        name: banner.name || '',
+        origin_name: banner.originName || banner.origin_name || '',
+        thumb_url: thumb,
+        poster_url: poster,
+        content: banner.content || '',
+        year: banner.year || '2026',
+        quality: banner.quality || 'HD',
+        lang: banner.lang || 'Vietsub',
+        episode_current: banner.episodeCurrent || banner.episode_current || '',
         category: banner.category || [],
         tmdb: banner.tmdb || {},
         imdb: banner.imdb || {},
-        logoUrl: banner.logoUrl // Custom logo
+        logoUrl: banner.logoUrl || ''
     };
 }
 
 // -- Smart Image Selector cho Desktop & Mobile -------------------
 function getHeroImageUrl(movie) {
     if (!movie) return '';
-    const isMobile = window.innerWidth < 768;
-    const isAdminBanner = (movie === heroSlides[0]);
-    if (isMobile) {
-        return movie.poster_url || movie.thumb_url;
-    } else {
-        return isAdminBanner ? (movie.poster_url || movie.thumb_url) : (movie.thumb_url || movie.poster_url);
-    }
+    return movie.poster_url || movie.thumb_url || '';
 }
 
 // -- State Logo Cache & ID ch?ng xung d?t (Race Condition Protection) --
@@ -737,12 +734,11 @@ function convertThumbnailsFromAPI(banners) {
 
 async function loadVietnameseThumbnailsFallback() {
     try {
-        const res = await fetch('https://ophim1.com/v1/api/quoc-gia/viet-nam?page=1', {
-            headers: { accept: 'application/json' }
-        });
-        const data = await res.json();
-        if (data.status === 'success' && data.data?.items) {
-            applyThumbnails(data.data.items.slice(0, 10));
+        const data = await movieAPI.getMoviesByCountry('viet-nam', 1);
+        const items = data?.data?.items || data?.items;
+        const isOk = data && ((data && (data.status === 'success' || data.status === true || data.status)) || data.status === true || data.status);
+        if (isOk && items && items.length > 0) {
+            applyThumbnails(items.slice(0, 10));
         }
     } catch (e) { console.error('VN fallback error:', e); }
 }
@@ -922,30 +918,28 @@ function renderHeroBannerContent(movie, isInstant) {
         }
     }
 
-    const isMobile = window.innerWidth < 768;
-    const rawUrl = movie.poster_url || movie.thumb_url;
+    const rawUrl = getHeroImageUrl(movie);
     const optUrl = buildImageUrl(rawUrl, 1200);
-    if (!optUrl) return;
 
-    heroImage.setAttribute('data-current-src', optUrl);
-
-    if (isInstant) {
-        // Cache hit ? g�n src ngay, fade in khi load
-        heroImage.src = optUrl;
+    heroImage.onerror = () => {
+        console.warn('Hero image primary load error, trying fallback URL:', rawUrl);
+        const fallbackUrl = rawUrl.startsWith('http')
+            ? rawUrl
+            : `https://img.ophim.live/uploads/movies/${rawUrl}`;
+        if (heroImage.src !== fallbackUrl) {
+            heroImage.src = fallbackUrl;
+        }
         showHeroImage();
-    } else {
-        // B?t d?u load ?nh ngay, hi?n v?i d? m? nh? l?p t?c d? browser render d?n
-        heroImage.style.opacity = '0.85';
-        heroImage.src = optUrl; 
-        
-        // ?n placeholder m? ngay sau 150ms d? t?i uu t?c d? nh?n di?n
-        setTimeout(() => {
-            showHeroImage();
-        }, 150);
-        
-        heroImage.onload = () => showHeroImage();
-        if (heroImage.complete && heroImage.naturalWidth > 0) showHeroImage();
+    };
+
+    if (optUrl) {
+        heroImage.setAttribute('data-current-src', optUrl);
+        heroImage.src = optUrl;
+    } else if (rawUrl) {
+        const fallbackUrl = rawUrl.startsWith('http') ? rawUrl : `https://img.ophim.live/uploads/movies/${rawUrl}`;
+        heroImage.src = fallbackUrl;
     }
+    showHeroImage();
 }
 
 // ================================================================
@@ -974,7 +968,7 @@ function showHeroImage() {
 async function fetchLatestEpisodeCount(movie) {
     if (!movie?.slug) return;
     try {
-        const res = await fetch(`https://ophim1.com/v1/api/phim/${movie.slug}`, {
+        const res = await movieAPI.fetchWithFallback(`/phim/${movie.slug}`, {
             headers: { accept: 'application/json' }
         });
         const data = await res.json();

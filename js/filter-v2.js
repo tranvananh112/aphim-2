@@ -229,7 +229,7 @@ async function loadMovies() {
         console.log('Loading movies from:', endpoint);
         const data = await fetchAPI(endpoint, currentPage);
 
-        if (data.status === 'success' && data.data) {
+        if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data) {
             const movies = data.data.items || [];
             const paginationData = data.data.params?.pagination || {};
 

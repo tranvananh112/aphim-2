@@ -480,8 +480,8 @@
     <link rel="stylesheet" href="css/navigation-modern.css?v=13">
     <link rel="stylesheet" href="css/navigation-pill-v2.css?v=13">
     <link rel="stylesheet" href="css/navigation-smooth.css?v=13">
-    <link rel="stylesheet" href="css/sticky-nav.css?v=1783524185491">
-    <link rel="stylesheet" href="css/nav-desktop-v2.css?v=7272">
+    <link rel="stylesheet" href="css/sticky-nav.css?v=1783524185464">
+    <link rel="stylesheet" href="css/nav-desktop-v2.css?v=7244">
     <link rel="stylesheet" href="css/material-icons-fix.css?v=13">
     <link rel="stylesheet" href="css/dropdown-z-index-fix.css?v=13">
     <link rel="stylesheet" href="css/top-movies.css?v=13">
@@ -991,11 +991,11 @@
     <script src="js/categories-dropdown.js?v=13"></script>
     <script src="js/countries-dropdown.js?v=13"></script>
     <script src="js/dropdown-hover-fix.js?v=13"></script>
-    <script src="js/mobile-menu-modern.js?v=1783519898827"></script>
+    <script src="js/mobile-menu-modern.js?v=1783518782850"></script>
     <script src="js/nav-instant-suggest.js?v=5"></script>
 
     <!-- Sticky Navigation -->
-    <script src="js/sticky-nav.js?v=1783523710061"></script>
+    <script src="js/sticky-nav.js?v=1783523710031"></script>
     <script src="js/nav-active-indicator.js?v=13"></script>
 
     <script>
@@ -2034,14 +2034,14 @@
         // Fallback function - load Vietnamese movies
         async function loadVietnameseMoviesHome() {
             try {
-                const response = await fetch('https://ophim1.com/v1/api/quoc-gia/viet-nam?page=1', {
+                const response = await movieAPI.fetchWithFallback('/quoc-gia/viet-nam?page=1', {
                     method: 'GET',
                     headers: { 'accept': 'application/json' }
                 });
 
                 const data = await response.json();
 
-                if (data.status === 'success' && data.data && data.data.items) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                     const movies = data.data.items.slice(0, 10);
                     renderVietnameseMovies(movies);
                 }
@@ -2115,7 +2115,7 @@
 
             try {
                 // Use ophim1.com API to get latest movies
-                const response = await fetch('https://ophim1.com/v1/api/danh-sach/phim-moi-cap-nhat?page=1', {
+                const response = await movieAPI.fetchWithFallback('/danh-sach/phim-moi-cap-nhat?page=1', {
                     method: 'GET',
                     headers: { 'accept': 'application/json' }
                 });
@@ -2123,7 +2123,7 @@
                 const data = await response.json();
                 console.log('Latest movies data:', data);
 
-                if (data.status === 'success' && data.data && data.data.items) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                     const movies = data.data.items.slice(0, 10);
                     renderLatestMovies(movies);
                 } else {
@@ -2197,7 +2197,7 @@
                 console.log('Loading action movies for homepage...');
 
                 // Load movies from category "hanh-dong"
-                const response = await fetch('https://ophim1.com/v1/api/the-loai/hanh-dong?page=1', {
+                const response = await movieAPI.fetchWithFallback('/the-loai/hanh-dong?page=1', {
                     method: 'GET',
                     headers: { 'accept': 'application/json' }
                 });
@@ -2205,7 +2205,7 @@
                 const data = await response.json();
                 console.log('Action movies data:', data);
 
-                if (data.status === 'success' && data.data && data.data.items) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                     const movies = data.data.items.slice(0, 10); // Get 10 movies
                     renderActionMovies(movies);
                 } else {
@@ -2326,9 +2326,9 @@
             const container = document.getElementById(containerId);
             try {
                 // Tăng lên 18 phim để load "đủ" hình cho scroll ngang
-                const response = await fetch(`https://ophim1.com/v1/api/the-loai/${slug}?page=1`);
+                const response = await movieAPI.fetchWithFallback(`/the-loai/${slug}?page=1`);
                 const data = await response.json();
-                if (data.status === 'success' && data.data && data.data.items) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                     const movies = data.data.items.slice(0, 18);
                     if (loading) loading.classList.add('hidden');
                     if (container) {
@@ -2389,9 +2389,9 @@
             const loading = document.getElementById('animationLoading');
             const container = document.getElementById('animationContainer');
             try {
-                const response = await fetch('https://ophim1.com/v1/api/danh-sach/hoat-hinh?page=1');
+                const response = await movieAPI.fetchWithFallback('/danh-sach/hoat-hinh?page=1');
                 const data = await response.json();
-                if (data.status === 'success' && data.data && data.data.items) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                     const movies = data.data.items.slice(0, 18);
                     if (loading) loading.classList.add('hidden');
                     if (container) {
@@ -2440,9 +2440,9 @@
             const loading = document.getElementById('adventureLoading');
             const container = document.getElementById('adventureContainer');
             try {
-                const response = await fetch('https://ophim1.com/v1/api/the-loai/phieu-luu?page=1');
+                const response = await movieAPI.fetchWithFallback('/the-loai/phieu-luu?page=1');
                 const data = await response.json();
-                if (data.status === 'success' && data.data && data.data.items) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                     const movies = data.data.items.slice(0, 18);
                     if (loading) loading.classList.add('hidden');
                     if (container) {
@@ -2489,9 +2489,9 @@
             const container = document.getElementById('sofaflixContainer');
             const loading = document.getElementById('sofaflixLoading');
             try {
-                const response = await fetch('https://ophim1.com/v1/api/danh-sach/phim-bo-dang-chieu?page=1');
+                const response = await movieAPI.fetchWithFallback('/danh-sach/phim-bo-dang-chieu?page=1');
                 const data = await response.json();
-                if (data.status === 'success' && data.data && data.data.items) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                     const movies = data.data.items.slice(0, 10);
                     if (loading) loading.classList.add('hidden');
                     if (container) {
@@ -2541,9 +2541,9 @@
             const container = document.getElementById('mythologyRankingContainer');
             const loading = document.getElementById('mythologyLoading');
             try {
-                const response = await fetch('https://ophim1.com/v1/api/the-loai/than-thoai?page=1');
+                const response = await movieAPI.fetchWithFallback('/the-loai/than-thoai?page=1');
                 const data = await response.json();
-                if (data.status === 'success' && data.data && data.data.items) {
+                if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
                     const movies = data.data.items.slice(0, 10);
                     if (loading) loading.classList.add('hidden');
                     if (container) {
@@ -3159,7 +3159,7 @@
 <link rel="stylesheet" href="css/mobile-search-overlay.css?v=110">
 <script src="js/mobile-search-overlay.js?v=111" defer></script>
 
-    <script src="js/bottom-nav.js?v=1783518514277" defer></script>
+    <script src="js/bottom-nav.js?v=1783518061455" defer></script>
 <script src="js/movie-slider.js"></script>
 </body>
 

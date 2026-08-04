@@ -175,7 +175,7 @@ async function loadMovies() {
         const data = await fetchAPI(endpoint, currentPage);
         console.log('Movies data:', data);
 
-        if (data.status === 'success' && data.data && data.data.items) {
+        if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
             const movies = data.data.items;
             const paginationData = data.data.params?.pagination || {};
 
@@ -200,7 +200,10 @@ async function loadMovies() {
 // Render Movies
 function renderMovies(movies) {
     moviesGrid.innerHTML = movies.map(movie => {
-        const posterUrl = movie.thumb_url || movie.poster_url || 'https://via.placeholder.com/300x450?text=No+Image';
+        const rawImg = movie.thumb_url || movie.poster_url || '';
+        const posterUrl = (typeof imageOptimizer !== 'undefined' && rawImg)
+            ? imageOptimizer.optimizeImageUrl(rawImg, 400, 80)
+            : (rawImg.startsWith('http') ? rawImg : (rawImg ? `https://img.ophim.live/uploads/movies/${rawImg}` : 'https://via.placeholder.com/300x450?text=No+Image'));
         const year = movie.year || 'N/A';
         const quality = movie.quality || movie.lang || '';
         const hiddenUI = window.getHiddenMovieOverlay ? window.getHiddenMovieOverlay(movie.slug) : { badge: '', imgClass: '', containerClass: '' };

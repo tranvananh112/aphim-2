@@ -325,7 +325,7 @@ async function performSearch() {
 
         console.log('Search data received:', data);
 
-        if (data && data.status === 'success' && data.data) {
+        if (data && (data && (data.status === 'success' || data.status === true || data.status)) && data.data) {
             let movies = data.data.items || [];
             console.log('Movies array:', movies.length, 'items');
 
@@ -371,14 +371,19 @@ function renderResults(movies) {
     resultsGrid.innerHTML = movies.map(movie => {
         const hiddenUI = window.getHiddenMovieOverlay ? window.getHiddenMovieOverlay(movie.slug) : { badge: '', imgClass: '', containerClass: '' };
 
+        const rawImg = movie.thumb_url || movie.poster_url || '';
+        const posterUrl = (typeof imageOptimizer !== 'undefined' && rawImg)
+            ? imageOptimizer.optimizeImageUrl(rawImg, 400, 80)
+            : (rawImg.startsWith('http') ? rawImg : (rawImg ? `https://img.ophim.live/uploads/movies/${rawImg}` : 'https://via.placeholder.com/400x600?text=No+Image'));
+
         return `
             <a href="movie-detail.html?slug=${movie.slug}"
                 class="group relative block rounded-xl overflow-hidden bg-surface-dark border border-white/5 hover:border-primary/50 transition-all duration-300 ${hiddenUI.containerClass}">
                 <div class="aspect-[2/3] w-full overflow-hidden relative">
                     <img alt="${movie.name}"
                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${hiddenUI.imgClass}"
-                        src="${movieAPI.getImageURL(movie.thumb_url)}"
-                        onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" />
+                        src="${posterUrl}"
+                        onerror="this.onerror=null; this.src='https://via.placeholder.com/400x600?text=No+Image'" />
                     ${hiddenUI.badge}
                     ${!hiddenUI.badge ? `
                     <div class="absolute top-2 left-2 bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded">

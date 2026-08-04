@@ -30,7 +30,7 @@ async function loadFeaturedMovies() {
     try {
         const data = await movieAPI.getMovieList(1);
 
-        if (data && data.status === 'success' && data.data && data.data.items) {
+        if (data && (data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
             renderMovieGrid(data.data.items, container);
         } else {
             container.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">Không thể tải danh sách phim</div>';

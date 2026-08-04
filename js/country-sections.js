@@ -5,26 +5,29 @@ const COUNTRY_CONFIGS = {
     korea: {
         id: 'korea',
         title: 'Phim Hàn Quốc mới',
-        url: 'https://ophim1.com/v1/api/quoc-gia/han-quoc?limit=20',
+        endpoint: '/quoc-gia/han-quoc?limit=20',
         linkUrl: 'phim-theo-quoc-gia.html?country=han-quoc'
     },
     china: {
         id: 'china',
         title: 'Phim Trung Quốc mới',
-        url: 'https://ophim1.com/v1/api/quoc-gia/trung-quoc?limit=20',
+        endpoint: '/quoc-gia/trung-quoc?limit=20',
         linkUrl: 'phim-theo-quoc-gia.html?country=trung-quoc'
     },
     usuk: {
         id: 'usuk',
         title: 'Phim US-UK mới',
-        url: 'https://ophim1.com/v1/api/quoc-gia/au-my?limit=20',
+        endpoint: '/quoc-gia/au-my?limit=20',
         linkUrl: 'phim-theo-quoc-gia.html?country=au-my'
     }
 };
 
 // Create Landscape Movie Card
 function createLandscapeMovieCard(movie) {
-    const posterUrl = `https://img.ophim.live/uploads/movies/${movie.thumb_url}`;
+    const rawImg = movie.thumb_url || movie.poster_url || '';
+    const posterUrl = (typeof imageOptimizer !== 'undefined' && rawImg)
+        ? imageOptimizer.optimizeImageUrl(rawImg, 480, 70)
+        : (rawImg.startsWith('http') ? rawImg : `https://img.ophim.live/uploads/movies/${rawImg}`);
     const detailUrl = `movie-detail.html?slug=${movie.slug}`;
     const hiddenUI = window.getHiddenMovieOverlay ? window.getHiddenMovieOverlay(movie.slug) : { badge: '', imgClass: '', containerClass: '' };
     
@@ -34,10 +37,10 @@ function createLandscapeMovieCard(movie) {
         <div class="landscape-card ${hiddenUI.containerClass}">
             <a href="${detailUrl}">
                 <div class="landscape-poster">
-                    <img src="${typeof imageOptimizer !== 'undefined' ? imageOptimizer.optimizeImageUrl(movie.thumb_url || movie.poster_url, 480, 70) : posterUrl}" 
+                    <img src="${posterUrl}" 
                          alt="${movie.name}" 
                          class="${hiddenUI.imgClass}"
-                         onerror="this.src='https://via.placeholder.com/480x270?text=No+Image'"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/480x270?text=No+Image'"
                          loading="lazy" />
                     
                     <div class="landscape-overlay"></div>
@@ -103,12 +106,16 @@ async function loadRowMovies(config) {
     if (!container) return;
 
     try {
-        const response = await fetch(config.url);
-        const data = await response.json();
+        const response = await movieAPI.fetchWithFallback(config.endpoint);
+        const rawData = await response.json();
+        const data = movieAPI.normalizeResponse(rawData);
+        const items = data?.data?.items || [];
 
-        if (data.status === 'success' && data.data && data.data.items) {
-            const movies = data.data.items.slice(0, 15);
+        if (items && items.length > 0) {
+            const movies = items.slice(0, 15);
             container.innerHTML = movies.map(movie => createLandscapeMovieCard(movie)).join('');
+        } else {
+            container.innerHTML = `<p class="text-gray-400 p-4">Không thể tải phim</p>`;
         }
     } catch (error) {
         console.error(`Error loading ${config.id} row:`, error);

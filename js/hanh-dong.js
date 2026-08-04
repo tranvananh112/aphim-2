@@ -25,7 +25,7 @@ async function loadActionMovies() {
         const data = await movieAPI.getMoviesFromMultipleSources(currentPage, CATEGORY_SLUG);
         console.log('Action movies data:', data);
 
-        if (data && data.status === 'success' && data.data && data.data.items) {
+        if (data && (data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
             const movies = data.data.items;
             console.log('Movies found:', movies.length);
 

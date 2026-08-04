@@ -1,7 +1,7 @@
 // Load and render all movie sections from home API
 async function loadHomeMovies() {
     try {
-        const response = await fetch('https://ophim1.com/v1/api/home', {
+        const response = await movieAPI.fetchWithFallback('/home', {
             method: 'GET',
             headers: { 'accept': 'application/json' }
         });
@@ -9,7 +9,7 @@ async function loadHomeMovies() {
         const data = await response.json();
         console.log('Home API data:', data);
 
-        if (data.status === 'success' && data.data) {
+        if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data) {
             // Home API trả về flat array của movies, không phải sections
             // Chúng ta sẽ group chúng theo category hoặc hiển thị như "Phim Mới Cập Nhật"
             if (Array.isArray(data.data.items) && data.data.items.length > 0) {
@@ -302,14 +302,14 @@ function renderAllSections(sections) {
 // Fallback function - load Vietnamese movies
 async function loadVietnameseMoviesHome() {
     try {
-        const response = await fetch('https://ophim1.com/v1/api/quoc-gia/viet-nam?page=1&limit=20', {
+        const response = await movieAPI.fetchWithFallback('/quoc-gia/viet-nam?page=1&limit=20', {
             method: 'GET',
             headers: { 'accept': 'application/json' }
         });
 
         const data = await response.json();
 
-        if (data.status === 'success' && data.data && data.data.items) {
+        if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
             const movies = data.data.items.slice(0, 20);
             renderVietnameseMovies(movies);
         }
