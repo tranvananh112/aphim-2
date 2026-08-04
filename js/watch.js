@@ -1625,9 +1625,71 @@ function handleStreamError() {
 
     // Trên mobile, hiển thị nút chọn thủ công (không tự nhảy nguồn để tránh lỗi kẹt player)
     if (window.innerWidth <= 768) {
-        console.warn('⚠️ Stream error detected on Mobile. Showing manual server switch suggestion.');
+        console.warn('⚠️ Stream error detected on Mobile.');
+        
+        // Fallback sang iframe nếu có và KHÔNG PHẢI là máy chủ OPhim (tránh lỗi quay vòng vòng của opstream)
+        if (currentEpisode && currentEpisode.link_embed && !currentEpisode.link_embed.includes('opstream')) {
+            console.log('🔄 Mobile native player failed. Falling back to iframe embed:', currentEpisode.link_embed);
+            const playerContainer = document.querySelector('.aspect-video') || document.getElementById('player-container');
+            if (playerContainer) {
+                playerContainer.innerHTML = `
+                    <iframe id="videoIframe" 
+                        src="${currentEpisode.link_embed}" 
+                        class="w-full h-full bg-black border-0" 
+                        allowfullscreen 
+                        allow="autoplay; fullscreen">
+                    </iframe>
+                `;
+                
+                // Mock player to prevent JS errors
+                window.player = {
+                    currentTime: 0, duration: 0, paused: false,
+                    play: async () => {}, pause: () => {},
+                    addEventListener: () => {}, removeEventListener: () => {},
+                    canPlayType: () => false,
+                    requestFullscreen: async () => {
+                        const iframe = document.getElementById('videoIframe');
+                        if (iframe && iframe.requestFullscreen) iframe.requestFullscreen();
+                    }
+                };
+
+                const mobCtrl = document.getElementById('mob-player-ctrl');
+                if (mobCtrl) mobCtrl.style.display = 'none';
+                return;
+            }
+        }
+        
         showError('Không thể phát video từ máy chủ này. Vui lòng thử máy chủ khác.');
         return;
+    }
+
+    // Trên PC: Fallback sang iframe nếu có (không phải opstream)
+    if (currentEpisode && currentEpisode.link_embed && !currentEpisode.link_embed.includes('opstream')) {
+        console.log('🔄 PC native player failed. Falling back to iframe embed:', currentEpisode.link_embed);
+        const playerContainer = document.querySelector('.aspect-video') || document.getElementById('player-container');
+        if (playerContainer) {
+            playerContainer.innerHTML = `
+                <iframe id="videoIframe" 
+                    src="${currentEpisode.link_embed}" 
+                    class="w-full h-full bg-black border-0" 
+                    allowfullscreen 
+                    allow="autoplay; fullscreen">
+                </iframe>
+            `;
+            
+            // Mock player
+            window.player = {
+                currentTime: 0, duration: 0, paused: false,
+                play: async () => {}, pause: () => {},
+                addEventListener: () => {}, removeEventListener: () => {},
+                canPlayType: () => false,
+                requestFullscreen: async () => {
+                    const iframe = document.getElementById('videoIframe');
+                    if (iframe && iframe.requestFullscreen) iframe.requestFullscreen();
+                }
+            };
+            return;
+        }
     }
 
     // Trên PC, tự động nhảy sang máy chủ tiếp theo (giống dự án Node)
