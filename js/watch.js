@@ -3,6 +3,7 @@ let currentMovie = null;
 let currentEpisode = null;
 let player = null;
 let currentServerIndex = 0; // Track the current server index for failover
+let _isInitializingPlayer = false; // Guard: chỉ cho phép 1 lần initializePlayer chạy cùng lúc
 
 document.addEventListener('DOMContentLoaded', async function () {
     const urlParams = new URLSearchParams(window.location.search);
@@ -298,24 +299,8 @@ async function fetchAndMergeSecondaryServers(slug, isPrimary = false, episodeSlu
         if (added > 0) {
             console.log(`✅ Đã thêm ${added} máy chủ mới (Tổng: ${currentMovie.episodes.length} nguồn)`);
             renderServerList(currentMovie.episodes);
-
-            // Tự động chuyển sang server được chỉ định trên URL nếu có (VD: server=1 cho Nguồn 2)
-            const urlParams = new URLSearchParams(window.location.search);
-            const requestedServer = urlParams.get('server');
-            if (requestedServer !== null && !isNaN(requestedServer)) {
-                const reqIdx = parseInt(requestedServer);
-                if (reqIdx >= 0 && reqIdx < currentMovie.episodes.length && reqIdx !== currentServerIndex) {
-                    console.log(`🎯 [Watch] Tự động chuyển sang Nguồn ${reqIdx + 1} theo đúng yêu cầu trên URL (server=${reqIdx})`);
-                    changeServer(reqIdx);
-                    return;
-                }
-            }
-
-            // Cập nhật màn hình 404 nếu player đang trong trạng thái báo lỗi link
-            const catLottie = document.querySelector('.aspect-video dotlottie-wc');
-            if (catLottie) {
-                showError('Máy chủ 1 không tìm thấy link phim.');
-            }
+            // ❌ KHÔNG tự động gọi changeServer hay initializePlayer ở đây
+            // → tránh gọi player nhiều lần gây xung đột luồng video
         }
     } catch (err) {
         console.warn('⚠️ Nguồn phụ thất bại:', err.message);
@@ -1308,6 +1293,14 @@ function renderEpisodeList(episodes) {
 
 // Initialize video player
 function initializePlayer(episode) {
+    // Guard: nếu đang trong quá trình khởi tạo, bỏ qua lần gọi này
+    if (_isInitializingPlayer) {
+        console.warn('⚠️ initializePlayer đang chạy, bỏ qua lần gọi trùng lặp.');
+        return;
+    }
+    _isInitializingPlayer = true;
+    setTimeout(() => { _isInitializingPlayer = false; }, 5000);
+
     console.log('🎥 Initializing player with episode:', episode);
 
     if (!episode) {
@@ -1379,7 +1372,7 @@ function initializePlayer(episode) {
         // Hide mobile overlay controls since iframe has its own
         const mobCtrl = document.getElementById('mob-player-ctrl');
         if (mobCtrl) mobCtrl.style.display = 'none';
-        
+        _isInitializingPlayer = false; // Reset guard
         return; // Skip HLS setup
     }
 
@@ -1613,8 +1606,14 @@ function initializePlayer(episode) {
 
     player.addEventListener('error', (e) => {
         console.error('❌ Video element error:', e);
+        _isInitializingPlayer = false; // Reset guard khi lỗi
         handleStreamError();
     });
+    
+    // Reset guard sau khi player bắt đầu load thành công
+    player.addEventListener('loadstart', () => {
+        _isInitializingPlayer = false;
+    }, { once: true });
 }
 
 // Server error handler - show manual switch suggestion (NO auto-switch)
