@@ -1292,8 +1292,7 @@ function renderEpisodeList(episodes) {
 }
 
 // Initialize video player
-function initializePlayer(episode, forceEmbed = false) {
-    if (!forceEmbed) window._hasFallenBackToEmbed = false;
+function initializePlayer(episode) {
     // Guard: nếu đang trong quá trình khởi tạo, bỏ qua lần gọi này
     if (_isInitializingPlayer) {
         console.warn('⚠️ initializePlayer đang chạy, bỏ qua lần gọi trùng lặp.');
@@ -1314,7 +1313,7 @@ function initializePlayer(episode, forceEmbed = false) {
     const movieLinks = JSON.parse(localStorage.getItem('movieLinks') || '{}');
     const customLink = movieLinks[currentMovie.slug];
 
-    let videoUrl = customLink || (forceEmbed ? episode.link_embed : (episode.link_m3u8 || episode.link_embed));
+    let videoUrl = customLink || episode.link_m3u8 || episode.link_embed;
 
     if (!videoUrl) {
         console.error('❌ No video link found in episode:', episode);
@@ -1342,7 +1341,7 @@ function initializePlayer(episode, forceEmbed = false) {
     // Load watch progress
     const progress = userService.getWatchProgress(currentMovie.slug, episode.slug);
 
-    const isEmbed = forceEmbed || (!episode.link_m3u8 && episode.link_embed);
+    const isEmbed = !episode.link_m3u8 && episode.link_embed;
 
     if (isEmbed) {
         playerContainer.innerHTML = `
@@ -1619,21 +1618,6 @@ function initializePlayer(episode, forceEmbed = false) {
 
 // Server error handler
 function handleStreamError() {
-    // 1. Thử dùng link_embed nội bộ nếu m3u8 bị chết 404 (Ví dụ: phim Đặc Vụ Kim Tái Khởi Động)
-    if (currentEpisode && currentEpisode.link_m3u8 && currentEpisode.link_embed) {
-        if (!window._hasFallenBackToEmbed) {
-            console.warn('⚠️ m3u8 failed (404/Network). Thử dùng iframe embed của cùng máy chủ...');
-            window._hasFallenBackToEmbed = true;
-            _isInitializingPlayer = false; // Bỏ qua guard để cho phép gọi lại ngay lập tức
-            
-            showSeekOverlay('Đang tải máy chủ dự phòng nội bộ...', true);
-            setTimeout(() => {
-                initializePlayer(currentEpisode, true);
-            }, 800);
-            return;
-        }
-    }
-
     if (!currentMovie || !currentMovie.episodes || currentMovie.episodes.length <= 1) {
         showError('Không thể phát video từ máy chủ này. Vui lòng thử lại sau.');
         return;
