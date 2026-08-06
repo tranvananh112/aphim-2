@@ -18,10 +18,14 @@
     <!-- 🚀 TURBO LOAD — Preconnect ngay lập tức để giảm độ trễ mạng -->
     <link rel="preconnect" href="https://phimapi.com" crossorigin>
     <link rel="preconnect" href="https://phimimg.com" crossorigin>
+    <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://phimapi.com">
     <link rel="dns-prefetch" href="https://phimimg.com">
+    <link rel="dns-prefetch" href="https://image.tmdb.org">
+    <link rel="dns-prefetch" href="https://api.themoviedb.org">
+    <link rel="dns-prefetch" href="https://corsproxy.io">
 
 
     <script src="js/chat-init-guard.js?v=37" fetchpriority="high"></script>
@@ -1892,7 +1896,9 @@
     <div class="aphim-inline-ad">
         <span class="aphim-inline-ad-label">Quảng cáo</span>
         <div class="aphim-inline-ad-inner">
-
+            <a class="aphim-inline-ad-item" href="https://8svui.com" target="_blank" rel="noopener nofollow" aria-label="8SVui">
+                <video src="/quangcao/8svui/8svui.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; height:100%; object-fit:fill; display:block; pointer-events:none;"></video>
+            </a>
             <a class="aphim-inline-ad-item" href="https://vsbet276.com/p/BSYk" target="_blank" rel="noopener nofollow" aria-label="VSBet">
                 <img src="/ads/catfish/728x90-AFF-Cup.gif" alt="VSBet" loading="lazy">
             </a>
@@ -2387,6 +2393,7 @@
             try {
                 await loadLatestMovies();
                 await loadActionMovies();
+                if (typeof loadVietnameseMoviesHome === 'function') await loadVietnameseMoviesHome();
                 if (typeof loadHomeMovies === 'function') await loadHomeMovies();
                 if (typeof loadTopMovies === 'function') loadTopMovies();
                 if (typeof loadComingSoonMovies === 'function') loadComingSoonMovies();
@@ -2475,7 +2482,7 @@
         // Call them
         loadCategoryToContainer('hai-huoc', 'comedyContainer', 'comedyLoading');
         loadCategoryToContainer('tinh-cam', 'romanceContainer', 'romanceLoading');
-        loadCategoryToContainer('short-drama', 'dramaContainer', 'dramaLoading');
+        loadCategoryToContainer('chinh-kich', 'dramaContainer', 'dramaLoading');
 
         // Load Animation Movies (Hoạt Hình)
         async function loadAnimationMovies() {

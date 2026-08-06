@@ -12,13 +12,13 @@ class ImageOptimizer {
 
     // Optimize image URL with CDN parameters
             optimizeImageUrl(url, width = 400, quality = 80, isPriority = false) {
-        if (!url) return 'https://via.placeholder.com/400x600?text=No+Image';
+        if (!url) return 'https://placehold.co/400x600?text=No+Image';
         
         let resolvedUrl = url;
         if (!resolvedUrl.startsWith('http')) {
             resolvedUrl = "https://phimimg.com/" + resolvedUrl.replace(/^\//, '');
         }
-        if (resolvedUrl.includes('phimimg.com')) {
+        if (resolvedUrl.includes('phimimg.com') || resolvedUrl.includes('tmdb.org')) {
             return resolvedUrl;
         }
 
@@ -53,7 +53,7 @@ class ImageOptimizer {
     }
 
     getProgressiveUrls(url) {
-        if (!url) return { placeholder: null, full: 'https://via.placeholder.com/400x600?text=No+Image' };
+        if (!url) return { placeholder: null, full: 'https://placehold.co/400x600?text=No+Image' };
 
         let full = url;
         if (!full.startsWith('http')) {
@@ -218,7 +218,7 @@ class ImageOptimizer {
                 class="img-progressive img-loading ${extraClasses}"
                 data-original-src="${originalUrl}"
                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
-                onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'"
+                onerror="this.src='https://placehold.co/400x600?text=No+Image'"
                 ${extraAttrs}
             />`;
         } else {
@@ -227,7 +227,7 @@ class ImageOptimizer {
                 alt="${altText}"
                 class="img-progressive img-desktop ${extraClasses}"
                 src="${originalUrl}"
-                onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'"
+                onerror="this.src='https://placehold.co/400x600?text=No+Image'"
                 loading="lazy"
                 ${extraAttrs}
             />`;
