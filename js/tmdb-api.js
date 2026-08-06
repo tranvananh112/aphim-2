@@ -308,7 +308,7 @@ async function getHeroImagesFromTMDB(movie) {
 
         // Ưu tiên tải ảnh từ PhimAPI images endpoint vì rất nhanh và chính xác
         try {
-            const imagesUrl = `https://phimapi.com/v1/api/phim/${movie.slug}/images`;
+            const imagesUrl = `https://ophim1.com/v1/api/phim/${movie.slug}/images`;
             const response = await fetch(imagesUrl);
             if (response.ok) {
                 const json = await response.json();

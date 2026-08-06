@@ -39,10 +39,10 @@ const API_CONFIG = {
     BACKEND_URL: chosenBackend + '/api',
 
     // Default Ophim API (primary)
-    OPHIM_URL: 'https://phimapi.com/v1/api',
+    OPHIM_URL: 'https://ophim1.com/v1/api',
 
     // Default Ophim17 API (secondary - mirror)
-    OPHIM17_URL: 'https://phimapi.com',
+    OPHIM17_URL: 'https://ophim1.com',
 
     // Backup PhimAPI (unblocked mirror)
     
@@ -78,7 +78,7 @@ try {
         if (cachedContent.apiBase && !cachedContent.apiBase.includes('apii.online')) {
             API_CONFIG.OPHIM_URL = cachedContent.apiBase;
         } else {
-            API_CONFIG.OPHIM_URL = 'https://phimapi.com/v1/api';
+            API_CONFIG.OPHIM_URL = 'https://ophim1.com/v1/api';
             // Clear broken cached apiBase
             delete cachedContent.apiBase;
             localStorage.setItem('cinestream_public_settings', JSON.stringify(cachedContent));
@@ -106,8 +106,8 @@ try {
         if (data && data.success && data.data) {
             const { content, general } = data.data;
             let configMap = {
-                apiBase: (content?.apiBase && !content.apiBase.includes('apii.online')) ? content.apiBase : 'https://phimapi.com/v1/api',
-                apiSecondary: (content?.apiSecondary && !content.apiSecondary.includes('apii.online')) ? content.apiSecondary : 'https://phimapi.com',
+                apiBase: (content?.apiBase && !content.apiBase.includes('apii.online')) ? content.apiBase : 'https://ophim1.com/v1/api',
+                apiSecondary: (content?.apiSecondary && !content.apiSecondary.includes('apii.online')) ? content.apiSecondary : 'https://ophim1.com',
                 enableMultipleSources: content?.enableMultipleSources,
                 enableWatermark: content?.enableWatermark,
                 watermarkUrl: content?.watermarkUrl,
