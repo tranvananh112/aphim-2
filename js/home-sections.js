@@ -53,7 +53,7 @@ async function loadHomeMovies() {
                     renderAllSections(data.data.sections);
                 } else {
                     // Fallback render flat list if no sections
-                    // renderLatestMoviesSection(movies);
+                    renderLatestMoviesSection(movies);
                 }
 
                 // Load Vietnamese movies separately

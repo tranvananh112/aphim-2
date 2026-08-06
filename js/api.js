@@ -69,7 +69,7 @@ class MovieAPI {
             `https://phimapi.com/v1/api${basePath}${paramStr}`
         ];
 
-        if (basePath.includes('phim-moi-cap-nhat') || basePath === '/home') {
+        if (basePath.includes('phim-moi-cap-nhat')) {
             urlsToTry.unshift(`/v1/api/danh-sach/phim-moi-cap-nhat${paramStr}`);
             urlsToTry.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
             urlsToTry.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
