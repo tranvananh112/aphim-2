@@ -64,7 +64,7 @@ function renderTopMovies(movies) {
 
     container.innerHTML = movies.map((movie, index) => {
         const rank = index + 1;
-        const optimizedUrl = movieAPI.getImageURL(movie.thumb_url || movie.poster_url, 400, 80);
+        const optimizedUrl = movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 400, 80);
         const detailUrl = `movie-detail.html?slug=${movie.slug}`;
         
         // Rating & Stars

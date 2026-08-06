@@ -200,7 +200,7 @@ async function loadMovies() {
 // Render Movies
 function renderMovies(movies) {
     moviesGrid.innerHTML = movies.map(movie => {
-        const rawImg = movie.thumb_url || movie.poster_url || '';
+        const rawImg = movie.poster_url || movie.thumb_url || '';
         const posterUrl = (typeof imageOptimizer !== 'undefined' && rawImg)
             ? imageOptimizer.optimizeImageUrl(rawImg, 400, 80)
             : (rawImg.startsWith('http') ? rawImg : (rawImg ? `https://phimimg.com/${rawImg}` : 'https://via.placeholder.com/300x450?text=No+Image'));
