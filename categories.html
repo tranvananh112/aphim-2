@@ -712,7 +712,7 @@
 
                     if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items && data.data.items.length > 0) {
                         const movie = data.data.items[0];
-                        const posterUrl = movie.thumb_url ? `https://img.ophim.live/uploads/movies/${movie.thumb_url}` : null;
+                        const posterUrl = movie.thumb_url ? `https://phimimg.com/${movie.thumb_url}` : null;
                         return { ...category, posterUrl };
                     }
                     return { ...category, posterUrl: null };
@@ -850,7 +850,7 @@
                     posterUrl = rawImg;
                 } else {
                     const filename = rawImg.replace(/^uploads\/movies\//, '');
-                    posterUrl = `https://img.ophim.live/uploads/movies/${filename}`;
+                    posterUrl = `https://phimimg.com/${filename}`;
                 }
                 const year = movie.year || 'N/A';
                 const quality = movie.quality || movie.lang || '';

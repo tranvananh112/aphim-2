@@ -12,8 +12,8 @@ const axiosInstance = axios.create({
 class OphimService {
     constructor() {
         // Use HTTP instead of HTTPS to avoid SSL issues
-        this.baseURL = process.env.OPHIM_API_URL || 'https://ophim1.com';
-        this.cdnImage = process.env.OPHIM_CDN_IMAGE || 'https://img.ophim.live';
+        this.baseURL = process.env.OPHIM_API_URL || 'https://phimapi.com';
+        this.cdnImage = process.env.OPHIM_CDN_IMAGE || 'https://phimimg.com';
     }
 
     // Fetch movie list from Ophim API

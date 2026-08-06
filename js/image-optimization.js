@@ -11,17 +11,17 @@ class ImageOptimizer {
     }
 
     // Optimize image URL with CDN parameters
-        optimizeImageUrl(url, width = 400, quality = 80, isPriority = false) {
+            optimizeImageUrl(url, width = 400, quality = 80, isPriority = false) {
         if (!url) return 'https://via.placeholder.com/400x600?text=No+Image';
         
         let resolvedUrl = url;
         if (!resolvedUrl.startsWith('http')) {
-            if (resolvedUrl.startsWith('uploads/movies/')) {
-                resolvedUrl = "https://img.ophim.live/" + resolvedUrl;
-            } else {
-                resolvedUrl = "https://img.ophim.live/uploads/movies/" + resolvedUrl;
-            }
+            resolvedUrl = "https://phimimg.com/" + resolvedUrl.replace(/^\//, '');
         }
+        if (resolvedUrl.includes('phimimg.com')) {
+            return resolvedUrl;
+        }
+
 
         if (!resolvedUrl.includes('localhost') && !resolvedUrl.includes('127.0.0.1')) {
             let targetWidth = width;
@@ -57,7 +57,7 @@ class ImageOptimizer {
 
         let full = url;
         if (!full.startsWith('http')) {
-            full = "https://img.ophim.live/uploads/movies/" + full;
+            full = "https://phimimg.com/" + full.replace(/^\//, "");
         }
 
         if ((typeof this.isMobile !== 'undefined' && !this.isMobile) || (!full.includes('ophim') && !full.includes('opstream'))) {

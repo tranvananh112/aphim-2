@@ -23,8 +23,8 @@ app.get('/proxy', async (req, res) => {
             responseType: 'stream',
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Referer': 'https://ophim1.com/',
-                'Origin': 'https://ophim1.com'
+                'Referer': 'https://phimapi.com/',
+                'Origin': 'https://phimapi.com'
             }
         });
 

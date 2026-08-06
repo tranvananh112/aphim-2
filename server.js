@@ -54,7 +54,7 @@ app.get('/', async (req, res) => {
         movies = response.data && response.data.items ? response.data.items : (response.data && response.data.data ? response.data.data.items || [] : []);
     } catch (e) {
         try {
-            const response2 = await axios.get('https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=1', { timeout: 5000 });
+            const response2 = await axios.get('https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1', { timeout: 5000 });
             movies = response2.data && response2.data.items ? response2.data.items : (response2.data && response2.data.data ? response2.data.data.items || [] : []);
         } catch (err) {
             console.error('Lỗi lấy dữ liệu trang chủ:', err.message);
@@ -80,7 +80,7 @@ app.get('/phim/:slug', async (req, res) => {
         return res.redirect(301, cleanUrl);
     }
     try {
-        const response = await axios.get(`https://ophim1.com/phim/${slug}`, { timeout: 5000 });
+        const response = await axios.get(`https://phimapi.com/phim/${slug}`, { timeout: 5000 });
         const data = response.data;
 
         if (data && data.status && data.movie) {
@@ -109,7 +109,7 @@ app.get('/phim/:slug', async (req, res) => {
             desc = desc.substring(0, 155);
 
             const img = movie.thumb_url
-                ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://img.ophim.live/uploads/movies/' + movie.thumb_url)
+                ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://phimimg.com/' +  movie.thumb_url)
                 : 'https://aphim.top/android-chrome-512x512.png';
             const pageUrl = `https://aphim.top/phim/${slug}`;
 
@@ -176,7 +176,7 @@ app.get('/xem-phim/:slug/:episode?', async (req, res) => {
         return res.redirect(301, `/xem-phim/${slug}/tap-${ep}`);
     }
     try {
-        const response = await axios.get(`https://ophim1.com/phim/${slug}`, { timeout: 5000 });
+        const response = await axios.get(`https://phimapi.com/phim/${slug}`, { timeout: 5000 });
         const data = response.data;
         const movie = data && data.movie ? data.movie : null;
         const episodes = data && data.episodes ? data.episodes : [];
@@ -193,7 +193,7 @@ app.get('/xem-phim/:slug/:episode?', async (req, res) => {
             
             title = `Xem Phim ${name} ${currentEpStr} - Vietsub Thuyết Minh HD ${year}`;
             metaDescription = `Xem phim ${name} ${currentEpStr} Vietsub Thuyết Minh Full HD trực tuyến. Xem ngay không quảng cáo, tải trang siêu tốc tại APhim.`;
-            ogImage = movie.thumb_url ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://img.ophim.live/uploads/movies/' + movie.thumb_url) : ogImage;
+            ogImage = movie.thumb_url ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://phimimg.com/' +  movie.thumb_url) : ogImage;
         }
 
         res.render('watch', {
@@ -398,7 +398,7 @@ app.get('/sitemap-images.xml', async (req, res) => {
 
         await Promise.all(pages.map(async (page) => {
             try {
-                const r = await axios.get('https://ophim1.com/v1/api/danh-sach/phim-moi-cap-nhat?page=' + page, { timeout: 6000 });
+                const r = await axios.get('https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=' + page, { timeout: 6000 });
                 if (r.data && r.data.data && r.data.data.items) {
                     allMovies.push(...r.data.data.items);
                 }
@@ -410,10 +410,10 @@ app.get('/sitemap-images.xml', async (req, res) => {
             const name = (movie.name || '').replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
             const pageUrl = 'https://aphim.top/phim/' + slug;
             const thumb = movie.thumb_url
-                ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://img.ophim.live/uploads/movies/' + movie.thumb_url)
+                ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://phimimg.com/' +  movie.thumb_url)
                 : '';
             const poster = movie.poster_url
-                ? (movie.poster_url.startsWith('http') ? movie.poster_url : 'https://img.ophim.live/uploads/movies/' + movie.poster_url)
+                ? (movie.poster_url.startsWith('http') ? movie.poster_url : 'https://phimimg.com/' +  movie.poster_url)
                 : '';
 
             let imageEntries = '';
@@ -465,15 +465,15 @@ app.use('/v1/api', async (req, res) => {
     if (!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
     
     const targets = [
-        `https://ophim1.com/v1/api${cleanPath}`,
+        `https://phimapi.com/v1/api${cleanPath}`,
         `https://phimapi.com/v1/api${cleanPath}`,
         `https://phimapi.com${cleanPath}`,
-        `https://ophim17.cc/v1/api${cleanPath}`,
-        `https://ophim10.cc/v1/api${cleanPath}`
+        `https://phimapi.com/v1/api${cleanPath}`,
+        `https://phimapi.com/v1/api${cleanPath}`
     ];
 
     if (cleanPath.includes('phim-moi-cap-nhat') || cleanPath.includes('home')) {
-        targets.unshift(`https://ophim1.com/danh-sach/phim-moi-cap-nhat`);
+        targets.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat`);
         targets.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat`);
     }
 
@@ -547,7 +547,7 @@ app.get(['/api/isports/schedule', '/v1/api/isports/schedule'], async (req, res) 
 
 // ==========================================
 // VSMOV PROXY: Fetch episodes từ nguồn phụ (server-side, tránh CORS)
-// GET /api/vsmov/:slug → thử phimapi.com, nguonc.com, rồi ophim1.com
+// GET /api/vsmov/:slug → thử phimapi.com, nguonc.com, rồi phimapi.com
 // ==========================================
 const vsmovCache = new Map();
 const VSMOV_CACHE_TTL = 5 * 60 * 1000; // 5 phút
@@ -601,7 +601,7 @@ app.get('/api/vsmov/:slug', async (req, res) => {
             }
         },
         {
-            url: `https://ophim1.com/phim/${slug}`,
+            url: `https://phimapi.com/phim/${slug}`,
             parse: d => ({
                 episodes: d?.data?.item?.episodes || d?.movie?.episodes,
                 movie: d?.data?.item || d?.movie

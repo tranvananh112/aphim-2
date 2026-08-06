@@ -84,7 +84,7 @@ const stripHtml = (html) => html ? html.replace(/<[^>]*>?/gm, '').trim() : '';
             console.log(`🔍 Bỏ qua quét tự động, đi tìm trực tiếp phim: ${targetSlug}`);
         }
         try {
-            const detailRes = await axios.get(`https://ophim1.com/phim/${targetSlug}`, { timeout: 10000 });
+            const detailRes = await axios.get(`https://phimapi.com/phim/${targetSlug}`, { timeout: 10000 });
             if (detailRes.data && detailRes.data.status) {
                 const m = detailRes.data.movie;
                 const eps = detailRes.data.episodes;
@@ -132,7 +132,7 @@ const stripHtml = (html) => html ? html.replace(/<[^>]*>?/gm, '').trim() : '';
         try {
             console.log('🔍 Bước 1: Quét danh sách phim mới từ trang 1 đến 5...');
             for (let page = 1; page <= 5; page++) {
-                const r = await axios.get(`https://ophim1.com/v1/api/danh-sach/phim-moi-cap-nhat?page=${page}`, { timeout: 15000 });
+                const r = await axios.get(`https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=${page}`, { timeout: 15000 });
                 if (r.data && r.data.data && r.data.data.items) {
                     for (const item of r.data.data.items) {
                         if (!newSlugs.includes(item.slug)) {
@@ -162,7 +162,7 @@ const stripHtml = (html) => html ? html.replace(/<[^>]*>?/gm, '').trim() : '';
         console.log(`\n🔍 Bước 2: Phân tích chỉ số IMDb và Lượt Xem (Views) cho ${unpostedSlugs.length} phim để tìm TRENDING...`);
         for (const slug of unpostedSlugs) {
             try {
-                const detailRes = await axios.get(`https://ophim1.com/phim/${slug}`, { timeout: 10000 });
+                const detailRes = await axios.get(`https://phimapi.com/phim/${slug}`, { timeout: 10000 });
                 const m = detailRes.data.movie;
                 const eps = detailRes.data.episodes;
                 
@@ -318,8 +318,8 @@ Yêu cầu bắt buộc:
 
         // Shared browser headers cho mọi CDN request
         const m3u8Headers = [
-            `Referer: https://ophim1.com/`,
-            `Origin: https://ophim1.com`,
+            `Referer: https://phimapi.com/`,
+            `Origin: https://phimapi.com`,
             `Accept: */*`,
             `Accept-Language: vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7`,
             `Connection: keep-alive`
@@ -340,8 +340,8 @@ Yêu cầu bắt buộc:
                 lib.get(movie.m3u8Link, {
                     headers: {
                         'User-Agent': UA,
-                        'Referer': 'https://ophim1.com/',
-                        'Origin': 'https://ophim1.com'
+                        'Referer': 'https://phimapi.com/',
+                        'Origin': 'https://phimapi.com'
                     },
                     timeout: 8000
                 }, (res) => {
@@ -423,8 +423,8 @@ Yêu cầu bắt buộc:
             try {
                 execSync(
                     `yt-dlp --no-check-certificates ` +
-                    `--add-header "Referer:https://ophim1.com/" ` +
-                    `--add-header "Origin:https://ophim1.com" ` +
+                    `--add-header "Referer:https://phimapi.com/" ` +
+                    `--add-header "Origin:https://phimapi.com" ` +
                     `--add-header "User-Agent:${UA}" ` +
                     `--add-header "Accept:*/*" ` +
                     `--add-header "Accept-Language:vi-VN,vi;q=0.9" ` +
@@ -459,8 +459,8 @@ Yêu cầu bắt buộc:
             try {
                 execSync(
                     `yt-dlp --no-check-certificates ` +
-                    `--add-header "Referer:https://ophim1.com/" ` +
-                    `--add-header "Origin:https://ophim1.com" ` +
+                    `--add-header "Referer:https://phimapi.com/" ` +
+                    `--add-header "Origin:https://phimapi.com" ` +
                     `--add-header "User-Agent:${UA}" ` +
                     `--add-header "Accept:*/*" ` +
                     `--add-header "Accept-Language:vi-VN,vi;q=0.9" ` +

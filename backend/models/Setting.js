@@ -1,9 +1,9 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const SettingSchema = new mongoose.Schema({
     general: {
         siteName: { type: String, default: 'A Phim' },
-        siteDesc: { type: String, default: 'Nền tảng xem phim trực tuyến hàng đầu Việt Nam' },
+        siteDesc: { type: String, default: 'N?n t?ng xem phim tr?c tuy?n h�ng d?u Vi?t Nam' },
         siteDomain: { type: String, default: 'APhim.vn' },
         siteEmail: { type: String, default: 'admin@APhim.vn' },
         logoUrl: { type: String, default: '../apple-touch-icon.png' },
@@ -27,12 +27,12 @@ const SettingSchema = new mongoose.Schema({
     content: {
         enablePhimX: { type: Boolean, default: false },
         enableWatermark: { type: Boolean, default: true },
-        watermarkUrl: { type: String, default: 'https://ophim1.com/logo.png' },
-        autoplayDelay: { type: String, default: '5 giây' },
+        watermarkUrl: { type: String, default: 'https://phimapi.com/logo.png' },
+        autoplayDelay: { type: String, default: '5 gi�y' },
         defaultServer: { type: String, default: 'Server #1 (OPhim)' },
         proxyUrl: { type: String, default: '' },
-        apiBase: { type: String, default: 'https://ophim1.com/v1/api' },
-        apiSecondary: { type: String, default: 'https://ophim17.cc/_next/data/9QkyZ8-jLzIfTtyR2y41x' },
+        apiBase: { type: String, default: 'https://phimapi.com/v1/api' },
+        apiSecondary: { type: String, default: 'https://phimapi.com/_next/data/9QkyZ8-jLzIfTtyR2y41x' },
         enableMultipleSources: { type: Boolean, default: false },
         heroThumbnails: { type: [Object], default: [] },
         categoryBackgrounds: {

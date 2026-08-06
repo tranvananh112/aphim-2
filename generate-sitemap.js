@@ -15,7 +15,7 @@ const fs = require('fs');
         
         await Promise.all(batch.map(async (page) => {
             try {
-                const r = await axios.get('https://ophim1.com/v1/api/danh-sach/phim-moi-cap-nhat?page=' + page, { timeout: 15000 });
+                const r = await axios.get('https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=' + page, { timeout: 15000 });
                 if (r.data && r.data.data && r.data.data.items) {
                     allMovies.push(...r.data.data.items);
                     console.log('Page ' + page + ' done: ' + r.data.data.items.length + ' movies');
@@ -45,10 +45,10 @@ const fs = require('fs');
             .replace(/"/g,'&quot;');
         const pageUrl = 'https://aphim.io.vn/movie-detail.html?slug=' + slug;
         const thumb = movie.thumb_url
-            ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://img.ophim.live/uploads/movies/' + movie.thumb_url)
+            ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : 'https://phimimg.com/' +  movie.thumb_url)
             : '';
         const poster = movie.poster_url
-            ? (movie.poster_url.startsWith('http') ? movie.poster_url : 'https://img.ophim.live/uploads/movies/' + movie.poster_url)
+            ? (movie.poster_url.startsWith('http') ? movie.poster_url : 'https://phimimg.com/' +  movie.poster_url)
             : '';
         
         let imgs = '';

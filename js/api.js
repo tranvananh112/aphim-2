@@ -1,4 +1,4 @@
-// API Service for ophim17.cc and Backend
+// API Service for phimapi.com and Backend
 class MovieAPI {
     constructor() {
         this.useBackend = API_CONFIG.USE_BACKEND_FOR_MOVIES || false;
@@ -44,7 +44,7 @@ class MovieAPI {
         };
     }
 
-    // Wrapper to fetch from primary OPhim URL or fallback OPhim mirrors (ophim1.com -> ophim17.cc -> ophim10.cc)
+    // Wrapper to fetch from primary OPhim URL or fallback OPhim mirrors (phimapi.com -> phimapi.com -> phimapi.com)
     async fetchWithFallback(endpoint, options = {}) {
         let cleanEndpoint = endpoint || '';
         if (cleanEndpoint.startsWith('http')) {
@@ -64,15 +64,15 @@ class MovieAPI {
         let urlsToTry = [
             `/v1/api${basePath}${paramStr}`,
             `https://phimapi.com${basePath}${paramStr}`,
-            `https://ophim1.com/v1/api${basePath}${paramStr}`,
-            `https://ophim17.cc/v1/api${basePath}${paramStr}`,
-            `https://ophim10.cc/v1/api${basePath}${paramStr}`
+            `https://phimapi.com/v1/api${basePath}${paramStr}`,
+            `https://phimapi.com/v1/api${basePath}${paramStr}`,
+            `https://phimapi.com/v1/api${basePath}${paramStr}`
         ];
 
         if (basePath.includes('phim-moi-cap-nhat') || basePath === '/home') {
             urlsToTry.unshift(`/v1/api/danh-sach/phim-moi-cap-nhat${paramStr}`);
             urlsToTry.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
-            urlsToTry.unshift(`https://ophim1.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
+            urlsToTry.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
         }
 
         const uniqueUrls = Array.from(new Set(urlsToTry.filter(Boolean)));
@@ -403,8 +403,8 @@ class MovieAPI {
         // Use imageOptimizer.resolveUrl if available — it handles all prefix cases correctly
         let fullUrl = imagePath;
         if (!imagePath.startsWith('http')) {
-            const filename = imagePath.replace(/^uploads\/movies\//, '');
-            fullUrl = `${API_CONFIG.IMAGE_BASE || 'https://img.ophim.live/uploads/movies/'}${filename}`;
+            const filename = imagePath.replace(/^\//, "");
+            fullUrl = `${API_CONFIG.IMAGE_BASE || 'https://phimimg.com/'}${filename}`;
         }
 
         // Use imageOptimizer for advanced compression and caching

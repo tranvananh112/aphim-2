@@ -3,7 +3,7 @@ const fs = require('fs');
 
 // Constants
 const POSTED_MOVIES_FILE = 'posted-movies.json';
-const API_URL = 'https://ophim1.com/v1/api/danh-sach/phim-moi-cap-nhat?page=1';
+const API_URL = 'https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1';
 const FB_PAGE_TOKEN = process.env.FB_PAGE_TOKEN;
 const COMPOSIO_API_KEY = process.env.COMPOSIO_API_KEY;
 
@@ -149,7 +149,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
         try {
             console.log(`Fetching details for: ${slug}...`);
             // Fetch detailed movie info to get content and categories
-            const detailRes = await axios.get(`https://ophim1.com/phim/${slug}`, { timeout: 10000 });
+            const detailRes = await axios.get(`https://phimapi.com/phim/${slug}`, { timeout: 10000 });
             const mDetail = detailRes.data.movie;
             
             const name = mDetail.name || mDetail.origin_name;
