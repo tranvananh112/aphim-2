@@ -46,16 +46,7 @@
 
         container.innerHTML = movies.map((movie, index) => {
             const rank = index + 1;
-            const thumb = movie.thumb_url || '';
-            const poster = movie.poster_url || '';
-            
-            const posterUrl = thumb ? 
-                (thumb.startsWith('http') ? thumb : `https://phimimg.com/${thumb}`) : 
-                (poster ? (poster.startsWith('http') ? poster : `https://phimimg.com/${poster}`) : '');
-                
-            const optimizedUrl = (typeof imageOptimizer !== 'undefined' && (thumb || poster)) ? 
-                imageOptimizer.optimizeImageUrl(thumb || poster, 400, 80) : posterUrl;
-            
+            const optimizedUrl = movieAPI.getImageURL(movie.thumb_url || movie.poster_url, 400, 80);
             const detailUrl = `movie-detail.html?slug=${movie.slug}`;
             const episodes = movie.episode_current || '';
             
