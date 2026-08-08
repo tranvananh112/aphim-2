@@ -397,10 +397,9 @@
             style="animation: ap-modal-slidein 0.35s cubic-bezier(0.34,1.56,0.64,1);">
             <!-- N�t d�ng trang -->
             <a href="index.html" class="page-close-btn" title="Quay lại"
-                onclick="if(window.history.length > 1 && document.referrer.includes(window.location.host)) { window.history.back(); return false; }">?</a>
+                onclick="if(window.history.length > 1 && document.referrer.includes(window.location.host)) { window.history.back(); return false; }">&times;</a>
             <!-- Left Panel -->
-            <div id="auth-left-panel"
-                class="hidden sm:flex flex-col items-center justify-end w-[280px] shrink-0 p-8 pt-10 rounded-l-[20px] relative overflow-hidden transition-all duration-500 ease-in-out">
+            <div id="auth-left-panel" class="hidden sm:flex flex-col items-center justify-end w-[280px] shrink-0 p-8 pt-10 rounded-l-[20px] relative overflow-hidden transition-all duration-500 ease-in-out" style="background: linear-gradient(to right, rgba(15,15,30,1) 0%, rgba(15,15,30,0) 100%), url('https://image.tmdb.org/t/p/original/8b8R8l88Qje9dn9OE8Ez05N5cKk.jpg') center / cover no-repeat;">
                 <div class="relative z-10 flex flex-col items-center gap-2.5">
                     <div
                         class="w-[52px] h-[52px] rounded-full border-2 border-primary overflow-hidden bg-black flex items-center justify-center shadow-lg">
@@ -764,7 +763,7 @@
     <script src="js/nav-active-indicator.js?v=13"></script>
 
     <!-- ====== APhim Catfish Banner + Popup ====== -->
-    <link rel="stylesheet" href="/css/catfish-banner.css?v=17">
+    <link rel="stylesheet" href="/css/catfish-banner.css?v=19">
     <link rel="stylesheet" href="/css/inline-ad.css?v=15">
     <script src="/js/catfish-banner.js?v=18" defer></script>
     <!-- ====== End Catfish Banner ====== -->
@@ -846,7 +845,39 @@
 
     <script src="js/bottom-nav.js?v=1783518514278" defer></script>
 <script src="js/movie-slider.js"></script>
-</body>
+
+    <!-- Dynamic Auth Background Script -->
+    <script>
+        setTimeout(async () => {
+            try {
+                const res = await fetch('https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=1');
+                const data = await res.json();
+                if (data?.items?.length > 0) {
+                    let bestMovie = data.items[0];
+                    for (const item of data.items) {
+                        if ((item.tmdb?.vote_average || 0) > (bestMovie.tmdb?.vote_average || 0)) {
+                            bestMovie = item;
+                        }
+                    }
+                    const imgPath = bestMovie.poster_url || bestMovie.thumb_url;
+                    let url = 'https://image.tmdb.org/t/p/w780/8b8R8l88Qje9dn9OE8Ez05N5cKk.jpg';
+                    if (imgPath) {
+                        url = `https://img.ophimimg.com/uploads/movies/${imgPath}`;
+                    }
+                    if (url) {
+                        const bgEl = document.getElementById('auth-left-panel') || document.getElementById('dynamic-auth-bg');
+                        if (bgEl) {
+                            bgEl.style.backgroundImage = `linear-gradient(to bottom, rgba(15,15,30,0.15) 0%, rgba(15,15,30,0.95) 100%), url('${url}')`;
+                            bgEl.style.backgroundPosition = 'center';
+                            bgEl.style.backgroundSize = 'cover';
+                            bgEl.style.backgroundRepeat = 'no-repeat';
+                        }
+                    }
+                }
+            } catch(e) {}
+        }, 100);
+    </script>
+\n</body>
 
 </html>
 

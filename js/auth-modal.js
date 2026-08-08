@@ -1,11 +1,11 @@
 ﻿/**
  * A PHIM - Auth Modal (Login / Register)
- * Hi?n popup dang nh?p / dang k� ngay t?i trang m� kh�ng redirect
+ * Hiện popup đăng nhập / đăng ký ngay tại trang mà không redirect
  */
 (function () {
     'use strict';
 
-    // -- Guard: Kh�ng ch?y modal overlay tr�n c�c trang standalone login/register --
+    // -- Guard: Không chạy modal overlay trên các trang standalone login/register --
     const _currentPage = window.location.pathname.replace(/.*\//, '');
     const _isAuthPage  = _currentPage === 'login.html' || _currentPage === 'register.html';
 
@@ -197,14 +197,35 @@
     if (typeof window !== 'undefined') {
         setTimeout(async () => {
             try {
-                const res = await movieAPI.fetchWithFallback('/quoc-gia/viet-nam');
+                // Fetch t? ophim1.com d? l?y d? li?u d? tránh l?i CORS image t? phimapi
+                const res = await fetch('https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=1');
                 const data = await res.json();
-                if (data?.data?.items?.length > 0) {
-                    const latestMovie = data.data.items[0];
-                    const url = `https://img.ophimimg.com/${latestMovie.thumb_url || latestMovie.poster_url.startsWith('uploads/') ? '' : 'uploads/movies/'}${latestMovie.thumb_url || latestMovie.poster_url}`;
+                if (data?.items?.length > 0) {
+                    let bestMovie = data.items[0];
+                    for (const item of data.items) {
+                        if ((item.tmdb?.vote_average || 0) > (bestMovie.tmdb?.vote_average || 0)) {
+                            bestMovie = item;
+                        }
+                    }
+                    
+                    // Xây d?ng URL ?nh chu?n, img.ophimimg.com không ch?n hotlink
+                    const imgPath = bestMovie.poster_url || bestMovie.thumb_url;
+                    let url = 'https://image.tmdb.org/t/p/w780/8b8R8l88Qje9dn9OE8Ez05N5cKk.jpg';
+                    if (imgPath) {
+                        url = `https://img.ophimimg.com/uploads/movies/${imgPath}`;
+                    }
+                    
                     dynamicPosterURL = url;
                     const img = new Image();
                     img.src = url;
+                    
+                    const leftPanels = document.querySelectorAll('.ap-auth-left, #auth-left-panel, #dynamic-auth-bg');
+                    leftPanels.forEach(p => {
+                        p.style.backgroundImage = `linear-gradient(to bottom, rgba(15,15,30,0.15) 0%, rgba(15,15,30,0.95) 100%), url('${url}')`;
+                        p.style.backgroundPosition = 'center';
+                        p.style.backgroundSize = 'cover';
+                        p.style.backgroundRepeat = 'no-repeat';
+                    });
                 }
             } catch(e) {}
         }, 100);
@@ -212,7 +233,7 @@
 
     // -- Create modal -------------------------------------------------
     function createModal(mode) {
-        // ��ng c�c modal cu (n?u c�) tru?c khi t?o m?i
+        // Đóng các modal cũ (nếu có) trước khi tạo mới
         const oldBackdrops = document.querySelectorAll('#ap-auth-backdrop');
         oldBackdrops.forEach(b => removeModal(b));
 
@@ -226,7 +247,7 @@
 
         backdrop.innerHTML = `
         <div id="ap-auth-modal">
-            <button class="ap-auth-close" id="ap-auth-close-btn" aria-label="��ng">?</button>
+            <button class="ap-auth-close" id="ap-auth-close-btn" aria-label="Đóng">&times;</button>
 
             <div class="ap-auth-left" style="background: linear-gradient(to bottom, rgba(15,15,30,0.15) 0%, rgba(15,15,30,0.95) 100%), url('${randomBg}') center / cover no-repeat;">
 
@@ -235,16 +256,16 @@
                         <img src="/apple-touch-icon.png" alt="A Phim">
                     </div>
                     <div class="ap-auth-brand-name">A <span>Phim</span></div>
-                    <div class="ap-auth-brand-tagline">Phim hay c? r?</div>
+                    <div class="ap-auth-brand-tagline">Giải trí không giới hạn</div>
                 </div>
             </div>
 
             <div class="ap-auth-right">
-                <h2 class="ap-auth-title">${isLogin ? '�ang nh?p' : '�ang k�'}</h2>
+                <h2 class="ap-auth-title">${isLogin ? 'Đăng nhập' : 'Đăng ký'}</h2>
                 <p class="ap-auth-subtitle">
                     ${isLogin
-                        ? 'Chua c� t�i kho?n? <a id="ap-switch-to-register">�ang k� ngay</a>'
-                        : '�� c� t�i kho?n? <a id="ap-switch-to-login">�ang nh?p</a>'
+                        ? 'Chưa có tài khoản? <a id="ap-switch-to-register">Đăng ký ngay</a>'
+                        : 'Đã có tài khoản? <a id="ap-switch-to-login">Đăng nhập</a>'
                     }
                 </p>
 
@@ -253,8 +274,8 @@
                 <form id="ap-auth-form" autocomplete="off">
                     ${!isLogin ? `
                     <div class="ap-auth-field">
-                        <label>H? v� t�n</label>
-                        <input class="ap-auth-input" type="text" id="ap-field-name" placeholder="Nguy?n Van A" required>
+                        <label>Họ và tên</label>
+                        <input class="ap-auth-input" type="text" id="ap-field-name" placeholder="Nguyễn Văn A" required>
                     </div>` : ''}
 
                     <div class="ap-auth-field">
@@ -264,27 +285,27 @@
 
                     ${!isLogin ? `
                     <div class="ap-auth-field">
-                        <label>S? di?n tho?i</label>
+                        <label>Số điện thoại</label>
                         <input class="ap-auth-input" type="tel" id="ap-field-phone" placeholder="0123456789">
                     </div>` : ''}
 
                     <div class="ap-auth-field">
-                        <label>M?t kh?u</label>
-                        <input class="ap-auth-input" type="password" id="ap-field-password" placeholder="��������" required>
+                        <label>Mật khẩu</label>
+                        <input class="ap-auth-input" type="password" id="ap-field-password" placeholder="••••••••" required>
                     </div>
 
                     ${!isLogin ? `
                     <div class="ap-auth-field">
-                        <label>X�c nh?n m?t kh?u</label>
-                        <input class="ap-auth-input" type="password" id="ap-field-confirm" placeholder="��������" required>
+                        <label>Xác nhận mật khẩu</label>
+                        <input class="ap-auth-input" type="password" id="ap-field-confirm" placeholder="••••••••" required>
                     </div>` : ''}
 
                     <button class="ap-auth-submit" type="submit" id="ap-auth-submit-btn">
-                        ${isLogin ? '�ANG NH?P' : '�ANG K�'}
+                        ${isLogin ? 'ĐĂNG NHẬP' : 'ĐĂNG KÝ'}
                     </button>
                 </form>
 
-                ${isLogin ? `<div class="ap-auth-forgot" id="ap-forgot-link">Qu�n m?t kh?u?</div>` : ''}
+                ${isLogin ? `<div class="ap-auth-forgot" id="ap-forgot-link">Quên mật khẩu?</div>` : ''}
             </div>
         </div>`;
 
@@ -337,12 +358,12 @@
         const password = backdrop.querySelector('#ap-field-password')?.value || '';
 
         if (!email || !password) {
-            showMsg(msgEl, 'Vui l�ng nh?p d?y d? th�ng tin', 'error'); return;
+            showMsg(msgEl, 'Vui lòng nhập đầy đủ thông tin', 'error'); return;
         }
 
         btn.disabled = true;
         const originalText = btn.textContent;
-        btn.textContent = isLogin ? '�ang dang nh?p...' : '�ang dang k�...';
+        btn.textContent = isLogin ? 'Đang đăng nhập...' : 'Đang đăng ký...';
         msgEl.className = 'ap-auth-msg';
 
         try {
@@ -354,15 +375,15 @@
                 const phone   = (backdrop.querySelector('#ap-field-phone')?.value || '').trim();
                 const confirm = backdrop.querySelector('#ap-field-confirm')?.value || '';
 
-                if (!name) { showMsg(msgEl, 'Vui l�ng nh?p h? t�n', 'error'); resetBtn(btn, originalText); return; }
-                if (password !== confirm) { showMsg(msgEl, 'M?t kh?u x�c nh?n kh�ng kh?p', 'error'); resetBtn(btn, originalText); return; }
-                if (password.length < 6) { showMsg(msgEl, 'M?t kh?u t?i thi?u 6 k� t?', 'error'); resetBtn(btn, originalText); return; }
+                if (!name) { showMsg(msgEl, 'Vui lòng nhập họ tên', 'error'); resetBtn(btn, originalText); return; }
+                if (password !== confirm) { showMsg(msgEl, 'Mật khẩu x�c nh?n kh�ng kh?p', 'error'); resetBtn(btn, originalText); return; }
+                if (password.length < 6) { showMsg(msgEl, 'Mật khẩu t?i thi?u 6 k� t?', 'error'); resetBtn(btn, originalText); return; }
 
                 result = await authService.register(email, password, name, phone);
             }
 
             if (result.success) {
-                showMsg(msgEl, isLogin ? '? �ang nh?p th�nh c�ng!' : '? �ang k� th�nh c�ng!', 'success');
+                showMsg(msgEl, isLogin ? '? Đăng nhập th�nh c�ng!' : '? Đăng ký th�nh c�ng!', 'success');
                 setTimeout(() => {
                     removeModal(backdrop);
                     refreshCommentSection();
@@ -374,11 +395,11 @@
                     }
                 }, 800);
             } else {
-                showMsg(msgEl, result.message || 'Th?t b?i, vui l�ng th? l?i', 'error');
+                showMsg(msgEl, result.message || 'Thất bại, vui lòng thử lại', 'error');
                 resetBtn(btn, originalText);
             }
         } catch (err) {
-            showMsg(msgEl, 'L?i k?t n?i server', 'error');
+            showMsg(msgEl, 'Lỗi kết nối server', 'error');
             resetBtn(btn, originalText);
         }
     }
@@ -408,18 +429,18 @@
         const el = specificBackdrop || document.getElementById('ap-auth-backdrop');
         if (!el) return;
         
-        el.id = 'ap-auth-backdrop-removing'; // �?i ID d? tr�nh conflict
+        el.id = 'ap-auth-backdrop-removing'; // Đổi ID để tránh conflict
         el.style.opacity = '0';
         const modal = el.querySelector('#ap-auth-modal');
         if (modal) {
-            modal.id = 'ap-auth-modal-removing'; // �?i ID lu�n
+            modal.id = 'ap-auth-modal-removing'; // Đổi ID luôn
             modal.style.transform = 'scale(0.9) translateY(20px)';
         }
         
         setTimeout(() => {
             el.remove();
             
-            // Ch? unlock scroll n?u kh�ng c�n modal n�o kh�c dang m?
+            // Chỉ unlock scroll nếu không còn modal nào khác đang mở
             if (!document.getElementById('ap-auth-backdrop')) {
                 document.body.classList.remove('ap-modal-open');
             }
@@ -434,7 +455,7 @@
 
     // -- Public API ----------------------------------------------------
     window.showAuthModal = function(mode) {
-        // Tr�n trang login/register standalone: redirect thay v� m? modal
+        // Trên trang login/register standalone: redirect thay vì mở modal
         if (_isAuthPage) {
             const page = (mode === 'register') ? 'register.html' : 'login.html';
             if (!window.location.pathname.endsWith(page)) {
@@ -446,7 +467,7 @@
     };
 
     // -- Intercept ALL clicks (capture phase) --------------------------
-    // Kh�ng ch?y tr�n c�c trang auth standalone
+    // Không chạy trên các trang auth standalone
     if (!_isAuthPage) {
         document.addEventListener('click', function (e) {
             // Ignore if clicking inside the auth modal itself
