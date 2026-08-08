@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="dark" lang="vi">
 
 <head>
@@ -16,12 +16,12 @@
     <meta property="og:description" content="APhim - Website xem phim online Full HD miễn phí, cập nhật phim mới nhất 2026, Phim Vietsub, Thuyết Minh, Phim Lồng Tiếng chất lượng cao." />
     <meta property="twitter:description" content="APhim - Website xem phim online Full HD miễn phí, cập nhật phim mới nhất 2026, Phim Vietsub, Thuyết Minh, Phim Lồng Tiếng chất lượng cao." />
     <!-- 🚀 TURBO LOAD — Preconnect ngay lập tức để giảm độ trễ mạng -->
-    <link rel="preconnect" href="https://phimapi.com" crossorigin>
-    <link rel="preconnect" href="https://phimimg.com" crossorigin>
+    <link rel="preconnect" href="https://ophim1.com" crossorigin>
+    <link rel="preconnect" href="https://img.ophimimg.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://phimapi.com">
-    <link rel="dns-prefetch" href="https://phimimg.com">
+    <link rel="dns-prefetch" href="https://ophim1.com">
+    <link rel="dns-prefetch" href="https://img.ophimimg.com">
 
 
     <script src="js/chat-init-guard.js?v=37" fetchpriority="high"></script>
@@ -398,8 +398,8 @@
 
             // Gửi các request API quan trọng ngay lập tức (Pre-fetch data)
             const apiEndpoints = [
-                'https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1',
-                'https://phimapi.com/v1/api/danh-sach/phim-le?page=1'
+                'https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=1',
+                'https://ophim1.com/v1/api/danh-sach/phim-le?page=1'
             ];
             apiEndpoints.forEach(url => {
                 const link = document.createElement('link');
@@ -437,10 +437,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://phimapi.com" crossorigin>
-    <link rel="preconnect" href="https://phimimg.com" crossorigin>
-    <link rel="dns-prefetch" href="https://phimapi.com">
-    <link rel="dns-prefetch" href="https://phimimg.com">
+    <link rel="preconnect" href="https://ophim1.com" crossorigin>
+    <link rel="preconnect" href="https://img.ophimimg.com" crossorigin>
+    <link rel="dns-prefetch" href="https://ophim1.com">
+    <link rel="dns-prefetch" href="https://img.ophimimg.com">
     <!-- Tailwind local build (không CDN - không còn warning) -->
     <link rel="stylesheet" href="css/tailwind.min.css?v=13">
 
@@ -456,11 +456,11 @@
 
     <!-- Material Icons: load async (non-blocking) -->
     <link rel="preload"
-        href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons"
+        href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons&display=block"
         as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
         <link
-            href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons"
+            href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons&display=block"
             rel="stylesheet">
     </noscript>
 
@@ -2069,8 +2069,8 @@
 
                 const finalImgUrl = (typeof imageOptimizer !== 'undefined') ?
                     imageOptimizer.optimizeImageUrl(thumb || poster, 400, 80) :
-                    (thumb ? (thumb.startsWith('http') ? thumb : `https://phimimg.com/${thumb}`) :
-                        (poster ? (poster.startsWith('http') ? poster : `https://phimimg.com/${poster}`) : ''));
+                    (thumb ? (thumb.startsWith('http') ? thumb : `https://img.ophimimg.com/${thumb.startsWith('uploads/') ? '' : 'uploads/movies/'}${thumb}`) :
+                        (poster ? (poster.startsWith('http') ? poster : `https://img.ophimimg.com/${poster.startsWith('uploads/') ? '' : 'uploads/movies/'}${poster}`) : ''));
 
                 return `
                     <div class="portrait-card group ${hiddenUI.containerClass}">
@@ -2079,7 +2079,7 @@
                                 <img src="${finalImgUrl}" 
                                      alt="${movie.name}" 
                                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                     onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'"
+                                     onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
                                      loading="lazy"
                                      decoding="async" />
                                 
@@ -2151,8 +2151,8 @@
                         <div class="portrait-poster-w">
                             <img alt="${movie.name}"
                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${hiddenUI.imgClass}"
-                                src="${typeof imageOptimizer !== 'undefined' ? imageOptimizer.optimizeImageUrl(movie.thumb_url, 350, 70) : `https://phimimg.com/${movie.thumb_url}`}"
-                                onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'"
+                                src="${typeof imageOptimizer !== 'undefined' ? imageOptimizer.optimizeImageUrl(movie.thumb_url, 350, 70) : `https://img.ophimimg.com/${movie.thumb_url.startsWith('uploads/') ? '' : 'uploads/movies/'}${movie.thumb_url}`}"
+                                onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
                                 loading="lazy"
                                 decoding="async" />
                             
@@ -2234,13 +2234,13 @@
                 const backdropUrl = poster || thumb;
                 const finalBackdrop = (typeof imageOptimizer !== 'undefined') ?
                     imageOptimizer.optimizeImageUrl(backdropUrl, 600, 75) :
-                    (backdropUrl.startsWith('http') ? backdropUrl : `https://phimimg.com/${backdropUrl}`);
+                    (backdropUrl.startsWith('http') ? backdropUrl : `https://img.ophimimg.com/${backdropUrl.startsWith('uploads/') ? '' : 'uploads/movies/'}${backdropUrl}`);
 
                 // Poster prioritized for portrait (thumb_url)
                 const posterUrl = thumb || poster;
                 const finalPoster = (typeof imageOptimizer !== 'undefined') ?
                     imageOptimizer.optimizeImageUrl(posterUrl, 200, 70) :
-                    (posterUrl.startsWith('http') ? posterUrl : `https://phimimg.com/${posterUrl}`);
+                    (posterUrl.startsWith('http') ? posterUrl : `https://img.ophimimg.com/${posterUrl.startsWith('uploads/') ? '' : 'uploads/movies/'}${posterUrl}`);
 
                 return `
                 <div class="action-premium-card group">
@@ -2250,7 +2250,7 @@
                             <img src="${finalBackdrop}" 
                                  alt="${movie.name}" 
                                  class="group-hover:scale-105 transition-transform duration-500" 
-                                 onerror="this.src='https://via.placeholder.com/600x338?text=${encodeURIComponent(movie.name)}'" />
+                                 onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E)}'" />
                             <div class="backdrop-quality-badge">${movie.lang || 'HD'}</div>
                         </div>
                         
@@ -2258,7 +2258,7 @@
                         <div class="action-small-poster">
                             <img src="${finalPoster}" 
                                  alt="Mini ${movie.name}" 
-                                 onerror="this.src='https://via.placeholder.com/200x300?text=No+Poster'" />
+                                 onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
                         </div>
                         
                         <!-- Text Info next to mini poster -->
@@ -2337,12 +2337,12 @@
                             const backdropUrl = poster || thumb;
                             const finalBackdrop = (typeof imageOptimizer !== 'undefined') ?
                                 imageOptimizer.optimizeImageUrl(backdropUrl, 600, 75) :
-                                (backdropUrl.startsWith('http') ? backdropUrl : `https://phimimg.com/${backdropUrl}`);
+                                (backdropUrl.startsWith('http') ? backdropUrl : `https://img.ophimimg.com/${backdropUrl.startsWith('uploads/') ? '' : 'uploads/movies/'}${backdropUrl}`);
 
                             const posterUrl = thumb || poster;
                             const finalPoster = (typeof imageOptimizer !== 'undefined') ?
                                 imageOptimizer.optimizeImageUrl(posterUrl, 200, 70) :
-                                (posterUrl.startsWith('http') ? posterUrl : `https://phimimg.com/${posterUrl}`);
+                                (posterUrl.startsWith('http') ? posterUrl : `https://img.ophimimg.com/${posterUrl.startsWith('uploads/') ? '' : 'uploads/movies/'}${posterUrl}`);
 
                             return `
                             <div class="action-premium-card group">
@@ -2351,13 +2351,13 @@
                                         <img src="${finalBackdrop}" 
                                              alt="${movie.name}" 
                                              class="group-hover:scale-105 transition-transform duration-500" 
-                                             onerror="this.src='https://via.placeholder.com/600x338?text=${encodeURIComponent(movie.name)}'" />
+                                             onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E)}'" />
                                         <div class="backdrop-quality-badge">${movie.lang || movie.quality || 'HD'}</div>
                                     </div>
                                     <div class="action-small-poster">
                                         <img src="${finalPoster}" 
                                              alt="Mini ${movie.name}" 
-                                             onerror="this.src='https://via.placeholder.com/200x300?text=No+Poster'" />
+                                             onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
                                     </div>
                                     <div class="action-info-overlay">
                                         <h3 class="action-title-p group-hover:text-amber-500 transition-colors">${movie.name}</h3>
@@ -2397,13 +2397,13 @@
                             const poster = movie.poster_url || '';
                             const finalImg = (typeof imageOptimizer !== 'undefined') ?
                                 imageOptimizer.optimizeImageUrl(thumb || poster, 400, 80) :
-                                (thumb ? (thumb.startsWith('http') ? thumb : `https://phimimg.com/${thumb}`) : `https://phimimg.com/${poster}`);
+                                (thumb ? (thumb.startsWith('http') ? thumb : `https://img.ophimimg.com/${thumb.startsWith('uploads/') ? '' : 'uploads/movies/'}${thumb}`) : `https://img.ophimimg.com/${poster.startsWith('uploads/') ? '' : 'uploads/movies/'}${poster}`);
 
                             return `
                             <div class="anime-card group">
                                 <a href="movie-detail.html?slug=${movie.slug}" class="block">
                                     <div class="anime-poster-wrapper group-hover:scale-[1.03] transition-transform duration-500">
-                                        <img src="${finalImg}" alt="${movie.name}" class="w-full h-full object-cover" loading="lazy" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" />
+                                        <img src="${finalImg}" alt="${movie.name}" class="w-full h-full object-cover" loading="lazy" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
                                         
                                         <!-- Badges exactly like the image -->
                                         <div class="anime-badge-container">
@@ -2448,13 +2448,13 @@
                             const poster = movie.poster_url || '';
                             const finalImg = (typeof imageOptimizer !== 'undefined') ?
                                 imageOptimizer.optimizeImageUrl(thumb || poster, 400, 80) :
-                                (thumb ? (thumb.startsWith('http') ? thumb : `https://phimimg.com/${thumb}`) : `https://phimimg.com/${poster}`);
+                                (thumb ? (thumb.startsWith('http') ? thumb : `https://img.ophimimg.com/${thumb.startsWith('uploads/') ? '' : 'uploads/movies/'}${thumb}`) : `https://img.ophimimg.com/${poster.startsWith('uploads/') ? '' : 'uploads/movies/'}${poster}`);
 
                             return `
                             <div class="anime-card group">
                                 <a href="movie-detail.html?slug=${movie.slug}" class="block">
                                     <div class="anime-poster-wrapper group-hover:scale-[1.03] transition-transform duration-500">
-                                        <img src="${finalImg}" alt="${movie.name}" class="w-full h-full object-cover" loading="lazy" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" />
+                                        <img src="${finalImg}" alt="${movie.name}" class="w-full h-full object-cover" loading="lazy" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
                                         
                                         <div class="anime-badge-container">
                                             <div class="anime-pill anime-pill-dark">PĐ. ${movie.lang || 'VS'}</div>
@@ -2498,7 +2498,7 @@
                             const poster = movie.poster_url || '';
                             const finalImg = (typeof imageOptimizer !== 'undefined') ?
                                 imageOptimizer.optimizeImageUrl(thumb || poster, 400, 80) :
-                                (thumb ? (thumb.startsWith('http') ? thumb : `https://phimimg.com/${thumb}`) : `https://phimimg.com/${poster}`);
+                                (thumb ? (thumb.startsWith('http') ? thumb : `https://img.ophimimg.com/${thumb.startsWith('uploads/') ? '' : 'uploads/movies/'}${thumb}`) : `https://img.ophimimg.com/${poster.startsWith('uploads/') ? '' : 'uploads/movies/'}${poster}`);
 
                             return `
                             <div class="ranking-item group" data-rank="${rank}">
@@ -2550,7 +2550,7 @@
                             const poster = movie.poster_url || '';
                             const finalImg = (typeof imageOptimizer !== 'undefined') ?
                                 imageOptimizer.optimizeImageUrl(thumb || poster, 400, 80) :
-                                (thumb ? (thumb.startsWith('http') ? thumb : `https://phimimg.com/${thumb}`) : `https://phimimg.com/${poster}`);
+                                (thumb ? (thumb.startsWith('http') ? thumb : `https://img.ophimimg.com/${thumb.startsWith('uploads/') ? '' : 'uploads/movies/'}${thumb}`) : `https://img.ophimimg.com/${poster.startsWith('uploads/') ? '' : 'uploads/movies/'}${poster}`);
 
                             return `
                             <div class="ranking-item group" data-rank="${rank}">
@@ -3059,24 +3059,24 @@
     <!-- ====== Pricing Card Backdrops — desktop + mobile ====== -->
     <style>
     /* Desktop plan cards */
-    #bd-free    { background-image: url('https://phimimg.com/nha-minh-di-thoi-thumb.jpg'); }
-    #bd-premium { background-image: url('https://phimimg.com/bo-gia-2021-thumb.jpg'); }
-    #bd-family  { background-image: url('https://phimimg.com/nha-ba-toi-mot-phong-thumb.jpg'); }
+    #bd-free    { background-image: url('https://img.ophimimg.com/uploads/movies/nha-minh-di-thoi-thumb.jpg'); }
+    #bd-premium { background-image: url('https://img.ophimimg.com/uploads/movies/bo-gia-2021-thumb.jpg'); }
+    #bd-family  { background-image: url('https://img.ophimimg.com/uploads/movies/nha-ba-toi-mot-phong-thumb.jpg'); }
 
     /* Desktop coin cards */
-    #bd-coin1 { background-image: url('https://phimimg.com/nha-ba-toi-mot-phong-thumb.jpg'); }
-    #bd-coin2 { background-image: url('https://phimimg.com/bo-gia-2021-thumb.jpg'); }
-    #bd-coin3 { background-image: url('https://phimimg.com/nha-minh-di-thoi-thumb.jpg'); }
+    #bd-coin1 { background-image: url('https://img.ophimimg.com/uploads/movies/nha-ba-toi-mot-phong-thumb.jpg'); }
+    #bd-coin2 { background-image: url('https://img.ophimimg.com/uploads/movies/bo-gia-2021-thumb.jpg'); }
+    #bd-coin3 { background-image: url('https://img.ophimimg.com/uploads/movies/nha-minh-di-thoi-thumb.jpg'); }
 
     /* Mobile swipe — card đã dark/trong suốt nên backdrop hiện rõ */
-    #msw-bd-free    { background-image: url('https://phimimg.com/nha-minh-di-thoi-thumb.jpg'); }
-    #msw-bd-premium { background-image: url('https://phimimg.com/bo-gia-2021-thumb.jpg'); }
-    #msw-bd-family  { background-image: url('https://phimimg.com/nha-ba-toi-mot-phong-thumb.jpg'); }
+    #msw-bd-free    { background-image: url('https://img.ophimimg.com/uploads/movies/nha-minh-di-thoi-thumb.jpg'); }
+    #msw-bd-premium { background-image: url('https://img.ophimimg.com/uploads/movies/bo-gia-2021-thumb.jpg'); }
+    #msw-bd-family  { background-image: url('https://img.ophimimg.com/uploads/movies/nha-ba-toi-mot-phong-thumb.jpg'); }
 
     /* Mobile coin swipe backdrops */
-    #msw-bd-coin1   { background-image: url('https://phimimg.com/nha-ba-toi-mot-phong-thumb.jpg'); }
-    #msw-bd-coin2   { background-image: url('https://phimimg.com/bo-gia-2021-thumb.jpg'); }
-    #msw-bd-coin3   { background-image: url('https://phimimg.com/nha-minh-di-thoi-thumb.jpg'); }
+    #msw-bd-coin1   { background-image: url('https://img.ophimimg.com/uploads/movies/nha-ba-toi-mot-phong-thumb.jpg'); }
+    #msw-bd-coin2   { background-image: url('https://img.ophimimg.com/uploads/movies/bo-gia-2021-thumb.jpg'); }
+    #msw-bd-coin3   { background-image: url('https://img.ophimimg.com/uploads/movies/nha-minh-di-thoi-thumb.jpg'); }
     </style>
     <!-- ====== End Pricing Card Backdrops ====== -->
 
@@ -3160,6 +3160,7 @@
 </body>
 
 </html>
+
 
 
 

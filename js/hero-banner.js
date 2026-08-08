@@ -1,4 +1,4 @@
-// ================================================================
+﻿// ================================================================
 // A PHIM � Hero Banner v10
 // Interactive Slide System: Click Thumbnail + Swipe/Drag
 // + Auto-return to Admin Banner sau 6 gi�y kh�ng tuong t�c
@@ -114,21 +114,15 @@ function getHeroImageUrl(movie) {
         if (cached) {
             const tmdbData = JSON.parse(cached);
             if (tmdbData) {
-                if (!isMobile && tmdbData.backdrop) return tmdbData.backdrop;
-                if (isMobile && tmdbData.poster) return tmdbData.poster;
+                // Luôn ưu tiên ảnh ngang (backdrop) cho Hero Banner trên cả PC & Mobile
                 if (tmdbData.backdrop) return tmdbData.backdrop;
                 if (tmdbData.poster) return tmdbData.poster;
             }
         }
     } catch(e) {}
     
-    if (!isMobile) {
-        // Desktop: Ưu tiên ảnh ngang (thumb_url là ảnh ngang)
-        return movie.thumb_url || movie.poster_url || '';
-    } else {
-        // Mobile: Ưu tiên ảnh dọc (poster_url là ảnh dọc)
-        return movie.poster_url || movie.thumb_url || '';
-    }
+    // Luôn ưu tiên ảnh ngang (thumb_url) cho Hero Banner
+    return movie.thumb_url || movie.poster_url || '';
 }
 
 // -- State Logo Cache & ID ch?ng xung d?t (Race Condition Protection) --
@@ -360,8 +354,19 @@ function switchHeroSlide(newIndex, skipThumbnailHighlight, isAutoReturn) {
     const rawUrl = getHeroImageUrl(movie);
     const optUrl = buildImageUrl(rawUrl, 1200);
     if (optUrl) {
+        // Tăng tốc cực đại: báo cho trình duyệt tải ở mức ưu tiên cao nhất
+        if (!document.querySelector(`link[href="${optUrl}"]`)) {
+            const preloadLink = document.createElement('link');
+            preloadLink.rel = 'preload';
+            preloadLink.as = 'image';
+            preloadLink.href = optUrl;
+            preloadLink.fetchPriority = 'high';
+            document.head.appendChild(preloadLink);
+        }
+        
         const preImg = new Image();
-        preImg.src = optUrl; // b?t d?u t?i ngay, khng ch?
+        preImg.fetchPriority = 'high'; // Đảm bảo mức độ ưu tiên
+        preImg.src = optUrl; // bắt đầu tải ngay, không chờ
     }
 
     // -- PHASE 1: Fade OUT (nhanh hon) --
@@ -447,7 +452,7 @@ function buildImageUrl(rawUrl, width) {
     }
     return rawUrl.startsWith('http')
         ? rawUrl
-        : `https://phimimg.com/${rawUrl}`;
+        : `https://img.ophimimg.com/${rawUrl.startsWith('uploads/') ? '' : 'uploads/movies/'}${rawUrl}`;
 }
 
 // -- Update ch? ph?n text c?a hero banner -----------------------
@@ -831,7 +836,7 @@ function renderThumbnails(movies) {
 
     container.innerHTML = movies.map((movie, i) => {
         const imgSrc = (typeof imageOptimizer !== 'undefined')
-            ? imageOptimizer.optimizeImageUrl(movie.thumb_url || movie.poster_url, 300, 75)
+            ? imageOptimizer.optimizeImageUrl(movie.thumb_url || movie.poster_url, 300, 75, 'thumbnail')
             : buildImageUrl(movie.thumb_url || movie.poster_url, 300);
 
         const slideIndex = i + 1;
@@ -849,7 +854,7 @@ function renderThumbnails(movies) {
                     alt="${movie.name || ''}"
                     class="w-full h-full object-cover object-center"
                     src="${imgSrc}"
-                    onerror="this.src='https://via.placeholder.com/150x85?text=No+Image'"
+                    onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
                     loading="lazy" />
             </div>
             <div class="hero-thumb-glow"></div>
@@ -957,7 +962,7 @@ function renderHeroBannerContent(movie, isInstant) {
     heroImage.decoding = 'async';
 
     heroImage.onerror = () => {
-        const fallbackUrl = rawUrl.startsWith('http') ? rawUrl : `https://phimimg.com/${rawUrl}`;
+        const fallbackUrl = rawUrl.startsWith('http') ? rawUrl : `https://img.ophimimg.com/${rawUrl.startsWith('uploads/') ? '' : 'uploads/movies/'}${rawUrl}`;
         if (heroImage.src !== fallbackUrl) heroImage.src = fallbackUrl;
         showHeroImage();
     };
@@ -966,7 +971,7 @@ function renderHeroBannerContent(movie, isInstant) {
         heroImage.setAttribute('data-current-src', optUrl);
         heroImage.src = optUrl;
     } else if (rawUrl) {
-        const fallbackUrl = rawUrl.startsWith('http') ? rawUrl : `https://phimimg.com/${rawUrl}`;
+        const fallbackUrl = rawUrl.startsWith('http') ? rawUrl : `https://img.ophimimg.com/${rawUrl.startsWith('uploads/') ? '' : 'uploads/movies/'}${rawUrl}`;
         heroImage.src = fallbackUrl;
     }
     showHeroImage();

@@ -12,20 +12,22 @@ class ImageOptimizer {
 
     // Optimize image URL with CDN parameters
             optimizeImageUrl(url, width = 400, quality = 80, isPriority = false) {
-        if (!url) return 'https://placehold.co/400x600?text=No+Image';
+        if (!url) return 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E';
         
         let resolvedUrl = url;
         if (!resolvedUrl.startsWith('http')) {
-            resolvedUrl = "https://phimimg.com/" + resolvedUrl.replace(/^\//, '');
+            let filename = resolvedUrl.replace(/^\//, '');
+            if (!filename.startsWith('uploads/')) {
+                filename = 'uploads/movies/' + filename;
+            }
+            resolvedUrl = "https://img.ophimimg.com/" + filename;
         }
-        if (resolvedUrl.includes('phimimg.com') || resolvedUrl.includes('tmdb.org') || 
-            resolvedUrl.includes('ophim1.com') || resolvedUrl.includes('img.phimapi.com') || 
-            resolvedUrl.includes('ophimcdn')) {
-            return resolvedUrl;
-        }
-
 
         if (!resolvedUrl.includes('localhost') && !resolvedUrl.includes('127.0.0.1')) {
+            // Priority images (like Hero Banner) bypass WP CDN proxy to ensure 
+            // 100% original quality and fastest possible direct load without processing delay.
+            if (isPriority === true) return resolvedUrl;
+
             let targetWidth = width;
             let targetQuality = quality;
 
@@ -48,28 +50,40 @@ class ImageOptimizer {
             }
             
             const cleanUrl = resolvedUrl.replace(/^https?:\/\//, '');
-            return "https://i0.wp.com/" + cleanUrl + "?w=" + targetWidth + "&quality=" + targetQuality + "&strip=all";
+            
+            // Chia cắt logic: Các ảnh Hero Thumbnails tải trực tiếp siêu tốc (Bypass CDN để không bị timeout)
+            if (isPriority === 'thumbnail') {
+                return resolvedUrl;
+            }
+
+            // DO CLOUDFLARE BLOCK WSRV.NL KHI TẢI TỪ IMG.OPHIM.LIVE (LỖI 302 ToS ABUSE), CHÚNG TA BUỘC PHẢI DÙNG LINK TRỰC TIẾP
+            return resolvedUrl;
         }
 
         return resolvedUrl;
     }
 
     getProgressiveUrls(url) {
-        if (!url) return { placeholder: null, full: 'https://placehold.co/400x600?text=No+Image' };
+        if (!url) return { placeholder: null, full: 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E' };
 
         let full = url;
         if (!full.startsWith('http')) {
-            full = "https://phimimg.com/" + full.replace(/^\//, "");
+            let filename = full.replace(/^\//, "");
+            if (!filename.startsWith('uploads/')) {
+                filename = 'uploads/movies/' + filename;
+            }
+            full = "https://img.ophimimg.com/" + filename;
         }
 
-        if ((typeof this.isMobile !== 'undefined' && !this.isMobile) || (!full.includes('ophim') && !full.includes('opstream'))) {
+        // Bỏ qua CDN nếu đang run local
+        if (full.includes('localhost') || full.includes('127.0.0.1')) {
             return { placeholder: null, full: full };
         }
 
-        const cleanUrl = full.replace(/^https?:\/\//, '');
+        // DO CLOUDFLARE BLOCK WSRV.NL, CHÚNG TA KHÔNG THỂ DÙNG PROGRESSIVE BẰNG CDN TRUNG GIAN NỮA
         return {
-            placeholder: "https://i0.wp.com/" + cleanUrl + "?w=20&quality=20&strip=all",
-            full: "https://i0.wp.com/" + cleanUrl + "?w=600&quality=82&strip=all"
+            placeholder: null,
+            full: full
         };
     }
 
@@ -220,7 +234,7 @@ class ImageOptimizer {
                 class="img-progressive img-loading ${extraClasses}"
                 data-original-src="${originalUrl}"
                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
-                onerror="this.src='https://placehold.co/400x600?text=No+Image'"
+                onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
                 ${extraAttrs}
             />`;
         } else {
@@ -229,7 +243,7 @@ class ImageOptimizer {
                 alt="${altText}"
                 class="img-progressive img-desktop ${extraClasses}"
                 src="${originalUrl}"
-                onerror="this.src='https://placehold.co/400x600?text=No+Image'"
+                onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
                 loading="lazy"
                 ${extraAttrs}
             />`;

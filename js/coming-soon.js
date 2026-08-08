@@ -17,15 +17,10 @@
 
         try {
             // Fetch from phim-chieu-rap API
-            const response = await movieAPI.fetchWithFallback('/danh-sach/phim-chieu-rap?page=1&limit=10', {
-                method: 'GET',
-                headers: { 'accept': 'application/json' }
-            });
+            const data = await movieAPI.getMoviesFromMultipleSources(1, 'phim-chieu-rap');
 
-            const data = await response.json();
-
-            if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
-                renderComingSoonMovies(data.data.items);
+            if (data && (data.status === 'success' || data.status === true) && data.data && data.data.items && data.data.items.length > 0) {
+                renderComingSoonMovies(data.data.items.slice(0, 10));
             } else {
                 loading.innerHTML = '<p class="text-gray-400">Không thể tải phim chiếu rạp</p>';
             }
@@ -46,7 +41,7 @@
 
         container.innerHTML = movies.map((movie, index) => {
             const rank = index + 1;
-            const optimizedUrl = movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 400, 80);
+            const optimizedUrl = movieAPI.getImageURL(movie.thumb_url || movie.poster_url, 400, 80);
             const detailUrl = `movie-detail.html?slug=${movie.slug}`;
             const episodes = movie.episode_current || '';
             
@@ -57,7 +52,7 @@
                             <img src="${optimizedUrl}" 
                                  alt="${movie.name}" 
                                  class="w-full h-full object-cover"
-                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/400x600?text=No+Poster'"
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
                                  loading="lazy" />
                             
                             <div class="ranking-badges-bottom">
@@ -111,3 +106,6 @@
     // Expose to window
     window.loadComingSoonMovies = loadComingSoonMovies;
 })();
+
+
+

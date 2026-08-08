@@ -42,13 +42,13 @@
 /* Label "Quảng cáo" nhỏ căn giữa phía trên */
 .aphim-inline-ad-label {
     position: absolute;
-    top: 5px;
+    top: 2px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 1.2px;
-    color: rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.3);
     text-transform: uppercase;
     user-select: none;
     pointer-events: none;
@@ -57,68 +57,104 @@
     z-index: 2;
 }
 
-/* Wrapper 3 banner hàng ngang */
-.aphim-inline-ad-inner {
-    display: flex;
-    align-items: stretch;
-    gap: 6px;
-    width: 100%;
-    max-width: 100%;     /* full width khớp vùng nội dung */
-    margin: 0 auto;
-    padding-top: 10px;   /* nhường chỗ cho nhãn "QUẢNG CÁO" phía trên */
-    box-sizing: border-box;
+/* ─── DESKTOP LAYOUT (>= 769px): TỰ ĐỘNG CHIA ĐỀU HÀNG NGANG (3 HOẶC 4 BANNERS) ─── */
+@media (min-width: 769px) {
+    .aphim-inline-ad-inner {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding-top: 14px !important;
+        box-sizing: border-box !important;
+    }
+
+    .aphim-inline-ad-item {
+        display: block !important;
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        height: 60px !important;
+        overflow: hidden !important;
+        border-radius: 8px !important;
+        line-height: 0 !important;
+        text-decoration: none !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        background: #000000 !important;
+        transition: filter 0.2s ease, transform 0.2s ease, border-color 0.2s ease !important;
+    }
+
+    .aphim-inline-ad-item:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+        border-color: rgba(252, 211, 77, 0.6) !important;
+    }
+
+    .aphim-inline-ad-item img,
+    .aphim-inline-ad-item video {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 60px !important;
+        object-fit: fill !important;
+        object-position: center !important;
+        display: block !important;
+        pointer-events: none !important;
+    }
 }
 
-.aphim-inline-ad-item {
-    display: flex;         /* flex container → img sẽ fill height */
-    flex: 1;
-    overflow: hidden;
-    border-radius: 8px;
-    line-height: 0;
-    text-decoration: none;
-    border: none;          /* đã xóa viền */
-    transition: filter 0.2s ease, transform 0.2s ease, opacity 0.4s ease;
-    min-width: 0;
-}
+/* ─── MOBILE SLIDESHOW (<= 768px): GỘP THÀNH 1 BANNER FULL-WIDTH 100% XOAY MƯỢT ─── */
+@media (max-width: 768px) {
+    .aphim-inline-ad-inner {
+        position: relative !important;
+        overflow: hidden !important;
+        display: block !important;
+        padding-top: 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
 
-.aphim-inline-ad-item:hover {
-    filter: brightness(1.06);
-    transform: translateY(-1px);
-}
+    .aphim-inline-ad-item {
+        display: none !important;
+        flex: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        border-radius: 10px !important;
+        opacity: 0 !important;
+        transition: opacity 0.5s ease-in-out !important;
+        border: 1px solid rgba(252, 211, 77, 0.3) !important;
+        overflow: hidden !important;
+        background: #000000 !important;
+    }
 
-.aphim-inline-ad-item img {
-    width: 100%;
-    height: 75px;
-    object-fit: cover;
-    object-position: top;
-    display: block;
-}
+    .aphim-inline-ad-item.slide-active {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 52px !important;
+        opacity: 1 !important;
+    }
 
-/* ─── MOBILE SLIDESHOW (≤768px) ─────────────────────────
-   JS sẽ thêm class "is-slideshow" vào .aphim-inline-ad-inner
-   Khi đó chỉ hiện 1 banner / lần, full width
-───────────────────────────────────────────────────────── */
-.aphim-inline-ad-inner.is-slideshow {
-    position: relative;
-    overflow: hidden;
-    display: block;         /* override flex */
-    padding-top: 10px;
-}
+    .aphim-inline-ad-item img,
+    .aphim-inline-ad-item video {
+        width: 100% !important;
+        height: 52px !important;
+        max-height: 52px !important;
+        object-fit: fill !important;
+        object-position: center !important;
+        display: block !important;
+        border-radius: 10px !important;
+    }
 
-/* Item ẩn trong slideshow mode */
-.aphim-inline-ad-inner.is-slideshow .aphim-inline-ad-item {
-    display: none;
-    flex: none;
-    width: 100%;
-    border-radius: 8px;
-    opacity: 0;
-    transition: opacity 0.45s ease;
-}
-
-/* Item đang active */
-.aphim-inline-ad-inner.is-slideshow .aphim-inline-ad-item.slide-active {
-    display: block;
-    opacity: 1;
+    .aphim-inline-dot-bar {
+        display: flex !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        margin-top: 8px !important;
+    }
 }
 
 /* Dots indicator cho slideshow */
@@ -249,11 +285,15 @@
 }
 
 @media (max-width: 768px) {
-    /* Ép tất cả các ảnh banner (inline, premium, slideshow, data-always-slideshow) về chiều cao 45px mảnh dẻ cực đẹp trên Mobile */
+    /* Ép tất cả các ảnh & video banner (inline, premium, slideshow, data-always-slideshow) về chiều cao 45px mảnh dẻ cực đẹp trên Mobile */
     .aphim-inline-ad-item img,
+    .aphim-inline-ad-item video,
     .aphim-inline-ad-inner .aphim-inline-ad-item img,
+    .aphim-inline-ad-inner .aphim-inline-ad-item video,
     .aphim-inline-ad-inner.is-slideshow .aphim-inline-ad-item img,
-    .aphim-inline-ad-inner[data-always-slideshow].is-slideshow .aphim-inline-ad-item img {
+    .aphim-inline-ad-inner.is-slideshow .aphim-inline-ad-item video,
+    .aphim-inline-ad-inner[data-always-slideshow].is-slideshow .aphim-inline-ad-item img,
+    .aphim-inline-ad-inner[data-always-slideshow].is-slideshow .aphim-inline-ad-item video {
         height: 45px !important;
         min-height: 45px !important;
         max-height: 45px !important;

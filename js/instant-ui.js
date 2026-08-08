@@ -1,4 +1,4 @@
-// Instant UI - Show content immediately with skeleton loading
+﻿// Instant UI - Show content immediately with skeleton loading
 
 class InstantUI {
     constructor() {
@@ -121,7 +121,7 @@ class InstantUI {
         if (url.startsWith('http')) return url;
 
         // Build optimized CDN URL
-        const baseURL = 'https://phimimg.com/';
+        const baseURL = 'https://img.ophimimg.com/';
         return `${baseURL}${url}?w=${width}&q=${quality}`;
     }
 

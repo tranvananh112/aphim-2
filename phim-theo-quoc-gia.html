@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -42,8 +42,8 @@
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://phimapi.com">
-    <link rel="dns-prefetch" href="https://phimimg.com">
+    <link rel="preconnect" href="https://ophim1.com">
+    <link rel="dns-prefetch" href="https://img.ophimimg.com">
 
     <!-- Critical CSS inline to prevent FOUC -->
     <style>
@@ -94,7 +94,7 @@
     <link rel="stylesheet" href="css/navigation-smooth.css?v=13">
     <link rel="stylesheet" href="css/material-icons-fix.css?v=13">
     <link rel="stylesheet" href="css/dropdown-z-index-fix.css?v=13">
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons&display=block" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet" />
@@ -694,13 +694,13 @@
                 const rawImg = movie.thumb_url || movie.poster_url || '';
                 let posterUrl;
                 if (!rawImg) {
-                    posterUrl = 'https://via.placeholder.com/200x300?text=No+Image';
+                    posterUrl = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E';
                 } else if (rawImg.startsWith('http')) {
                     posterUrl = rawImg;
                 } else {
                     // Strip any leading 'uploads/movies/' to avoid duplicating the path
                     const filename = rawImg.replace(/^uploads\/movies\//, '');
-                    posterUrl = `https://phimimg.com/${filename}`;
+                    posterUrl = `https://img.ophimimg.com/${filename.startsWith('uploads/') ? '' : 'uploads/movies/'}${filename}`;
                 }
                 const year = movie.year || 'N/A';
                 const quality = movie.quality || movie.lang || '';
@@ -717,7 +717,7 @@
                                  alt="${movie.name}"
                                  class="w-full h-full object-cover ${hiddenUI.imgClass}"
                                  loading="lazy"
-                                 onerror="this.onerror=null; this.src='https://via.placeholder.com/200x300?text=No+Image'">
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
                             
                             ${hiddenUI.badge}
                             
@@ -1231,6 +1231,7 @@
 </body>
 
 </html>
+
 
 
 

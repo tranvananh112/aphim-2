@@ -1,4 +1,4 @@
-// Load and render all movie sections from home API
+﻿// Load and render all movie sections from home API
 async function loadHomeMovies() {
     try {
         const response = await movieAPI.fetchWithFallback('/home', {
@@ -105,7 +105,7 @@ function renderLatestMoviesSection(movies) {
 
     const html = `
         <section class="py-4 md:py-5 bg-transparent">
-            <div class="w-full px-4 md:px-10 lg:px-16">
+            <div class="w-full px-4 md:px-6 lg:px-8">
                 <div class="flex items-center justify-between mb-8">
                     <h2 class="text-3xl font-bold text-white flex items-center gap-3">
                         <span class="w-1.5 h-8 bg-primary rounded-full block shadow-[0_0_10px_rgba(242,242,13,0.5)]"></span>
@@ -129,9 +129,9 @@ function renderLatestMoviesSection(movies) {
                                 <div class="aspect-[2/3] w-full overflow-hidden relative">
                                             <img alt="Xem Phim ${movie.name} (${movie.year}) Full HD Vietsub"
                                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${hiddenUI.imgClass}"
-                                                data-src="${typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : `https://phimimg.com/${movie.poster_url || movie.thumb_url}`}"
+                                                data-src="${typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : `https://img.ophimimg.com/${movie.poster_url || movie.thumb_url.startsWith('uploads/') ? '' : 'uploads/movies/'}${movie.poster_url || movie.thumb_url}`}"
                                                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 3'%3E%3C/svg%3E"
-                                                onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" />
+                                                onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
                                     ${hiddenUI.badge}
                                     ${!hiddenUI.badge ? `
                                     <div class="absolute top-2 left-2 bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded">
@@ -226,7 +226,7 @@ function renderAllSections(sections) {
 
         return `
             <section class="py-1 md:py-1 ${bgClass}">
-                <div class="w-full px-4 md:px-10 lg:px-16">
+                <div class="w-full px-4 md:px-6 lg:px-8">
                     <div class="flex items-center justify-between mb-3">
                         <h2 class="text-3xl font-bold text-white flex items-center gap-3">
                             <span class="w-1.5 h-8 bg-primary rounded-full block shadow-[0_0_10px_rgba(242,242,13,0.5)]"></span>
@@ -252,9 +252,9 @@ function renderAllSections(sections) {
                                     <div class="aspect-[2/3] w-full overflow-hidden relative">
                                         <img alt="Xem Phim ${movie.name} (${movie.year}) Vietsub"
                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${hiddenUI.imgClass}"
-                                            data-src="${typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : `https://phimimg.com/${movie.poster_url || movie.thumb_url}`}"
+                                            data-src="${typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : `https://img.ophimimg.com/${movie.poster_url || movie.thumb_url.startsWith('uploads/') ? '' : 'uploads/movies/'}${movie.poster_url || movie.thumb_url}`}"
                                             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 3'%3E%3C/svg%3E"
-                                            onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'" />
+                                            onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
                                         ${hiddenUI.badge}
                                         ${!hiddenUI.badge ? `
                                         <div class="absolute top-2 left-2 bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded">
@@ -344,8 +344,8 @@ function renderVietnameseMovies(movies) {
             <div class="aspect-[2/3] w-full overflow-hidden relative">
                 <img alt="Xem Phim ${movie.name} (${movie.year}) Thuyết Minh Vietsub"
                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${hiddenUI.imgClass}"
-                    src="${typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : `https://phimimg.com/${movie.poster_url || movie.thumb_url}`}"
-                    onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'"
+                    src="${typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : `https://img.ophimimg.com/${movie.poster_url || movie.thumb_url.startsWith('uploads/') ? '' : 'uploads/movies/'}${movie.poster_url || movie.thumb_url}`}"
+                    onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
                     loading="lazy" />
                 ${hiddenUI.badge}
                 ${!hiddenUI.badge ? `
@@ -395,3 +395,6 @@ window.addEventListener('hiddenMoviesSynced', () => {
     console.log('Hidden movies synced, re-rendering home sections...');
     loadHomeMovies();
 });
+
+
+

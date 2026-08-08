@@ -1,4 +1,4 @@
-// Banner Management Script - MongoDB API Version
+﻿// Banner Management Script - MongoDB API Version
 
 let loadedMovies = [];
 let localCurrentPage = 1;
@@ -147,10 +147,10 @@ function renderBanners() {
     tbody.innerHTML = pageItems.map(banner => `
         <tr class="hover:bg-white/5 transition-colors">
             <td>
-                <img src="https://phimimg.com/${banner.thumbUrl}"
+                <img src="https://img.ophimimg.com/uploads/movies/${banner.thumbUrl}"
                      alt="${banner.name}"
                      class="banner-thumb"
-                     onerror="this.src='https://via.placeholder.com/80x120?text=No+Image'">
+                     onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
             </td>
             <td>
                 <div class="movie-title" style="font-size:13.5px;font-weight:600; color:var(--text-primary);">${banner.name}</div>
@@ -251,10 +251,10 @@ function renderActiveBanner() {
         const cleanContent = activeBanner.content ? activeBanner.content.replace(/<[^>]*>/g, '') : 'Không có mô tả';
         content.innerHTML = `
             <div style="display:flex;gap:24px;align-items:flex-start">
-                <img src="https://phimimg.com/${activeBanner.thumbUrl}"
+                <img src="https://img.ophimimg.com/uploads/movies/${activeBanner.thumbUrl}"
                      alt="${activeBanner.name}"
                      class="banner-active-poster"
-                     onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
+                     onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
                 <div style="flex:1; min-width: 0;">
                     <h3 style="font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${activeBanner.name}</h3>
                     <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${activeBanner.originName || activeBanner.origin_name || ''}</p>
@@ -513,10 +513,10 @@ function displayMovies(movies) {
         
         return `
         <div class="movie-pick-card">
-            <img src="https://phimimg.com/${movie.thumb_url}"
+            <img src="https://img.ophimimg.com/uploads/movies/${movie.thumb_url}"
                  alt="${movie.name}"
                  class="movie-pick-thumb"
-                 onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
+                 onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
             <div class="movie-pick-body">
                 <div class="movie-pick-title">${movie.name}</div>
                 <div class="movie-pick-meta">
@@ -791,9 +791,9 @@ function renderThumbnailGrid() {
              ondragend="onThumbDragEnd(event)">
             <span class="thumb-card-order">${idx + 1}</span>
             <button class="thumb-card-remove" onclick="removeFromThumbnail('${item.movieSlug}')" title="Xóa">✕</button>
-            <img src="https://phimimg.com/${item.thumbUrl}"
+            <img src="https://img.ophimimg.com/uploads/movies/${item.thumbUrl}"
                  alt="${item.name}"
-                 onerror="this.src='https://via.placeholder.com/100x140?text=No+Img'">
+                 onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
             <div class="thumb-card-body">
                 <div class="thumb-card-name" title="${item.name}">${item.name}</div>
                 <div style="font-size:10px;color:var(--text-muted)">${item.year || ''}</div>
@@ -980,7 +980,7 @@ function selectCategoryBgMovie(movie) {
     const inputId = pathMap[categoryBgSelectionMode];
     if (inputId) {
         const inputEl = document.getElementById(inputId);
-        const imageUrl = movie.thumb_url.startsWith('http') ? movie.thumb_url : `https://phimimg.com/${movie.thumb_url}`;
+        const imageUrl = movie.thumb_url.startsWith('http') ? movie.thumb_url : `https://img.ophimimg.com/${movie.thumb_url.startsWith('uploads/') ? '' : 'uploads/movies/'}${movie.thumb_url}`;
         
         if (inputEl) {
             inputEl.value = imageUrl;
@@ -1018,7 +1018,7 @@ async function previewCatBg(input, previewId, apiPath = null) {
         img.src = val;
     } else {
         // Fetch from OPhim to show what is currently active
-        img.src = 'https://via.placeholder.com/80x45?text=Loading';
+        img.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E';
         if (apiPath) {
             try {
                 const response = await movieAPI.fetchWithFallback(`/${apiPath}?page=1&limit=1`, {
@@ -1028,16 +1028,16 @@ async function previewCatBg(input, previewId, apiPath = null) {
                 const data = await response.json();
                 if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items && data.data.items.length > 0) {
                     const thumbUrl = data.data.items[0].thumb_url;
-                    img.src = thumbUrl.startsWith('http') ? thumbUrl : `https://phimimg.com/${thumbUrl}`;
+                    img.src = thumbUrl.startsWith('http') ? thumbUrl : `https://img.ophimimg.com/${thumbUrl.startsWith('uploads/') ? '' : 'uploads/movies/'}${thumbUrl}`;
                 } else {
-                    img.src = 'https://via.placeholder.com/80x45?text=Auto';
+                    img.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E';
                 }
             } catch (e) {
                 console.error('Failed to preview auto bg:', e);
-                img.src = 'https://via.placeholder.com/80x45?text=Auto';
+                img.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E';
             }
         } else {
-            img.src = 'https://via.placeholder.com/80x45?text=Auto';
+            img.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E';
         }
     }
 }
