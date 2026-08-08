@@ -1,4 +1,4 @@
-﻿// Country Sections - Unified Frame Layout with Landscape Cards
+// Country Sections - Unified Frame Layout with Landscape Cards
 // Phim Hàn Quốc, Trung Quốc, US-UK
 
 const COUNTRY_CONFIGS = {
@@ -27,7 +27,7 @@ function createLandscapeMovieCard(movie) {
     const rawImg = movie.poster_url || movie.thumb_url || '';
     const posterUrl = (typeof imageOptimizer !== 'undefined' && rawImg)
         ? imageOptimizer.optimizeImageUrl(rawImg, 480, 70)
-        : (rawImg.startsWith('http') ? rawImg : `https://img.ophimimg.com/${rawImg.startsWith('uploads/') ? '' : 'uploads/movies/'}${rawImg}`);
+        : (rawImg.startsWith('http') ? rawImg : `https://img.ophimimg.com/${rawImg}`);
     const detailUrl = `movie-detail.html?slug=${movie.slug}`;
     const hiddenUI = window.getHiddenMovieOverlay ? window.getHiddenMovieOverlay(movie.slug) : { badge: '', imgClass: '', containerClass: '' };
     
@@ -37,10 +37,16 @@ function createLandscapeMovieCard(movie) {
         <div class="landscape-card ${hiddenUI.containerClass}">
             <a href="${detailUrl}">
                 <div class="landscape-poster">
-                    <img src="${posterUrl}" 
+                    <img data-src="${posterUrl}" 
                          alt="${movie.name}" 
                          class="${hiddenUI.imgClass}"
-                         onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+                         data-tmdb-slug="${movie.slug}"
+                         data-tmdb-id="${movie.tmdb?.id || ''}"
+                         data-tmdb-name="${(movie.name || '').replace(/"/g, '&quot;')}"
+                         data-tmdb-year="${movie.year || ''}"
+                         data-tmdb-type="poster"
+                         src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
                          loading="lazy" />
                     
                     <div class="landscape-overlay"></div>

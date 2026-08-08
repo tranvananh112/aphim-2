@@ -1,4 +1,4 @@
-﻿// Movie Detail Page Script
+// Movie Detail Page Script
 // --- Anti-FOUC CSS injection (Mobile layout jump fix) ---
 if (!document.getElementById('anti-fouc-style')) {
     const style = document.createElement('style');
@@ -303,7 +303,21 @@ function renderMovieDetail(movie) {
                 { opacity: 1, transform: 'scale(1)' }
             ], { duration: 600, easing: 'ease-out' });
         };
-        posterImg.src = movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 600, 85, true);
+        if (typeof imageOptimizer !== 'undefined') {
+            imageOptimizer.getTMDBImageUrl({
+                dataset: {
+                    tmdbSlug: movie.slug,
+                    tmdbId: movie.tmdb?.id || '',
+                    tmdbName: movie.name,
+                    tmdbYear: movie.year,
+                    tmdbType: 'poster'
+                }
+            }).then(url => {
+                posterImg.src = url || movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 600, 85, true);
+            });
+        } else {
+            posterImg.src = movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 600, 85, true);
+        }
         posterImg.alt = `Xem Phim ${movie.name} (${movie.year}) Full HD Vietsub tại APhim`;
     }
 
@@ -319,7 +333,21 @@ function renderMovieDetail(movie) {
                 { opacity: targetOpacity }
             ], { duration: 800, easing: 'ease-out' });
         };
-        bgImg.src = movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 1200, 90, true);
+        if (typeof imageOptimizer !== 'undefined') {
+            imageOptimizer.getTMDBImageUrl({
+                dataset: {
+                    tmdbSlug: movie.slug,
+                    tmdbId: movie.tmdb?.id || '',
+                    tmdbName: movie.name,
+                    tmdbYear: movie.year,
+                    tmdbType: 'backdrop'
+                }
+            }).then(url => {
+                bgImg.src = url || movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 1200, 90, true);
+            });
+        } else {
+            bgImg.src = movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 1200, 90, true);
+        }
     }
 
     // Update title

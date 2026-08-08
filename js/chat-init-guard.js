@@ -52,7 +52,7 @@
         if (existing.indexOf('Material+Icons') === -1 || existing.indexOf('Material+Icons+') !== -1 && existing.indexOf('Material+Icons|') === -1 && existing.indexOf('|Material+Icons') === -1) {
             var link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'https://fonts.googleapis.com/icon?family=Material+Icons&display=block';
+            link.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
             document.head.appendChild(link);
         }
     }
@@ -62,4 +62,3 @@
         fixIcons();
     }
 })();
-

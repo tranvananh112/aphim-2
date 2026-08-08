@@ -17,10 +17,15 @@
 
         try {
             // Fetch from phim-chieu-rap API
-            const data = await movieAPI.getMoviesFromMultipleSources(1, 'phim-chieu-rap');
+            const response = await movieAPI.fetchWithFallback('/danh-sach/phim-chieu-rap?page=1&limit=10', {
+                method: 'GET',
+                headers: { 'accept': 'application/json' }
+            });
 
-            if (data && (data.status === 'success' || data.status === true) && data.data && data.data.items && data.data.items.length > 0) {
-                renderComingSoonMovies(data.data.items.slice(0, 10));
+            const data = await response.json();
+
+            if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
+                renderComingSoonMovies(data.data.items);
             } else {
                 loading.innerHTML = '<p class="text-gray-400">Không thể tải phim chiếu rạp</p>';
             }
@@ -49,11 +54,17 @@
                 <div class="ranking-item group" data-rank="${rank}">
                     <a href="${detailUrl}">
                         <div class="ranking-poster-w">
-                            <img src="${optimizedUrl}" 
+                            <img data-src="${optimizedUrl}" 
                                  alt="${movie.name}" 
                                  class="w-full h-full object-cover"
-                                 onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
-                                 loading="lazy" />
+                                 data-tmdb-slug="${movie.slug}"
+                                 data-tmdb-id="${movie.tmdb?.id || ''}"
+                                 data-tmdb-name="${(movie.name || '').replace(/"/g, '&quot;')}"
+                                 data-tmdb-year="${movie.year || ''}"
+                                 data-tmdb-type="poster"
+                                 src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E"
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+                                  />
                             
                             <div class="ranking-badges-bottom">
                                 <span class="badge-pd">PĐ. ${episodes.replace(/[^0-9]/g, '') || 'HD'}</span>
@@ -106,6 +117,3 @@
     // Expose to window
     window.loadComingSoonMovies = loadComingSoonMovies;
 })();
-
-
-

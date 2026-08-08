@@ -2,7 +2,7 @@
 // API Documentation: https://developers.themoviedb.org/3
 
 const TMDB_API_KEY = '5fb3c8d9ad2ca4cd2029836befcc3ab5'; // TMDB API Key (v3)
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+const TMDB_BASE_URL = 'https://api.tmdb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w185';
 
 // Wrapper to bypass VN ISP blocking via multiple fallback proxies

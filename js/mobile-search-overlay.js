@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    A PHIM — Mobile Search Overlay JS
    Live autocomplete khi tap icon Search trên mobile
    ========================================================================== */
@@ -166,15 +166,23 @@
         const display = movies.slice(0, 5);
         let html = '';
         display.forEach(function (movie) {
-            const thumb = movie.thumb_url || movie.poster_url || '';
-            const poster = thumb ? `https://img.ophimimg.com/${thumb.startsWith('uploads/') ? '' : 'uploads/movies/'}${thumb}` : '';
+            const rawImg = movie.thumb_url || movie.poster_url || '';
+            const poster = (typeof imageOptimizer !== 'undefined' && rawImg)
+                ? imageOptimizer.optimizeImageUrl(rawImg, 100, 80)
+                : (rawImg ? `https://img.ophimimg.com/${rawImg.startsWith('uploads/') ? '' : 'uploads/movies/'}${rawImg}` : '');
             const badge = movie.year || movie.episode_current || 'HD';
             const title = (movie.name || '').replace(/</g, '&lt;');
             const enTitle = (movie.origin_name || '').replace(/</g, '&lt;');
 
             html += `
                 <a href="movie-detail.html?slug=${movie.slug}" class="mso-suggest-row">
-                    <img src="${poster}" class="mso-suggest-thumb" alt="${title}" loading="lazy"
+                    <img data-src="${poster}" class="mso-suggest-thumb" alt="${title}" loading="lazy"
+                         data-tmdb-slug="${movie.slug}"
+                         data-tmdb-id="${movie.tmdb?.id || ''}"
+                         data-tmdb-name="${title.replace(/"/g, '&quot;')}"
+                         data-tmdb-year="${movie.year || ''}"
+                         data-tmdb-type="poster"
+                         src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22150%22%3E%3Crect fill=%22%23111%22 width=%22100%22 height=%22150%22/%3E%3C/svg%3E"
                          onerror="this.style.display='none'">
                     <div class="mso-suggest-info">
                         <div class="mso-suggest-title">${title}</div>

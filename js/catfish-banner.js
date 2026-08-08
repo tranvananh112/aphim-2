@@ -28,8 +28,14 @@
 
         banners: [
             {
+                img: '/quangcao/8svui/BANNER.mp4',
+                url: 'https://8svui.com',
+                label: '8SVui — Khuyến Mãi 150%',
+                isVideo: true
+            },
+            {
                 img: '/ads/catfish/728x90-AFF-Cup.gif',
-                url: 'https://vsbet276.com/p/BSYk',
+                url: 'https://vsbet294.com/p/BSYk',
                 label: 'VSBet — Nạp Đầu Nhận 68,888,000đ'
             },
             {
@@ -48,6 +54,13 @@
     /* ─────────────────────────────────────────────────────────
        HELPERS
     ───────────────────────────────────────────────────────── */
+
+    function renderMedia(item) {
+        if (item.isVideo || (item.img && item.img.endsWith('.mp4'))) {
+            return '<video src="' + item.img + '" autoplay loop muted playsinline disablePictureInPicture style="width:100%; height:100%; object-fit:cover; display:block; pointer-events:none;"></video>';
+        }
+        return '<img src="' + item.img + '" alt="' + item.label + '" loading="eager">';
+    }
 
     function isExpired(key, hours) {
         try {
@@ -111,17 +124,27 @@
         bar.setAttribute('aria-label', 'Quảng cáo đối tác');
         bar.innerHTML =
             '<div class="catfish-inner">' +
-                '<div class="catfish-row">' +
-                    '<a class="catfish-item" href="' + b[0].url + '" target="_blank" rel="noopener nofollow" aria-label="' + b[0].label + '">' +
-                        '<img src="' + b[0].img + '" alt="' + b[0].label + '" loading="eager">' +
+                '<!-- Row 1: Desktop (8SVui + VSBet) / Mobile (Slot xoay mượt VSBet <-> 8SVui) -->' +
+                '<div class="catfish-row catfish-row-1">' +
+                    '<a class="catfish-item catfish-item-desktop-only" href="' + b[0].url + '" target="_blank" rel="noopener nofollow" aria-label="' + b[0].label + '">' +
+                        renderMedia(b[0]) +
                     '</a>' +
+                    '<div class="catfish-rotate-slot">' +
+                        '<a class="catfish-item catfish-slide slide-active" href="' + b[1].url + '" target="_blank" rel="noopener nofollow" aria-label="' + b[1].label + '">' +
+                            renderMedia(b[1]) +
+                        '</a>' +
+                        '<a class="catfish-item catfish-slide" href="' + b[0].url + '" target="_blank" rel="noopener nofollow" aria-label="' + b[0].label + '">' +
+                            renderMedia(b[0]) +
+                        '</a>' +
+                    '</div>' +
                 '</div>' +
-                '<div class="catfish-row">' +
-                    '<a class="catfish-item" href="' + b[1].url + '" target="_blank" rel="noopener nofollow" aria-label="' + b[1].label + '">' +
-                        '<img src="' + b[1].img + '" alt="' + b[1].label + '" loading="eager">' +
-                    '</a>' +
+                '<!-- Row 2: ColaTV & ColaScore -->' +
+                '<div class="catfish-row catfish-row-2">' +
                     '<a class="catfish-item" href="' + b[2].url + '" target="_blank" rel="noopener nofollow" aria-label="' + b[2].label + '">' +
-                        '<img src="' + b[2].img + '" alt="' + b[2].label + '" loading="eager">' +
+                        renderMedia(b[2]) +
+                    '</a>' +
+                    '<a class="catfish-item" href="' + b[3].url + '" target="_blank" rel="noopener nofollow" aria-label="' + b[3].label + '">' +
+                        renderMedia(b[3]) +
                     '</a>' +
                 '</div>' +
             '</div>' +
@@ -129,6 +152,29 @@
 
         document.body.appendChild(bar);
         document.body.classList.add('aphim-has-catfish');
+
+        // Tự động xoay mượt giữa VSBet và 8SVui ở slot Row 1 (mỗi 3.5s - CHỈ TRÊN MOBILE)
+        var rotateSlot = bar.querySelector('.catfish-rotate-slot');
+        if (rotateSlot) {
+            var slides = rotateSlot.querySelectorAll('.catfish-slide');
+            if (slides.length >= 2) {
+                var currentIdx = 0;
+                setInterval(function () {
+                    // Trên Desktop (> 768px) giữ cố định duy nhất banner VSBet (slide 0), không xoay sang 8SVui
+                    if (window.innerWidth > 768) {
+                        if (currentIdx !== 0) {
+                            slides[currentIdx].classList.remove('slide-active');
+                            currentIdx = 0;
+                            slides[0].classList.add('slide-active');
+                        }
+                        return;
+                    }
+                    slides[currentIdx].classList.remove('slide-active');
+                    currentIdx = (currentIdx + 1) % slides.length;
+                    slides[currentIdx].classList.add('slide-active');
+                }, 3500);
+            }
+        }
 
         requestAnimationFrame(function () {
             requestAnimationFrame(function () { 
@@ -142,7 +188,6 @@
                 bar.classList.remove('visible');
                 document.body.classList.remove('aphim-has-catfish');
                 setTimeout(function () { if (bar.parentNode) bar.parentNode.removeChild(bar); }, 450);
-                // Đánh dấu đã đóng theo từng trang (sessionStorage)
                 var pageKey = CONFIG.catfish.sessionKey;
                 setSession(pageKey);
             });

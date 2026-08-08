@@ -446,10 +446,16 @@ function loadFavorites() {
             <div class="relative flex gap-4 p-4 bg-black/30 border border-white/5 rounded-lg hover:border-primary/50 transition-all group">
                 <div class="relative w-24 aspect-[2/3] flex-shrink-0 rounded-md overflow-hidden bg-black/40">
                     <a href="movie-detail.html?slug=${movie.slug}" class="block w-full h-full">
-                        <img src="${movieAPI.getImageURL(movie.thumb_url)}" 
+                        <img data-src="${movieAPI.getImageURL(movie.thumb_url)}" 
                              alt="${movie.name}"
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                             onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
+                             data-tmdb-slug="${movie.slug}"
+                             data-tmdb-id="${movie.tmdb?.id || ''}"
+                             data-tmdb-name="${(movie.name || '').replace(/"/g, '&quot;')}"
+                             data-tmdb-year="${movie.year || ''}"
+                             data-tmdb-type="poster"
+                             src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E"
+                             onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
                     </a>
                     <button onclick="event.preventDefault(); event.stopPropagation(); removeFavorite('${movie.slug}')" 
                             class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-md border border-white/10 transition-all active:scale-90 z-10"
@@ -525,10 +531,16 @@ function loadHistory() {
                 <a href="watch.html?slug=${movie.slug}${movie.episode ? `&episode=${movie.episode}` : ''}" 
                    class="flex gap-4 p-4 bg-black/30 border border-white/5 rounded-lg hover:border-primary/50 transition-all group">
                     <div class="w-24 aspect-[2/3] flex-shrink-0 rounded-md overflow-hidden">
-                        <img src="${movieAPI.getImageURL(movie.thumb_url)}" 
+                        <img data-src="${movieAPI.getImageURL(movie.thumb_url)}" 
                              alt="${movie.name}"
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                             onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
+                             data-tmdb-slug="${movie.slug}"
+                             data-tmdb-id="${movie.tmdb?.id || ''}"
+                             data-tmdb-name="${(movie.name || '').replace(/"/g, '&quot;')}"
+                             data-tmdb-year="${movie.year || ''}"
+                             data-tmdb-type="poster"
+                             src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E"
+                             onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
                     </div>
                     <div class="flex-1 min-w-0">
                         <h4 class="font-bold text-white group-hover:text-primary transition-colors truncate">
@@ -744,7 +756,14 @@ window.viewPlaylist = function(id) {
                              onmouseout="this.style.background='rgba(255,255,255,0.03)';this.style.transform='translateX(0)';this.style.borderColor='rgba(255,255,255,0.05)'">
                             <a href="movie-detail.html?slug=${movie.slug}" style="display:flex;align-items:center;gap:14px;text-decoration:none;min-width:0;flex:1;">
                                 <div style="position:relative;flex-shrink:0;">
-                                    <img src="${movieAPI.getImageURL(movie.thumb_url)}" style="width:50px;height:75px;border-radius:10px;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,0.3);" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
+                                    <img data-src="${movieAPI.getImageURL(movie.thumb_url)}" 
+                                         data-tmdb-slug="${movie.slug}"
+                                         data-tmdb-id="${movie.tmdb?.id || ''}"
+                                         data-tmdb-name="${(movie.name || '').replace(/"/g, '&quot;')}"
+                                         data-tmdb-year="${movie.year || ''}"
+                                         data-tmdb-type="poster"
+                                         src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E"
+                                         style="width:50px;height:75px;border-radius:10px;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,0.3);" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
                                     <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.4), transparent);border-radius:10px;"></div>
                                 </div>
                                 <div style="min-width:0;">

@@ -1,4 +1,4 @@
-﻿// ================================================================
+// ================================================================
 // A PHIM � Hero Banner v10
 // Interactive Slide System: Click Thumbnail + Swipe/Drag
 // + Auto-return to Admin Banner sau 6 gi�y kh�ng tuong t�c
@@ -114,15 +114,21 @@ function getHeroImageUrl(movie) {
         if (cached) {
             const tmdbData = JSON.parse(cached);
             if (tmdbData) {
-                // Luôn ưu tiên ảnh ngang (backdrop) cho Hero Banner trên cả PC & Mobile
+                if (!isMobile && tmdbData.backdrop) return tmdbData.backdrop;
+                if (isMobile && tmdbData.poster) return tmdbData.poster;
                 if (tmdbData.backdrop) return tmdbData.backdrop;
                 if (tmdbData.poster) return tmdbData.poster;
             }
         }
     } catch(e) {}
     
-    // Luôn ưu tiên ảnh ngang (thumb_url) cho Hero Banner
-    return movie.thumb_url || movie.poster_url || '';
+    if (!isMobile) {
+        // Desktop: Ưu tiên ảnh ngang (thumb_url là ảnh ngang)
+        return movie.thumb_url || movie.poster_url || '';
+    } else {
+        // Mobile: Ưu tiên ảnh dọc (poster_url là ảnh dọc)
+        return movie.poster_url || movie.thumb_url || '';
+    }
 }
 
 // -- State Logo Cache & ID ch?ng xung d?t (Race Condition Protection) --
@@ -253,7 +259,7 @@ async function loadHeroLogo(movie) {
         // Search by origin_name or name if TMDB ID is missing
         if (!tmdbId) {
             const query = encodeURIComponent(movie.origin_name || movie.name);
-            const searchUrl = `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${query}`;
+            const searchUrl = `https://api.tmdb.org/3/search/multi?api_key=${API_KEY}&query=${query}`;
             const searchRes = await secureFetch(searchUrl);
             if (loadId !== currentLogoLoadId) return; // H?y n?u slide d chuy?n
 
@@ -275,7 +281,7 @@ async function loadHeroLogo(movie) {
             return;
         }
 
-        const url = `https://api.themoviedb.org/3/${type}/${tmdbId}/images?api_key=${API_KEY}`;
+        const url = `https://api.tmdb.org/3/${type}/${tmdbId}/images?api_key=${API_KEY}`;
         const res = await secureFetch(url);
         if (loadId !== currentLogoLoadId) return;
         if (!res) {
@@ -354,19 +360,8 @@ function switchHeroSlide(newIndex, skipThumbnailHighlight, isAutoReturn) {
     const rawUrl = getHeroImageUrl(movie);
     const optUrl = buildImageUrl(rawUrl, 1200);
     if (optUrl) {
-        // Tăng tốc cực đại: báo cho trình duyệt tải ở mức ưu tiên cao nhất
-        if (!document.querySelector(`link[href="${optUrl}"]`)) {
-            const preloadLink = document.createElement('link');
-            preloadLink.rel = 'preload';
-            preloadLink.as = 'image';
-            preloadLink.href = optUrl;
-            preloadLink.fetchPriority = 'high';
-            document.head.appendChild(preloadLink);
-        }
-        
         const preImg = new Image();
-        preImg.fetchPriority = 'high'; // Đảm bảo mức độ ưu tiên
-        preImg.src = optUrl; // bắt đầu tải ngay, không chờ
+        preImg.src = optUrl; // b?t d?u t?i ngay, khng ch?
     }
 
     // -- PHASE 1: Fade OUT (nhanh hon) --
@@ -836,7 +831,7 @@ function renderThumbnails(movies) {
 
     container.innerHTML = movies.map((movie, i) => {
         const imgSrc = (typeof imageOptimizer !== 'undefined')
-            ? imageOptimizer.optimizeImageUrl(movie.thumb_url || movie.poster_url, 300, 75, 'thumbnail')
+            ? imageOptimizer.optimizeImageUrl(movie.thumb_url || movie.poster_url, 300, 75)
             : buildImageUrl(movie.thumb_url || movie.poster_url, 300);
 
         const slideIndex = i + 1;
@@ -853,9 +848,15 @@ function renderThumbnails(movies) {
                 <img
                     alt="${movie.name || ''}"
                     class="w-full h-full object-cover object-center"
-                    src="${imgSrc}"
-                    onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
-                    loading="lazy" />
+                    data-src="${imgSrc}"
+                    data-tmdb-slug="${movie.slug}"
+                    data-tmdb-id="${movie.tmdb?.id || ''}"
+                    data-tmdb-name="${(movie.name || '').replace(/"/g, '&quot;')}"
+                    data-tmdb-year="${movie.year || ''}"
+                    data-tmdb-type="backdrop"
+                    src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E"
+                    onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+                     />
             </div>
             <div class="hero-thumb-glow"></div>
         </div>`;

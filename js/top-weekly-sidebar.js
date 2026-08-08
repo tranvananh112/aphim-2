@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const sidebar = document.getElementById('top-weekly-sidebar');
     if (!sidebar) return;
 
@@ -41,7 +41,10 @@
             
             const imgBase = imgDomain.endsWith('/') ? imgDomain.slice(0, -1) : imgDomain;
             const fullImgPath = false ? imgBase : `${imgBase}/uploads/movies`;
-            const thumbUrl = item.thumb_url.startsWith('http') ? item.thumb_url : `${fullImgPath}/${item.thumb_url}`;
+            const rawImg = item.thumb_url || item.poster_url || '';
+            const thumbUrl = (typeof imageOptimizer !== 'undefined' && rawImg)
+                ? imageOptimizer.optimizeImageUrl(rawImg, 100, 80)
+                : (rawImg.startsWith('http') ? rawImg : `${fullImgPath}/${rawImg}`);
             const title = item.name || item.origin_name;
             const badge = item.quality || 'HD';
             const episode = item.episode_current || 'Tập 1';
@@ -50,7 +53,13 @@
             html += `
                 <a href="movie-detail.html?slug=${item.slug}" class="ap-top-weekly-item group">
                     <div class="ap-top-num" style="--num-color: ${numColor};">${num}</div>
-                    <img src="${thumbUrl}" alt="${title}" class="ap-top-thumb" loading="lazy" />
+                    <img data-src="${thumbUrl}" alt="${title}" class="ap-top-thumb" loading="lazy"
+                         data-tmdb-slug="${item.slug}"
+                         data-tmdb-id="${item.tmdb?.id || ''}"
+                         data-tmdb-name="${title.replace(/"/g, '&quot;')}"
+                         data-tmdb-year="${item.year || ''}"
+                         data-tmdb-type="poster"
+                         src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2280%22%3E%3Crect fill=%22%23111%22 width=%2260%22 height=%2280%22/%3E%3C/svg%3E" />
                     <div class="ap-top-info">
                         <h4 class="ap-top-name group-hover:text-red-500 transition-colors">${title}</h4>
                         <div class="ap-top-meta">

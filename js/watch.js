@@ -57,9 +57,8 @@ async function loadMovieAndPlay(slug, episodeSlug) {
             if (requestedServer !== null && !isNaN(requestedServer) && parseInt(requestedServer) < currentMovie.episodes.length) {
                 currentServerIndex = parseInt(requestedServer);
             } else {
-                // Tự động chọn nguồn có link video sống đầu tiên nếu Nguồn 1 rỗng link
-                const validIdx = currentMovie.episodes.findIndex(s => s.server_data && s.server_data.some(ep => ep.link_m3u8 || ep.link_embed));
-                currentServerIndex = validIdx !== -1 ? validIdx : 0;
+                // Luôn ưu tiên Nguồn 1 (OPhim, index 0) - chỉ dùng nguồn khác khi người dùng tự chọn
+                currentServerIndex = 0;
             }
 
             const serverData = currentMovie.episodes[currentServerIndex]?.server_data || currentMovie.episodes[0].server_data;
@@ -103,9 +102,8 @@ async function loadMovieAndPlay(slug, episodeSlug) {
                     if (requestedServer !== null && !isNaN(requestedServer) && parseInt(requestedServer) < currentMovie.episodes.length) {
                         currentServerIndex = parseInt(requestedServer);
                     } else {
-                        // Tự động chọn nguồn có link video sống đầu tiên nếu Nguồn 1 rỗng link
-                        const validIdx = currentMovie.episodes.findIndex(s => s.server_data && s.server_data.some(ep => ep.link_m3u8 || ep.link_embed));
-                        currentServerIndex = validIdx !== -1 ? validIdx : 0;
+                        // Luôn ưu tiên Nguồn 1 (OPhim, index 0) - chỉ dùng nguồn khác khi người dùng tự chọn
+                        currentServerIndex = 0;
                     }
 
                     const serverData = currentMovie.episodes[currentServerIndex]?.server_data || currentMovie.episodes[0].server_data;
@@ -139,74 +137,48 @@ async function loadMovieAndPlay(slug, episodeSlug) {
 
 // 🔄 Fetch VSMOV qua proxy server-side (tránh CORS)
 // isPrimary=true  → OPhim thất bại, dùng VSMOV làm nguồn chính + tự phát
-// 🔄 Helper fetch nguồn phụ thông minh: Thử proxy server-side trước, nếu fail thì gọi thẳng API (có CORS)
+// 🔄 Helper fetch nguồn phụ thông minh: Thử proxy server-side trước, nếu fail thì gọi thẳng phimapi.com (có CORS)
 async function getSecondaryEpisodes(slug) {
-    // Proxy Node.js (chạy ở port 3001)
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     let proxyUrl = `/api/vsmov/${encodeURIComponent(slug)}`;
-    if (isLocalhost && window.location.port !== '3001') {
-        proxyUrl = `http://localhost:3001/api/vsmov/${encodeURIComponent(slug)}`;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        if (window.location.port !== '3000') {
+            proxyUrl = `http://localhost:3000/api/vsmov/${encodeURIComponent(slug)}`;
+        }
     }
 
     try {
-        const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
+        const res = await fetch(proxyUrl);
         if (res.ok) {
             const data = await res.json();
             if (data.status && data.episodes && data.episodes.length > 0) {
-                console.log('✅ Nguồn phụ từ proxy:', data.source);
                 return data;
             }
         }
     } catch (e) {
-        console.warn('⚠️ Proxy fetch failed:', e.message);
+        console.warn('⚠️ Proxy fetch failed, trying direct phimapi.com:', e.message);
     }
 
-    // Nguồn 2: phimapi.com (API mới nhất, không CORS)
     try {
-        const phimapiUrl = `https://phimapi.com/phim/${encodeURIComponent(slug)}`;
-        const res = await fetch(phimapiUrl, { signal: AbortSignal.timeout(6000) });
+        const directUrl = `https://phimapi.com/phim/${encodeURIComponent(slug)}`;
+        const res = await fetch(directUrl);
         if (res.ok) {
             const json = await res.json();
-            const episodes = json.episodes || json.data?.item?.episodes || json.movie?.episodes;
-            if (episodes && episodes.length > 0) {
-                console.log('✅ Nguồn phụ từ phimapi.com');
+            if (json && json.episodes && json.episodes.length > 0) {
                 return {
                     status: true,
                     source: 'phimapi.com',
-                    episodes: episodes,
-                    movie: json.movie || json.data?.item || null
+                    episodes: json.episodes,
+                    movie: json.movie || null
                 };
             }
         }
     } catch (e) {
-        console.warn('⚠️ phimapi.com fetch failed:', e.message);
+        console.warn('⚠️ Direct phimapi.com fetch failed:', e.message);
     }
 
-    // Nguồn 3: ophim1.com v1/api (endpoint đúng)
-    try {
-        const ophimUrl = `https://ophim1.com/v1/api/phim/${encodeURIComponent(slug)}`;
-        const res = await fetch(ophimUrl, { signal: AbortSignal.timeout(6000) });
-        if (res.ok) {
-            const json = await res.json();
-            const episodes = json?.data?.item?.episodes || json.episodes;
-            if (episodes && episodes.length > 0) {
-                console.log('✅ Nguồn phụ từ ophim1.com v1/api');
-                return {
-                    status: true,
-                    source: 'ophim1.com',
-                    episodes: episodes,
-                    movie: json?.data?.item || null
-                };
-            }
-        }
-    } catch (e) {
-        console.warn('⚠️ ophim1.com v1/api fetch failed:', e.message);
-    }
-
-    // Nguồn 4: nguonc.com
     try {
         const nguonCUrl = `https://phim.nguonc.com/api/film/${encodeURIComponent(slug)}`;
-        const res = await fetch(nguonCUrl, { signal: AbortSignal.timeout(6000) });
+        const res = await fetch(nguonCUrl);
         if (res.ok) {
             const json = await res.json();
             if (json && json.status === 'success' && json.movie && json.movie.episodes) {
@@ -219,7 +191,6 @@ async function getSecondaryEpisodes(slug) {
                         link_m3u8: it.m3u8 || ''
                     }))
                 }));
-                console.log('✅ Nguồn phụ từ nguonc.com');
                 return {
                     status: true,
                     source: 'nguonc.com',
@@ -237,10 +208,9 @@ async function getSecondaryEpisodes(slug) {
             }
         }
     } catch (e) {
-        console.warn('⚠️ nguonc.com fetch failed:', e.message);
+        console.warn('⚠️ Direct NguonC fetch failed:', e.message);
     }
 
-    console.warn('⚠️ Tất cả nguồn phụ đều thất bại cho slug:', slug);
     return null;
 }
 
@@ -329,18 +299,8 @@ async function fetchAndMergeSecondaryServers(slug, isPrimary = false, episodeSlu
         if (added > 0) {
             console.log(`✅ Đã thêm ${added} máy chủ mới (Tổng: ${currentMovie.episodes.length} nguồn)`);
             renderServerList(currentMovie.episodes);
-
-            // Tự động chuyển sang server được chỉ định trên URL nếu có (VD: server=1 cho Nguồn 2)
-            const urlParams = new URLSearchParams(window.location.search);
-            const requestedServer = urlParams.get('server');
-            if (requestedServer !== null && !isNaN(requestedServer)) {
-                const reqIdx = parseInt(requestedServer);
-                if (reqIdx >= 0 && reqIdx < currentMovie.episodes.length && reqIdx !== currentServerIndex) {
-                    console.log(`🎯 [Watch] Tự động chuyển sang Nguồn ${reqIdx + 1} theo đúng yêu cầu trên URL (server=${reqIdx})`);
-                    changeServer(reqIdx);
-                    return;
-                }
-            }
+            // ❌ KHÔNG tự động gọi changeServer hay initializePlayer ở đây
+            // → tránh gọi player nhiều lần gây xung đột luồng video
         }
     } catch (err) {
         console.warn('⚠️ Nguồn phụ thất bại:', err.message);
@@ -551,7 +511,13 @@ function renderMovieInfo(movie, episode) {
     // 🌟 Render Sidebar Premium Movie Card Details
     const sidebarPoster = document.getElementById('sidebar-poster');
     if (sidebarPoster) {
-        sidebarPoster.src = movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 300, 85, true);
+        sidebarPoster.dataset.src = movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 300, 85, true);
+        sidebarPoster.dataset.tmdbSlug = movie.slug;
+        sidebarPoster.dataset.tmdbId = movie.tmdb?.id || '';
+        sidebarPoster.dataset.tmdbName = (movie.name || '').replace(/"/g, '&quot;');
+        sidebarPoster.dataset.tmdbYear = movie.year || '';
+        sidebarPoster.dataset.tmdbType = 'poster';
+        sidebarPoster.src = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E";
         sidebarPoster.alt = movie.name;
     }
 
@@ -907,7 +873,7 @@ async function loadMovieGallery(movie) {
     if (!galleryContainer || !scrollContainer) return;
 
     try {
-        const url = `https://ophim1.com/v1/api/phim/${movie.slug}/images`;
+        const url = `https://phimapi.com/v1/api/phim/${movie.slug}/images`;
         const options = {method: 'GET', headers: {accept: 'application/json'}};
         
         const res = await fetch(url, options);
@@ -1104,6 +1070,25 @@ function renderPlayerPlaceholder(episode) {
             placeholder.addEventListener('mouseleave', () => anim.stop());
         }
     }
+
+    if (currentMovie && typeof imageOptimizer !== 'undefined') {
+        imageOptimizer.getTMDBImageUrl({
+            dataset: {
+                tmdbSlug: currentMovie.slug,
+                tmdbId: currentMovie.tmdb?.id || '',
+                tmdbName: currentMovie.name,
+                tmdbYear: currentMovie.year,
+                tmdbType: 'backdrop'
+            }
+        }).then(url => {
+            if (url) {
+                const bgs = document.querySelectorAll('#playerPlaceholder .bg-cover');
+                bgs.forEach(bg => {
+                    bg.style.backgroundImage = `url('${url}')`;
+                });
+            }
+        });
+    }
 }
 
 // Global callback to start playback on click
@@ -1159,27 +1144,21 @@ function renderServerList(episodes) {
         let borderColor = 'border-blue-500';
         let activeBg = 'bg-blue-500/20';
         let sepColor = 'text-blue-400';
-        let glowShadow = 'shadow-[0_0_12px_rgba(59,130,246,0.5)]';
-        let inactiveBg = 'bg-blue-500/10';
 
-        if (index === 0) { // Ngu?n 1: V�ng
+        if (index === 0) { // Nguồn 1: Vàng
             borderColor = 'border-yellow-500';
             activeBg = 'bg-yellow-500/20';
             sepColor = 'text-yellow-400';
-            glowShadow = 'shadow-[0_0_12px_rgba(234,179,8,0.5)]';
-            inactiveBg = 'bg-yellow-500/10';
-        } else if (index === 1) { // Ngu?n 2: Xanh l�
+        } else if (index === 1) { // Nguồn 2: Xanh lá
             borderColor = 'border-green-500';
             activeBg = 'bg-green-500/20';
             sepColor = 'text-green-400';
-            glowShadow = 'shadow-[0_0_12px_rgba(34,197,94,0.5)]';
-            inactiveBg = 'bg-green-500/10';
         }
 
         if (isActive) {
             return `
                 <button onclick="changeServer(${index})"
-                    class="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 border-2 ${borderColor} ${activeBg} text-white ${glowShadow} cursor-pointer hover:brightness-110">
+                    class="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 border-2 ${borderColor} ${activeBg} text-white shadow-md cursor-pointer">
                     <span class="text-white font-bold">${serverName}</span>
                     <span class="${sepColor} font-bold">|</span>
                     <span class="text-gray-200 font-medium">${epText}</span>
@@ -1188,7 +1167,7 @@ function renderServerList(episodes) {
         } else {
             return `
                 <button onclick="changeServer(${index})"
-                    class="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 border border-white/10 bg-[#323447] hover:bg-white/20 text-gray-300 hover:text-white cursor-pointer">
+                    class="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 border ${borderColor}/60 bg-black/20 hover:bg-white/10 text-gray-300 hover:text-white cursor-pointer">
                     <span>${serverName}</span>
                     <span class="text-gray-500">|</span>
                     <span class="text-gray-400">${epText}</span>
@@ -1198,7 +1177,7 @@ function renderServerList(episodes) {
     }).join('');
 
     container.innerHTML = labelHTML + buttonsHTML;
-    container.className = "flex flex-wrap items-center gap-2 mb-4 w-full";
+    container.className = "flex flex-nowrap overflow-x-auto items-center gap-2 mb-4 w-full pb-2 hide-scrollbar";
 }
 
 window.changeServer = function(index) {
@@ -1428,12 +1407,28 @@ function initializePlayer(episode) {
             controls 
             preload="auto"
             controlsList="nodownload"
-            poster="${movieAPI.getImageURL(currentMovie.thumb_url, 1200, 90, true)}">
+            poster="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%221200%22 height=%22675%22%3E%3Crect fill=%22%23111%22 width=%221200%22 height=%22675%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E">
             Trình duyệt của bạn không hỗ trợ video.
         </video>
     `;
 
     player = document.getElementById('videoPlayer');
+
+    if (currentMovie && typeof imageOptimizer !== 'undefined') {
+        imageOptimizer.getTMDBImageUrl({
+            dataset: {
+                tmdbSlug: currentMovie.slug,
+                tmdbId: currentMovie.tmdb?.id || '',
+                tmdbName: currentMovie.name,
+                tmdbYear: currentMovie.year,
+                tmdbType: 'backdrop'
+            }
+        }).then(url => {
+            if (url && player) {
+                player.poster = url;
+            }
+        });
+    }
 
     // Register mobile touch double-tap handler directly on the video element
     let lastTap = 0;
@@ -1975,7 +1970,14 @@ function renderRecommendations(movies) {
         
         return `
             <a href="movie-detail.html?slug=${movie.slug}" class="watch-rec-item group">
-                <img src="${movieAPI.getImageURL(movie.thumb_url, 300, 85, true)}" alt="${movie.name}" class="watch-rec-thumb" loading="lazy" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
+                <img data-src="${movieAPI.getImageURL(movie.thumb_url, 300, 85, true)}" 
+                     alt="${movie.name}" class="watch-rec-thumb" loading="lazy" 
+                     data-tmdb-slug="${movie.slug}"
+                     data-tmdb-id="${movie.tmdb?.id || ''}"
+                     data-tmdb-name="${(movie.name || '').replace(/"/g, '&quot;')}"
+                     data-tmdb-year="${movie.year || ''}"
+                     data-tmdb-type="poster"
+                     src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
                 <div class="watch-rec-info">
                     <h4 class="watch-rec-name group-hover:text-red-500 transition-colors">${movie.name}</h4>
                     <div class="watch-rec-meta">
@@ -2740,7 +2742,4 @@ document.addEventListener('DOMContentLoaded', () => {
 const style = document.createElement('style');
 style.innerHTML = '#mpbFs, #mab-fs, #fullscreenBtn { display: none !important; }';
 document.head.appendChild(style);
-
-
-
 
