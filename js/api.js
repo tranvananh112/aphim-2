@@ -1,4 +1,4 @@
-﻿// API Service for phimapi.com and Backend
+// API Service for phimapi.com and Backend
 class MovieAPI {
     constructor() {
         this.useBackend = API_CONFIG.USE_BACKEND_FOR_MOVIES || false;
@@ -703,19 +703,7 @@ class MovieAPI {
             return await this.getMovieList(page);
         }
     }
-    // Get Home Page Multi-Section Data
-    async getHome() {
-        try {
-            const response = await this.fetchWithFallback('/home', {
-                headers: { 'accept': 'application/json' }
-            });
-            const data = await response.json();
-            return this.filterHiddenMovies(data);
-        } catch (error) {
-            console.error('Error fetching home data:', error);
-            return null;
-        }
-    }
+
 
     // Get Movie Images (TMDB Posters / Backdrops)
     async getMovieImages(slug) {

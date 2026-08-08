@@ -1,4 +1,4 @@
-﻿// Banner Management Script - MongoDB API Version
+// Banner Management Script - MongoDB API Version
 
 let loadedMovies = [];
 let localCurrentPage = 1;
@@ -8,6 +8,25 @@ let localFilters = {
     status: ''
 };
 let allBanners = []; // Cache from API
+
+function getValidImageUrl(url) {
+    if (!url) return 'https://placehold.co/400x600?text=No+Image';
+    if (url.startsWith('http')) {
+        return url.replace('phimimg.com', 'img.ophimimg.com').replace('img.ophim.live', 'img.ophimimg.com');
+    }
+    const imageBase = (window.API_CONFIG && window.API_CONFIG.IMAGE_BASE) ? window.API_CONFIG.IMAGE_BASE : 'https://img.ophimimg.com/';
+    const base = imageBase.endsWith('/') ? imageBase.slice(0, -1) : imageBase;
+    return base + '/' + normalizeImagePath(url);
+}
+
+function normalizeImagePath(url) {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    if (!url.startsWith('uploads/movies/')) {
+        return 'uploads/movies/' + url.replace(new RegExp('^/'), '');
+    }
+    return url;
+}
 
 // Check authentication
 document.addEventListener('DOMContentLoaded', () => {
@@ -147,7 +166,7 @@ function renderBanners() {
     tbody.innerHTML = pageItems.map(banner => `
         <tr class="hover:bg-white/5 transition-colors">
             <td>
-                <img src="https://img.ophimimg.com/uploads/movies/${banner.thumbUrl}"
+                <img src="${getValidImageUrl(banner.thumbUrl)}"
                      alt="${banner.name}"
                      class="banner-thumb"
                      onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
@@ -251,7 +270,7 @@ function renderActiveBanner() {
         const cleanContent = activeBanner.content ? activeBanner.content.replace(/<[^>]*>/g, '') : 'Không có mô tả';
         content.innerHTML = `
             <div style="display:flex;gap:24px;align-items:flex-start">
-                <img src="https://img.ophimimg.com/uploads/movies/${activeBanner.thumbUrl}"
+                <img src="${getValidImageUrl(activeBanner.thumbUrl)}"
                      alt="${activeBanner.name}"
                      class="banner-active-poster"
                      onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
@@ -402,7 +421,7 @@ async function loadMoviesFromOphim(keyword = '', page = 1) {
         if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data?.items) {
             let newMovies = data.data.items;
             
-            const pagination = data.data.params?.pagination || data.data.paginate || data.data.pagination || {};
+            const pagination = data.data?.params?.pagination || data.data?.paginate || data.data?.pagination || data.pagination || {};
             const totalItems = pagination?.totalItems || pagination?.total_items || newMovies.length;
             const perPage = pagination?.totalItemsPerPage || 24;
             
@@ -513,7 +532,7 @@ function displayMovies(movies) {
         
         return `
         <div class="movie-pick-card">
-            <img src="https://img.ophimimg.com/uploads/movies/${movie.thumb_url}"
+            <img src="${getValidImageUrl(movie.thumb_url)}"
                  alt="${movie.name}"
                  class="movie-pick-thumb"
                  onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
@@ -791,7 +810,7 @@ function renderThumbnailGrid() {
              ondragend="onThumbDragEnd(event)">
             <span class="thumb-card-order">${idx + 1}</span>
             <button class="thumb-card-remove" onclick="removeFromThumbnail('${item.movieSlug}')" title="Xóa">✕</button>
-            <img src="https://img.ophimimg.com/uploads/movies/${item.thumbUrl}"
+            <img src="${getValidImageUrl(item.thumbUrl)}"
                  alt="${item.name}"
                  onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
             <div class="thumb-card-body">
@@ -1028,7 +1047,7 @@ async function previewCatBg(input, previewId, apiPath = null) {
                 const data = await response.json();
                 if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items && data.data.items.length > 0) {
                     const thumbUrl = data.data.items[0].thumb_url;
-                    img.src = thumbUrl.startsWith('http') ? thumbUrl : `https://img.ophimimg.com/${thumbUrl.startsWith('uploads/') ? '' : 'uploads/movies/'}${thumbUrl}`;
+                    img.src = formatImgUrl(thumbUrl);
                 } else {
                     img.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E';
                 }
