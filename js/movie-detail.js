@@ -84,10 +84,11 @@ async function loadMovieDetail(slug) {
         console.warn('⚠️ [Detail] OPhim lỗi:', error.message, '→ thử VSMOV...');
     }
 
-    // Luôn luôn thử VSMOV:
-    // - Nếu OPhim OK: merge thêm server phụ
+    // Luôn luôn thử VSMOV nếu nguồn chính thất bại:
     // - Nếu OPhim thất bại: dùng VSMOV làm nguồn chính
-    await fetchAndMergeSecondaryServersDetail(slug, !ophimOk);
+    if (!ophimOk) {
+        await fetchAndMergeSecondaryServersDetail(slug, true);
+    }
 }
 
 // 🔄 Helper fetch nguồn phụ thông minh: Thử proxy server-side trước, nếu fail thì gọi thẳng API (có CORS)

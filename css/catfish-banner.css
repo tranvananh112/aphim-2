@@ -507,7 +507,7 @@ body.aphim-has-catfish { /* card dưới không cần push body */ }
 .catfish-row:first-child .catfish-item video {
     height: 70px;
     width: 100%;
-    object-fit: fill;
+    object-fit: contain;
 }
 
 .catfish-row:last-child .catfish-item video {

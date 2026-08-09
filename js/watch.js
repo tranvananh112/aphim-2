@@ -131,8 +131,10 @@ async function loadMovieAndPlay(slug, episodeSlug) {
         }
     }
 
-    // Luôn luôn thử VSMOV
-    await fetchAndMergeSecondaryServers(slug, !ophimOk, episodeSlug);
+    // Luôn luôn thử VSMOV nếu nguồn chính thất bại
+    if (!ophimOk) {
+        await fetchAndMergeSecondaryServers(slug, true, episodeSlug);
+    }
 }
 
 // 🔄 Fetch VSMOV qua proxy server-side (tránh CORS)

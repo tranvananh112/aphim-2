@@ -57,9 +57,9 @@
 
     function renderMedia(item) {
         if (item.isVideo || (item.img && item.img.endsWith('.mp4'))) {
-            return '<video src="' + item.img + '" autoplay loop muted playsinline disablePictureInPicture style="width:100%; height:100%; object-fit:cover; display:block; pointer-events:none;"></video>';
+            return '<video src="' + item.img + '" autoplay loop muted playsinline disablePictureInPicture style="width:100%; height:100%; object-fit:contain; display:block; pointer-events:none;"></video>';
         }
-        return '<img src="' + item.img + '" alt="' + item.label + '" loading="eager">';
+        return '<img src="' + item.img + '" alt="' + item.label + '" loading="eager" style="object-fit:contain;">';
     }
 
     function isExpired(key, hours) {
