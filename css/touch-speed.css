@@ -266,3 +266,8 @@ html, body {
         margin-right: 0 !important;
     }
 }
+
+/* Scroll Optimization */
+.is-dragging { scroll-snap-type: none !important; scroll-behavior: auto !important; cursor: grabbing !important; }
+.overflow-x-auto, .snap-x { will-change: scroll-position; transform: translateZ(0); }
+
