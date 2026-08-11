@@ -108,6 +108,12 @@ function convertBannerToMovie(banner) {
 function getHeroImageUrl(movie) {
     if (!movie) return '';
     const isMobile = window.innerWidth < 768;
+
+    // TÍNH NĂNG MỚI: Nếu Admin cài link ảnh Custom trực tiếp (bắt đầu bằng http và không phải từ ophimimg), ưu tiên tuyệt đối lấy làm ảnh nền Desktop
+    if (!isMobile && movie.thumb_url && movie.thumb_url.startsWith('http') && !movie.thumb_url.includes('ophimimg.com') && !movie.thumb_url.includes('phimimg.com')) {
+        return movie.thumb_url;
+    }
+
     const cacheKey = `tmdb_hero_${movie.slug}`;
     try {
         const cached = sessionStorage.getItem(cacheKey);
