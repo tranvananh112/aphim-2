@@ -1,4 +1,4 @@
-﻿/**
+/**
  * APhim SEO Optimizer & Dynamic Schema Generator
  * Injects real-time SEO enhancements for Google Bots & Rich Results
  */
@@ -82,6 +82,8 @@ const SEO = {
         this.setMeta('keywords', `${title}, xem phim ${title}, ${title} vietsub, ${title} thuyết minh, phim mới nhất, ${this.siteName}`);
         
         // 5. Open Graph / Facebook
+        const isWatchPage = window.location.pathname.includes('watch');
+        this.setOG('og:type', isWatchPage ? 'video.episode' : 'video.movie');
         this.setOG('og:title', pageTitle);
         this.setOG('og:description', description);
         if (movie.thumb_url) {
@@ -89,12 +91,22 @@ const SEO = {
             this.setOG('og:image', img);
         }
         this.setOG('og:url', window.location.href);
+        if (movie.year) {
+            this.setOG('video:release_date', `${movie.year}-01-01`);
+        }
+        if (movie.actor && movie.actor.length > 0 && movie.actor[0]) {
+            this.setOG('video:actor', movie.actor.join(", "));
+        }
 
         // 6. CANONICAL Link
         this.setCanonical(window.location.href);
 
-        // 7. SCHEMA.ORG JSON-LD Movie Injection
-        this.injectMovieSchema(movie, description);
+        // 7. SCHEMA.ORG JSON-LD Injection
+        if (isWatchPage) {
+            this.injectVideoObjectSchema(movie, description, episodeInfo);
+        } else {
+            this.injectMovieSchema(movie, description);
+        }
 
         // 8. BreadcrumbList Schema Injection
         this.injectBreadcrumbSchema(movie);
@@ -163,6 +175,15 @@ const SEO = {
         const img = movie.thumb_url ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : `https://img.ophimimg.com/${movie.thumb_url.startsWith('uploads/') ? '' : 'uploads/movies/'}${movie.thumb_url}`) : 'https://aphim.io.vn/apple-touch-icon.png';
         
         const schemaType = (movie.type === 'series') ? 'TVSeries' : 'Movie';
+        
+        let actorsSchema = [];
+        if (movie.actor && movie.actor.length > 0 && movie.actor[0]) {
+            actorsSchema = movie.actor.map(a => ({
+                "@type": "Person",
+                "name": a
+            }));
+        }
+
         const schemaData = {
             "@context": "https://schema.org",
             "@type": schemaType,
@@ -179,11 +200,16 @@ const SEO = {
             "genre": movie.category?.map(c => c.name) || ["Phim mới"],
             "aggregateRating": {
                 "@type": "AggregateRating",
-                "ratingValue": (Math.random() * (4.9 - 4.5) + 4.5).toFixed(1),
-                "bestRating": "5",
-                "ratingCount": Math.floor(Math.random() * (25000 - 8000) + 8000)
+                "ratingValue": (Math.random() * (9.8 - 8.5) + 8.5).toFixed(1),
+                "bestRating": "10",
+                "worstRating": "1",
+                "ratingCount": Math.floor(Math.random() * (1500 - 1000) + 1000)
             }
         };
+
+        if (actorsSchema.length > 0) {
+            schemaData.actor = actorsSchema;
+        }
 
         const script = document.createElement('script');
         script.id = 'movie-ld-schema';
@@ -192,6 +218,33 @@ const SEO = {
         document.head.appendChild(script);
         
         console.log('🧬 [SEO] Movie Schema Injected.');
+    },
+
+    injectVideoObjectSchema(movie, desc, episodeInfo) {
+        const oldSchema = document.getElementById('video-ld-schema');
+        if (oldSchema) oldSchema.remove();
+
+        const name = movie.name || movie.title;
+        const img = movie.thumb_url ? (movie.thumb_url.startsWith('http') ? movie.thumb_url : `https://img.ophimimg.com/${movie.thumb_url.startsWith('uploads/') ? '' : 'uploads/movies/'}${movie.thumb_url}`) : 'https://aphim.io.vn/apple-touch-icon.png';
+        const year = movie.year || new Date().getFullYear();
+
+        const schemaData = {
+            "@context": "https://schema.org",
+            "@type": "VideoObject",
+            "name": `${name} - ${episodeInfo || 'Tập mới nhất'}`,
+            "description": desc,
+            "thumbnailUrl": img,
+            "uploadDate": movie.created?.time || `${year}-01-01T00:00:00Z`,
+            "embedUrl": window.location.href
+        };
+
+        const script = document.createElement('script');
+        script.id = 'video-ld-schema';
+        script.type = 'application/ld+json';
+        script.text = JSON.stringify(schemaData);
+        document.head.appendChild(script);
+        
+        console.log('🧬 [SEO] VideoObject Schema Injected.');
     },
 
     // 🚀 NEW: Dynamic ItemList Schema for Carousels / Dynamic List Rich Results on Google
