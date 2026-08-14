@@ -2,6 +2,10 @@
     "version": 2,
     "routes": [
         {
+            "src": "/api/vsmov/(.*)",
+            "dest": "https://vsmov.com/api/phim/$1"
+        },
+        {
             "src": "/(.*\\.(html|css|js|json|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|md|bat|mp4|webm|webp|avif|txt|xml|lottie|webmanifest))",
             "dest": "/$1"
         },
