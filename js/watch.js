@@ -131,15 +131,14 @@ async function loadMovieAndPlay(slug, episodeSlug) {
         }
     }
 
-    // Luôn luôn thử VSMOV nếu nguồn chính thất bại
-    if (!ophimOk) {
-        await fetchAndMergeSecondaryServers(slug, true, episodeSlug);
-    }
+    // Luôn luôn thử VSMOV
+    await fetchAndMergeSecondaryServers(slug, !ophimOk, episodeSlug);
 }
 
 // 🔄 Fetch VSMOV qua proxy server-side (tránh CORS)
 // isPrimary=true  → OPhim thất bại, dùng VSMOV làm nguồn chính + tự phát
 // 🔄 Helper fetch nguồn phụ thông minh: Thử proxy server-side trước, nếu fail thì gọi thẳng phimapi.com (có CORS)
+// 🔄 Fetch tất cả nguồn phụ đồng thời (VSMOV proxy, PhimAPI, NguonC)
 async function getSecondaryEpisodes(slug) {
     let proxyUrl = `/api/vsmov/${encodeURIComponent(slug)}`;
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -148,69 +147,77 @@ async function getSecondaryEpisodes(slug) {
         }
     }
 
-    try {
-        const res = await fetch(proxyUrl);
-        if (res.ok) {
-            const data = await res.json();
-            if (data.status && data.episodes && data.episodes.length > 0) {
-                return data;
-            }
-        }
-    } catch (e) {
-        console.warn('⚠️ Proxy fetch failed, trying direct phimapi.com:', e.message);
-    }
+    const directUrl = `https://phimapi.com/phim/${encodeURIComponent(slug)}`;
+    const nguonCUrl = `https://phim.nguonc.com/api/film/${encodeURIComponent(slug)}`;
 
     try {
-        const directUrl = `https://phimapi.com/phim/${encodeURIComponent(slug)}`;
-        const res = await fetch(directUrl);
-        if (res.ok) {
-            const json = await res.json();
-            if (json && json.episodes && json.episodes.length > 0) {
-                return {
-                    status: true,
-                    source: 'phimapi.com',
-                    episodes: json.episodes,
-                    movie: json.movie || null
+        // Gọi cả 3 nguồn cùng lúc để tăng tốc độ
+        const [vsRes, phimApiRes, ncRes] = await Promise.allSettled([
+            fetch(proxyUrl).then(async r => {
+                if (!r.ok) throw new Error('VSMOV HTTP error ' + r.status);
+                return r.json();
+            }),
+            fetch(directUrl).then(async r => {
+                if (!r.ok) throw new Error('PhimAPI HTTP error ' + r.status);
+                return r.json();
+            }),
+            fetch(nguonCUrl).then(async r => {
+                if (!r.ok) throw new Error('NguonC HTTP error ' + r.status);
+                return r.json();
+            })
+        ]);
+
+        let mergedEpisodes = [];
+        let movieMeta = null;
+
+        // Xử lý PhimAPI (có CORS, ổn định nhất)
+        if (phimApiRes.status === 'fulfilled' && phimApiRes.value && phimApiRes.value.episodes && phimApiRes.value.episodes.length > 0) {
+            mergedEpisodes.push(...phimApiRes.value.episodes);
+            if (!movieMeta && phimApiRes.value.movie) movieMeta = phimApiRes.value.movie;
+        }
+
+        // Xử lý VSMOV (qua Proxy Vercel)
+        if (vsRes.status === 'fulfilled' && vsRes.value && vsRes.value.episodes && vsRes.value.episodes.length > 0) {
+            mergedEpisodes.push(...vsRes.value.episodes);
+            if (!movieMeta && vsRes.value.movie) movieMeta = vsRes.value.movie;
+        }
+
+        // Xử lý NguonC
+        if (ncRes.status === 'fulfilled' && ncRes.value && ncRes.value.status === 'success' && ncRes.value.movie && ncRes.value.movie.episodes) {
+            const mappedEps = ncRes.value.movie.episodes.map(s => ({
+                server_name: s.server_name || 'Vietsub',
+                server_data: (s.items || []).map(it => ({
+                    name: it.name && !it.name.toLowerCase().includes('tập') ? `Tập ${it.name}` : (it.name || 'Tập 1'),
+                    slug: it.slug || `tap-${it.name}`,
+                    link_embed: it.embed || '',
+                    link_m3u8: it.m3u8 || ''
+                }))
+            }));
+            mergedEpisodes.push(...mappedEps);
+            
+            if (!movieMeta) {
+                movieMeta = {
+                    name: ncRes.value.movie.name,
+                    origin_name: ncRes.value.movie.original_name,
+                    thumb_url: ncRes.value.movie.thumb_url,
+                    poster_url: ncRes.value.movie.poster_url,
+                    content: ncRes.value.movie.description,
+                    quality: ncRes.value.movie.quality,
+                    lang: ncRes.value.movie.language
                 };
             }
         }
-    } catch (e) {
-        console.warn('⚠️ Direct phimapi.com fetch failed:', e.message);
-    }
 
-    try {
-        const nguonCUrl = `https://phim.nguonc.com/api/film/${encodeURIComponent(slug)}`;
-        const res = await fetch(nguonCUrl);
-        if (res.ok) {
-            const json = await res.json();
-            if (json && json.status === 'success' && json.movie && json.movie.episodes) {
-                const mappedEps = json.movie.episodes.map(s => ({
-                    server_name: s.server_name || 'Vietsub',
-                    server_data: (s.items || []).map(it => ({
-                        name: it.name && !it.name.toLowerCase().includes('tập') ? `Tập ${it.name}` : (it.name || 'Tập 1'),
-                        slug: it.slug || `tap-${it.name}`,
-                        link_embed: it.embed || '',
-                        link_m3u8: it.m3u8 || ''
-                    }))
-                }));
-                return {
-                    status: true,
-                    source: 'nguonc.com',
-                    episodes: mappedEps,
-                    movie: {
-                        name: json.movie.name,
-                        origin_name: json.movie.original_name,
-                        thumb_url: json.movie.thumb_url,
-                        poster_url: json.movie.poster_url,
-                        content: json.movie.description,
-                        quality: json.movie.quality,
-                        lang: json.movie.language
-                    }
-                };
-            }
+        if (mergedEpisodes.length > 0) {
+            return {
+                status: true,
+                source: 'multi-source',
+                episodes: mergedEpisodes,
+                movie: movieMeta
+            };
         }
     } catch (e) {
-        console.warn('⚠️ Direct NguonC fetch failed:', e.message);
+        console.warn('⚠️ All secondary sources failed:', e.message);
     }
 
     return null;
