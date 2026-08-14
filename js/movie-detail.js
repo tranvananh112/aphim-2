@@ -84,115 +84,113 @@ async function loadMovieDetail(slug) {
         console.warn('⚠️ [Detail] OPhim lỗi:', error.message, '→ thử VSMOV...');
     }
 
-    // Luôn luôn thử VSMOV nếu nguồn chính thất bại:
+    // Luôn luôn thử VSMOV:
+    // - Nếu OPhim OK: merge thêm server phụ
     // - Nếu OPhim thất bại: dùng VSMOV làm nguồn chính
-    if (!ophimOk) {
-        await fetchAndMergeSecondaryServersDetail(slug, true);
-    }
+    await fetchAndMergeSecondaryServersDetail(slug, !ophimOk);
 }
 
-// 🔄 Helper fetch nguồn phụ thông minh: Thử proxy server-side trước, nếu fail thì gọi thẳng API (có CORS)
+// 🔄 Fetch tất cả nguồn phụ đồng thời (VSMOV proxy, PhimAPI, NguonC, Ophim v1)
 async function getSecondaryEpisodes(slug) {
-    // Proxy Node.js (chạy ở port 3001)
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     let proxyUrl = `/api/vsmov/${encodeURIComponent(slug)}`;
-    if (isLocalhost && window.location.port !== '3001') {
-        proxyUrl = `http://localhost:3001/api/vsmov/${encodeURIComponent(slug)}`;
-    }
-
-    try {
-        const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
-        if (res.ok) {
-            const data = await res.json();
-            if (data.status && data.episodes && data.episodes.length > 0) {
-                console.log('✅ Nguồn phụ từ proxy:', data.source);
-                return data;
-            }
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        if (window.location.port !== '3000') {
+            proxyUrl = `http://localhost:3000/api/vsmov/${encodeURIComponent(slug)}`;
         }
-    } catch (e) {
-        console.warn('⚠️ Proxy fetch failed:', e.message);
     }
 
-    // Nguồn 2: phimapi.com (API mới nhất, không CORS)
+    const phimapiUrl = `https://phimapi.com/phim/${encodeURIComponent(slug)}`;
+    const ophimUrl = `https://ophim1.com/v1/api/phim/${encodeURIComponent(slug)}`;
+    const nguonCUrl = `https://phim.nguonc.com/api/film/${encodeURIComponent(slug)}`;
+
     try {
-        const phimapiUrl = `https://phimapi.com/phim/${encodeURIComponent(slug)}`;
-        const res = await fetch(phimapiUrl, { signal: AbortSignal.timeout(6000) });
-        if (res.ok) {
-            const json = await res.json();
+        // Gọi tất cả các nguồn cùng lúc để tăng tốc độ
+        const [vsRes, phimApiRes, ophimRes, ncRes] = await Promise.allSettled([
+            fetch(proxyUrl, { signal: AbortSignal.timeout(6000) }).then(async r => {
+                if (!r.ok) throw new Error('VSMOV HTTP error ' + r.status);
+                return r.json();
+            }),
+            fetch(phimapiUrl, { signal: AbortSignal.timeout(6000) }).then(async r => {
+                if (!r.ok) throw new Error('PhimAPI HTTP error ' + r.status);
+                return r.json();
+            }),
+            fetch(ophimUrl, { signal: AbortSignal.timeout(6000) }).then(async r => {
+                if (!r.ok) throw new Error('Ophim HTTP error ' + r.status);
+                return r.json();
+            }),
+            fetch(nguonCUrl, { signal: AbortSignal.timeout(6000) }).then(async r => {
+                if (!r.ok) throw new Error('NguonC HTTP error ' + r.status);
+                return r.json();
+            })
+        ]);
+
+        let mergedEpisodes = [];
+        let movieMeta = null;
+
+        // Xử lý PhimAPI
+        if (phimApiRes.status === 'fulfilled' && phimApiRes.value) {
+            const json = phimApiRes.value;
             const episodes = json.episodes || json.data?.item?.episodes || json.movie?.episodes;
             if (episodes && episodes.length > 0) {
-                console.log('✅ Nguồn phụ từ phimapi.com');
-                return {
-                    status: true,
-                    source: 'phimapi.com',
-                    episodes: episodes,
-                    movie: json.movie || json.data?.item || null
-                };
+                mergedEpisodes.push(...episodes);
+                if (!movieMeta) movieMeta = json.movie || json.data?.item || null;
             }
         }
-    } catch (e) {
-        console.warn('⚠️ phimapi.com fetch failed:', e.message);
-    }
 
-    // Nguồn 3: ophim1.com v1/api (endpoint đúng)
-    try {
-        const ophimUrl = `https://ophim1.com/v1/api/phim/${encodeURIComponent(slug)}`;
-        const res = await fetch(ophimUrl, { signal: AbortSignal.timeout(6000) });
-        if (res.ok) {
-            const json = await res.json();
+        // Xử lý Ophim v1
+        if (ophimRes.status === 'fulfilled' && ophimRes.value) {
+            const json = ophimRes.value;
             const episodes = json?.data?.item?.episodes || json.episodes;
             if (episodes && episodes.length > 0) {
-                console.log('✅ Nguồn phụ từ ophim1.com v1/api');
-                return {
-                    status: true,
-                    source: 'ophim1.com',
-                    episodes: episodes,
-                    movie: json?.data?.item || null
+                mergedEpisodes.push(...episodes);
+                if (!movieMeta) movieMeta = json.movie || json.data?.item || null;
+            }
+        }
+
+        // Xử lý VSMOV (qua Proxy Vercel)
+        if (vsRes.status === 'fulfilled' && vsRes.value && vsRes.value.episodes && vsRes.value.episodes.length > 0) {
+            mergedEpisodes.push(...vsRes.value.episodes);
+            if (!movieMeta && vsRes.value.movie) movieMeta = vsRes.value.movie;
+        }
+
+        // Xử lý NguonC
+        if (ncRes.status === 'fulfilled' && ncRes.value && ncRes.value.status === 'success' && ncRes.value.movie && ncRes.value.movie.episodes) {
+            const mappedEps = ncRes.value.movie.episodes.map(s => ({
+                server_name: s.server_name || 'Vietsub',
+                server_data: (s.items || []).map(it => ({
+                    name: it.name && !it.name.toLowerCase().includes('tập') ? `Tập ${it.name}` : (it.name || 'Tập 1'),
+                    slug: it.slug || `tap-${it.name}`,
+                    link_embed: it.embed || '',
+                    link_m3u8: it.m3u8 || ''
+                }))
+            }));
+            mergedEpisodes.push(...mappedEps);
+            
+            if (!movieMeta) {
+                movieMeta = {
+                    name: ncRes.value.movie.name,
+                    origin_name: ncRes.value.movie.original_name,
+                    thumb_url: ncRes.value.movie.thumb_url,
+                    poster_url: ncRes.value.movie.poster_url,
+                    content: ncRes.value.movie.description,
+                    quality: ncRes.value.movie.quality,
+                    lang: ncRes.value.movie.language
                 };
             }
         }
-    } catch (e) {
-        console.warn('⚠️ ophim1.com v1/api fetch failed:', e.message);
-    }
 
-    // Nguồn 4: nguonc.com
-    try {
-        const nguonCUrl = `https://phim.nguonc.com/api/film/${encodeURIComponent(slug)}`;
-        const res = await fetch(nguonCUrl, { signal: AbortSignal.timeout(6000) });
-        if (res.ok) {
-            const json = await res.json();
-            if (json && json.status === 'success' && json.movie && json.movie.episodes) {
-                const mappedEps = json.movie.episodes.map(s => ({
-                    server_name: s.server_name || 'Vietsub',
-                    server_data: (s.items || []).map(it => ({
-                        name: it.name && !it.name.toLowerCase().includes('tập') ? `Tập ${it.name}` : (it.name || 'Tập 1'),
-                        slug: it.slug || `tap-${it.name}`,
-                        link_embed: it.embed || '',
-                        link_m3u8: it.m3u8 || ''
-                    }))
-                }));
-                console.log('✅ Nguồn phụ từ nguonc.com');
-                return {
-                    status: true,
-                    source: 'nguonc.com',
-                    episodes: mappedEps,
-                    movie: {
-                        name: json.movie.name,
-                        origin_name: json.movie.original_name,
-                        thumb_url: json.movie.thumb_url,
-                        poster_url: json.movie.poster_url,
-                        content: json.movie.description,
-                        quality: json.movie.quality,
-                        lang: json.movie.language
-                    }
-                };
-            }
+        if (mergedEpisodes.length > 0) {
+            return {
+                status: true,
+                source: 'multi-source',
+                episodes: mergedEpisodes,
+                movie: movieMeta
+            };
         }
     } catch (e) {
-        console.warn('⚠️ nguonc.com fetch failed:', e.message);
+        console.warn('⚠️ All secondary sources failed in movie-detail:', e.message);
     }
 
-    console.warn('⚠️ Tất cả nguồn phụ đều thất bại cho slug:', slug);
     return null;
 }
 
