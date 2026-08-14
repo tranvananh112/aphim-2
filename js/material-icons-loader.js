@@ -8,12 +8,16 @@
     function checkFontLoaded() {
         if (fontsLoaded) return true;
 
-        if (document.fonts && document.fonts.check) {
-            // Modern browsers with Font Loading API
-            const loaded = document.fonts.check('24px "Material Icons Round"') ||
-                document.fonts.check('24px "Material Icons"');
-            if (loaded) fontsLoaded = true;
-            return loaded;
+        try {
+            if (document.fonts && document.fonts.check) {
+                // Modern browsers with Font Loading API
+                const loaded = document.fonts.check('24px "Material Icons Round"') ||
+                    document.fonts.check('24px "Material Icons"');
+                if (loaded) fontsLoaded = true;
+                return loaded;
+            }
+        } catch (e) {
+            console.warn('Font check API error:', e);
         }
         return false;
     }
