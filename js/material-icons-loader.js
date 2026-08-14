@@ -32,14 +32,6 @@
         fontsLoaded = true;
     }
 
-    // Force mark icons as loaded (fallback)
-    function forceMarkLoaded() {
-        if (!fontsLoaded) {
-            console.log('⚠️ Font loading timeout - forcing icons to show');
-            markIconsAsLoaded();
-        }
-    }
-
     // Wait for fonts to load
     function waitForFonts() {
         if (checkFontLoaded()) {
@@ -47,20 +39,34 @@
             return;
         }
 
-        if (document.fonts && document.fonts.ready) {
-            // Set a shorter timeout as fallback (500ms instead of 1500ms)
-            const timeout = setTimeout(forceMarkLoaded, 500);
+        if (document.fonts) {
+            // Explicitly request browser to load the font family
+            if (typeof document.fonts.load === 'function') {
+                document.fonts.load('24px "Material Icons Round"')
+                    .then(() => { if (checkFontLoaded()) markIconsAsLoaded(); })
+                    .catch(() => {});
+                document.fonts.load('24px "Material Icons"')
+                    .then(() => { if (checkFontLoaded()) markIconsAsLoaded(); })
+                    .catch(() => {});
+            }
 
-            document.fonts.ready.then(() => {
-                clearTimeout(timeout);
-                markIconsAsLoaded();
-            }).catch(() => {
-                clearTimeout(timeout);
-                forceMarkLoaded();
-            });
+            // Keep polling until it actually loads (do not force timeout on modern browsers)
+            // This ensures we keep showing the hourglass instead of ugly English text on slow networks
+            const pollInterval = setInterval(() => {
+                if (checkFontLoaded()) {
+                    clearInterval(pollInterval);
+                    markIconsAsLoaded();
+                }
+            }, 100);
+            
+            // Stop polling after a very long time (e.g. 30 seconds) just to free resources
+            setTimeout(() => {
+                clearInterval(pollInterval);
+            }, 30000);
+
         } else {
-            // Fallback for older browsers - faster timeout
-            setTimeout(forceMarkLoaded, 300);
+            // Fallback for very old browsers only
+            setTimeout(markIconsAsLoaded, 2000);
         }
     }
 
@@ -110,14 +116,4 @@
     } else {
         init();
     }
-
-    // Also check on window load as a final fallback
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            if (!fontsLoaded) {
-                console.log('🔄 Window loaded - final check');
-                forceMarkLoaded();
-            }
-        }, 500);
-    });
 })();
