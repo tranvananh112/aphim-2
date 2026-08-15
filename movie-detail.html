@@ -73,7 +73,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://ophim1.com">
+    <link rel="preconnect" href="https://phimapi.com">
     <link rel="dns-prefetch" href="https://img.ophimimg.com">
 
     <link rel="stylesheet" href="css/tailwind.min.css?v=13">
@@ -133,7 +133,7 @@
 
     <link rel="stylesheet" href="css/nav-desktop-v2.css?v=7241">
     <script src="js/material-icons-loader.js?v=13"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons&display=block"
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons"
         rel="stylesheet">
     <script src="js/anti-devtools.js?v=10"></script>
     <link rel="stylesheet" href="css/avatar-frames.css?v=15">
@@ -434,6 +434,7 @@
                                 class="w-1.5 h-6 rounded-full cinematic-gold-bar"></span>
                             Danh sách tập phim
                         </h3>
+                        <div id="server-list-desktop" class="flex flex-wrap gap-2 mb-4 w-full"></div>
                         
                         <!-- Thanh tìm kiếm tập phim (Desktop) -->
                         <div id="episode-search-desktop" class="flex items-center gap-2 mb-4 w-full" style="display: none;">
@@ -501,12 +502,12 @@
                         </button>
                     </div>
 
-                    <!-- MÁY CHỦ (DESKTOP) MOVED HERE -->
-                    <div id="desktop-server-wrapper" class="hidden lg:block w-full mt-2 mb-2">
-                        <div id="server-list-desktop" class="flex flex-wrap gap-2 w-full"></div>
+                    <!-- [8SVUI-HERO-AD] Banner Quảng Cáo Video 8SVui ngay dưới cụm nút XEM NGAY -->
+                    <div id="movie-detail-hero-ad" class="hero-under-btn-ad mt-2 mb-4 w-full max-w-md md:max-w-lg">
+                        <a href="https://8svui.com" target="_blank" rel="noopener nofollow" class="block rounded-xl overflow-hidden border border-yellow-400/30 shadow-[0_6px_20px_rgba(0,0,0,0.6)] hover:border-yellow-400/80 transition-all group" aria-label="Quảng cáo 8SVui">
+                            <video src="/quangcao/8svui/BANNER.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; display:block; object-fit:cover; pointer-events:none;" class="rounded-xl group-hover:scale-[1.01] transition-transform duration-300"></video>
+                        </a>
                     </div>
-
-
 
                     <!-- MOBILE EPISODES (Hidden on desktop) -->
                     <div class="block lg:hidden w-full mt-6 mb-4">
@@ -678,7 +679,9 @@
     <div class="aphim-inline-ad">
         <span class="aphim-inline-ad-label">Quảng cáo</span>
         <div class="aphim-inline-ad-inner">
-
+            <a class="aphim-inline-ad-item" href="https://8svui.com" target="_blank" rel="noopener nofollow" aria-label="8SVui">
+                <video src="/quangcao/8svui/8svui.mp4" autoplay loop muted playsinline disablePictureInPicture style="width:100%; height:100%; object-fit:cover; display:block; pointer-events:none;"></video>
+            </a>
             <a class="aphim-inline-ad-item" href="https://vsbet276.com/p/BSYk" target="_blank" rel="noopener nofollow" aria-label="VSBet">
                 <img src="/ads/catfish/728x90-AFF-Cup.gif" alt="VSBet" loading="lazy">
             </a>
@@ -864,7 +867,7 @@
     <script src="js/image-optimization.js?v=13"></script>
     <script src="js/config.js?v=15"></script>
     <script src="js/seo-optimizer.js?v=2"></script>
-    <script src="js/api.js?v=99"></script>
+    <script src="js/api.js?v=15"></script>
     <script src="js/auth.js?v=38"></script>
     <script src="js/premium-ad-blocker.js?v=1"></script>
     <script src="js/user.js?v=38"></script>
@@ -873,7 +876,7 @@
     <script src="js/tmdb-api.js?v=15"></script>
     <script src="js/playlist-service.js"></script>
     <script src="js/playlist-modal.js"></script>
-    <script src="js/movie-detail.js?v=1786111944"></script>
+    <script src="js/movie-detail.js?v=55"></script>
     <script src="js/categories-dropdown.js?v=13"></script>
     <script src="js/countries-dropdown.js?v=13"></script>
 
@@ -881,7 +884,6 @@
 
     <script src="js/mobile-menu-modern.js?v=1783518782846"></script>
     <script src="js/nav-instant-suggest.js?v=5"></script>
-
     <!-- Sticky Navigation -->
     <script src="js/sticky-nav.js?v=1783523710027"></script>
 
@@ -897,7 +899,7 @@
     <!-- Chat Widget Logic -->
     <script src="js/chat-room.js?v=65"></script>
     <!-- Auth Modal (Login/Register popup) -->
-    <script src="js/auth-modal.js?v=16"></script>
+    <script src="js/auth-modal.js?v=13"></script>
     <!-- Firebase Comments (aphim-comments project) -->
     <script src="js/firebase-comments.js?v=19"></script>
 
@@ -991,15 +993,10 @@
 
     <script src="js/bottom-nav.js?v=1783518061448" defer></script>
 <script src="js/movie-slider.js"></script>
+    <script src="js/voice-search.js?v=28"></script>
 </body>
 
 </html>
-
-
-
-
-
-
 
 
 

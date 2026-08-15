@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="vi">
 
 <head>
@@ -52,7 +52,7 @@
     <link rel="stylesheet" href="css/navigation-smooth.css?v=13">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons&display=block"
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons"
         rel="stylesheet">
 
     <link rel="stylesheet" href="css/chat-room.css?v=65">
@@ -351,6 +351,9 @@
 
     <!-- ===== SEARCH PAGE UI ===== -->
     <style>
+    /* Sửa lỗi position: sticky không hoạt động khi body có overflow-x: hidden */
+    html, body { overflow-x: clip !important; }
+
     /* ─── Mobile PWA gap fix ─── */
     @media (max-width: 767px) {
         /* Padding-top main: nav (~56px) + safe area + 8px thở */
@@ -384,10 +387,10 @@
     .sp-search-row { padding: 10px 0 0; }
     .sp-search-box {
         display: flex; align-items: center; gap: 10px;
-        background: #181a22;
-        border: 1.5px solid rgba(255,255,255,0.10);
+        background: #242834;
+        border: 1.5px solid rgba(255,255,255,0.15);
         border-radius: 50px;
-        padding: 7px 8px 7px 22px;
+        padding: 4px 6px 4px 18px;
         box-shadow: 0 4px 32px rgba(0,0,0,0.4);
         transition: border-color 0.2s, box-shadow 0.2s;
     }
@@ -415,6 +418,36 @@
     }
     .sp-search-btn:hover { background: #ffd84d; transform: scale(1.03); }
     .sp-search-btn:active { transform: scale(0.97); }
+
+    /* ─── Voice Search Button ─── */
+    .sp-voice-btn {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.07);
+        color: rgba(255,255,255,0.6);
+        cursor: pointer; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+        margin-right: 4px;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .sp-voice-btn:hover {
+        background: rgba(242,242,13,0.15);
+        border-color: rgba(242,242,13,0.5);
+        color: #f2f20d;
+        box-shadow: 0 0 10px rgba(242,242,13,0.25);
+    }
+    .sp-voice-btn.vs-listening {
+        background: rgba(234,67,53,0.2);
+        border-color: rgba(234,67,53,0.7);
+        color: #ea4335;
+        animation: spMicPulse 1.2s infinite;
+    }
+    @keyframes spMicPulse {
+        0%, 100% { box-shadow: 0 0 6px rgba(234,67,53,0.4); }
+        50%       { box-shadow: 0 0 16px rgba(234,67,53,0.7); }
+    }
 
     /* ─── Tabs row ─── */
     .sp-tabs {
@@ -595,7 +628,6 @@
             display: grid;
             grid-template-columns: 230px 1fr;
             gap: 0 28px;
-            align-items: start;
             margin-top: 16px;
         }
         /* Sidebar always visible on desktop - override drawer animation */
@@ -605,8 +637,11 @@
             opacity: 1 !important;
             overflow: visible !important;
             pointer-events: auto !important;
+            align-self: start;
+            height: fit-content;
+            position: -webkit-sticky;
             position: sticky;
-            top: 76px;
+            top: 86px;
             transition: none !important;
         }
         /* Filter card: no max-width, full sidebar width */
@@ -647,7 +682,7 @@
         /* Shrink search box slightly on desktop */
         @media (min-width: 768px) {
             .sp-search-box {
-                padding: 5px 6px 5px 18px;
+                padding: 2px 6px 2px 16px;
             }
             #searchInput { font-size: 0.97rem; }
             .sp-search-btn {
@@ -666,8 +701,8 @@
 
 
     <main class="pt-safe-main pb-24 min-h-[80vh]">
-        <!-- Nút Quay Lại: đồng bộ với categories.html dùng container chuẩn -->
-        <div style="max-width:1400px;margin:0 auto;padding:0 24px;" class="mb-2">
+        <!-- Nút Quay Lại: đồng bộ với categories.html dùng container chuẩn (Ẩn trên desktop vì đã đưa vào sidebar) -->
+        <div style="max-width:1400px;margin:0 auto;padding:0 24px;" class="mb-2 md:hidden block">
             <button onclick="window.history.back()" class="flex items-center gap-2 px-3 py-1.5 border border-white/10 rounded-full hover:bg-white/5 transition-colors text-gray-300 hover:text-white w-fit group">
                 <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-colors">
                     <span class="material-icons-round text-[14px]">chevron_left</span>
@@ -684,6 +719,16 @@
 
                 <!-- LEFT SIDEBAR: Filter (luôn mở trên desktop, toggle trên mobile) -->
                 <aside class="sp-sidebar sp-filter-drawer" id="spFilterDrawer">
+                    <!-- Nút Quay Lại cho Desktop (Sticky cùng sidebar) -->
+                    <div class="hidden md:block mb-5 pl-1">
+                        <button onclick="window.history.back()" class="flex items-center gap-2 px-3 py-1.5 border border-white/10 rounded-full hover:bg-white/5 transition-colors text-gray-300 hover:text-white w-fit group" style="background: rgba(255,255,255,0.03);">
+                            <div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-colors">
+                                <span class="material-icons-round text-[14px]">chevron_left</span>
+                            </div>
+                            <span class="text-[13px] font-semibold pr-1">Quay Lại</span>
+                        </button>
+                    </div>
+
                     <div class="sp-filter-card">
                         <div class="flex items-center gap-2 mb-5">
                             <span class="material-icons-round" style="color:#f2c94c;font-size:22px;">tune</span>
@@ -802,10 +847,15 @@
                 <div class="sp-main">
                     <!-- Search Bar (nằm trong cột phải trên desktop) -->
                     <div class="sp-search-row">
-                        <div class="sp-search-box">
-                            <span class="material-icons-round sp-ic">search</span>
-                            <input type="text" id="searchInput" placeholder="Tìm phim, diễn viên..." autocomplete="off">
-                            <button class="sp-search-btn" onclick="spDoSearch()">Tìm</button>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <div class="sp-search-box" style="flex: 1; padding-right: 8px;">
+                                <span class="material-icons-round sp-ic">search</span>
+                                <input type="text" id="searchInput" placeholder="Tìm phim, diễn viên..." autocomplete="off">
+                                <button type="button" id="spVoiceBtn" class="sp-voice-btn" aria-label="Tìm kiếm bằng giọng nói" title="Tìm kiếm bằng giọng nói" style="margin: 0;">
+                                    <span class="material-icons-round" style="font-size:18px;">mic</span>
+                                </button>
+                            </div>
+                            <button class="sp-search-btn" onclick="spDoSearch()" style="margin: 0; padding: 11px 28px; border-radius: 50px;">Tìm</button>
                         </div>
                     </div>
 
@@ -1155,7 +1205,7 @@
     <script src="js/image-optimization.js?v=13"></script>
     <script src="js/auth.js?v=38"></script>
     <script src="js/premium-ad-blocker.js?v=1"></script>
-    <script src="js/auth-modal.js?v=16"></script>
+    <script src="js/auth-modal.js?v=13"></script>
     <script src="js/user.js?v=38"></script>
     <script src="js/user-ui.js?v=37"></script>
     <script src="js/search.js?v=15"></script>
@@ -1169,6 +1219,30 @@
     <!-- <script src="js/navigation-danh-sach.js?v=15"></script> -->
     <script src="js/mobile-menu-modern.js?v=1783519898838"></script>
     <script src="js/nav-instant-suggest.js?v=5"></script>
+    <script>
+    // Bind mic button trên trang Khám Phá
+    (function bindSpVoiceBtn() {
+        var btn = document.getElementById('spVoiceBtn');
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+            if (typeof window.openVoiceSearch === 'function') {
+                // Patch: sau khi nhận giọng nói → điền vào searchInput thay vì redirect
+                var _orig = window._vsOnFinalOverride;
+                window._vsOnFinalOverride = function(text) {
+                    var sinp = document.getElementById('searchInput');
+                    if (sinp) {
+                        sinp.value = text;
+                        sinp.dispatchEvent(new Event('input', {bubbles:true}));
+                        sinp.focus();
+                        // Tự tìm kiếm luôn
+                        if (typeof spDoSearch === 'function') spDoSearch();
+                    }
+                };
+                window.openVoiceSearch();
+            }
+        });
+    })();
+    </script>
 
     <!-- Sticky Navigation -->
     <script src="js/sticky-nav.js?v=1783523710072"></script>
@@ -1425,7 +1499,7 @@
     <script src="js/nav-active-indicator.js?v=13"></script>
 
     <!-- ====== APhim Catfish Banner + Popup ====== -->
-    <link rel="stylesheet" href="/css/catfish-banner.css?v=19">
+    <link rel="stylesheet" href="/css/catfish-banner.css?v=17">
     <link rel="stylesheet" href="/css/inline-ad.css?v=15">
     <script src="/js/catfish-banner.js?v=18" defer></script>
     <!-- ====== End Catfish Banner ====== -->
@@ -1507,10 +1581,10 @@
 
     <script src="js/bottom-nav.js?v=1783518514279" defer></script>
 <script src="js/movie-slider.js"></script>
+    <script src="js/voice-search.js?v=28"></script>
 </body>
 
 </html>
-
 
 
 

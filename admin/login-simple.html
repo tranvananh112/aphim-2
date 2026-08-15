@@ -1,0 +1,258 @@
+﻿<!DOCTYPE html> 
+<html lang="vi"> 
+ 
+<head>
+    <!-- BẢO MẬT: Chặn Google Index trang Admin -->
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <meta charset="UTF-8">
+    <meta name="description" content="APhim - Website xem phim online Full HD miễn phí, cập nhật phim mới nhất 2026, Phim Vietsub, Thuyết Minh, Phim Lồng Tiếng chất lượng cao." />
+    <meta property="og:description" content="APhim - Website xem phim online Full HD miễn phí, cập nhật phim mới nhất 2026, Phim Vietsub, Thuyết Minh, Phim Lồng Tiếng chất lượng cao." />
+    <meta property="twitter:description" content="APhim - Website xem phim online Full HD miễn phí, cập nhật phim mới nhất 2026, Phim Vietsub, Thuyết Minh, Phim Lồng Tiếng chất lượng cao." /> 
+  
+ <meta name="viewport"content="width=device-width, initial-scale=1.0"> 
+ <title>Đăng nhập Admin - Simple</title> 
+ <script src="../js/config.js"></script> 
+ <style> 
+ * { 
+ margin: 0; 
+ padding: 0; 
+ box-sizing: border-box; 
+ } 
+ 
+ body { 
+ font-family: Arial, sans-serif; 
+ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+ min-height: 100vh; 
+ display: flex; 
+ align-items: center; 
+ justify-content: center; 
+ padding: 20px; 
+ } 
+ 
+ .container { 
+ background: white; 
+ padding: 40px; 
+ border-radius: 10px; 
+ box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); 
+ width: 100%; 
+ max-width: 400px; 
+ } 
+ 
+ h1 { 
+ text-align: center; 
+ color: #333; 
+ margin-bottom: 30px; 
+ } 
+ 
+ .form-group { 
+ margin-bottom: 20px; 
+ } 
+ 
+ label { 
+ display: block; 
+ margin-bottom: 5px; 
+ color: #555; 
+ font-weight: bold; 
+ } 
+ 
+ input { 
+ width: 100%; 
+ padding: 12px; 
+ border: 2px solid #ddd; 
+ border-radius: 5px; 
+ font-size: 16px; 
+ } 
+ 
+ input:focus { 
+ outline: none; 
+ border-color: #667eea; 
+ } 
+ 
+ button { 
+ width: 100%; 
+ padding: 12px; 
+ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+ color: white; 
+ border: none; 
+ border-radius: 5px; 
+ font-size: 16px; 
+ font-weight: bold; 
+ cursor: pointer; 
+ margin-top: 10px; 
+ } 
+ 
+ button:hover { 
+ opacity: 0.9; 
+ } 
+ 
+ button:disabled { 
+ opacity: 0.5; 
+ cursor: not-allowed; 
+ } 
+ 
+ .message { 
+ padding: 10px; 
+ border-radius: 5px; 
+ margin-bottom: 20px; 
+ display: none; 
+ } 
+ 
+ .message.success { 
+ background: #d4edda; 
+ color: #155724; 
+ border: 1px solid #c3e6cb; 
+ } 
+ 
+ .message.error { 
+ background: #f8d7da; 
+ color: #721c24; 
+ border: 1px solid #f5c6cb; 
+ } 
+ 
+ .info { 
+ background: #e7f3ff; 
+ padding: 15px; 
+ border-radius: 5px; 
+ margin-top: 20px; 
+ font-size: 14px; 
+ } 
+ 
+ .info strong { 
+ display: block; 
+ margin-bottom: 5px; 
+ } 
+ </style> 
+ <link rel="icon"type="image/png"href="../favicon.png"> 
+ <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.14/dist/dotlottie-wc.js" type="module"></script>
+    <link rel="stylesheet" href="css/bottom-nav.css?v=138">
+</head> 
+ 
+<body> 
+ <div class="container"> 
+ <h1>x ─Đăng nhập Admin</h1> 
+ 
+ <div id="message"class="message"></div> 
+ 
+ <formỗid="loginForm"> 
+ <div class="form-group"> 
+ <label for="email">Email:</label> 
+ <input type="email"id="email"value="admin@aphim.io.vn"required> 
+ </div> 
+ 
+ <div class="form-group"> 
+ <label for="password">Password:</label> 
+ <input type="password"id="password"value="admin123"required> 
+ </div> 
+ 
+ <button type="submit"id="loginBtn">Đăng nhập</button> 
+ </form> 
+ 
+ <div class="info"> 
+ <strong>Thông tin mặc địnhớ</strong> 
+ Email: admin@aphim.io.vn<br> 
+ Password: admin123 
+ </div> 
+ </div> 
+ 
+ <script> 
+ const form = document.getElementById('loginForm'); 
+ const messageDiv = document.getElementById('message'); 
+ const loginBtn = document.getElementById('loginBtn'); 
+ 
+ function showMessage(text, type) { 
+ messageDiv.textContent = text; 
+ messageDiv.className = 'message ' + type; 
+ messageDiv.style.display = 'block'; 
+ } 
+ 
+ form.addEventListener('submit', async (e) => { 
+ e.preventDefault(); 
+ 
+ const email = document.getElementById('email').value; 
+ const password = document.getElementById('password').value; 
+ 
+ loginBtn.disabled = true; 
+ loginBtn.textContent = 'Đang ăng nhập...'; 
+ 
+ try { 
+ console.log('Logging in to:', API_BASE_URL + '/api/auth/login'); 
+ console.log('Email:', email); 
+ 
+ const response = await fetch(API_BASE_URL + '/api/auth/login', { 
+  method: 'POST', 
+  headers: { 
+  'Content-Type': 'application/json' 
+  }, 
+  body: JSON.stringify({ email, password }) 
+ }); 
+ 
+ console.log('Response status:', response.status); 
+ const data = await response.json(); 
+ console.log('Response data:', data); 
+ 
+ if (data.success && data.token) { 
+  // Save token 
+  localStorage.setItem('adminToken', data.token); 
+  localStorage.setItem('adminUser', JSON.stringify(data.user)); 
+ 
+  showMessage('Số Đăng nhập thành công! Đang chuyỒn hư:ng...', 'success'); 
+ 
+  console.log('Token saved:', data.token.substring(0, 50) + '...'); 
+ 
+  // Redirect after 1 second 
+  setTimeout(() => { 
+  window.location.href = 'supporters.html'; 
+  }, 1000); 
+ } else { 
+  showMessage('Số ' + (data.message || 'Đăng nhập thất bại'), 'error'); 
+  loginBtn.disabled = false; 
+  loginBtn.textContent = 'Đăng nhập'; 
+ } 
+ } catch (error) { 
+ console.error('Login error:', error); 
+ showMessage('Số Lỗi kết nối: ' + error.message, 'error'); 
+ loginBtn.disabled = false; 
+ loginBtn.textContent = 'Đăng nhập'; 
+ } 
+ }); 
+ 
+ // Check if already logged in 
+ window.addEventListener('DOMContentLoaded', () => { 
+ const token = localStorage.getItem('adminToken'); 
+ if (token) { 
+ showMessage('Bạn đã ăng nhập. Đang chuyỒn hư:ng...', 'success'); 
+ setTimeout(() => { 
+  window.location.href = 'supporters.html'; 
+ }, 1000); 
+ } 
+ }); 
+ </script> 
+ <script>lucide.createIcons();</script>
+
+ <script>
+ // Tự động render Lucide Icons khi DOM thay đổi (tải dữ liệu bảng/động)
+ document.addEventListener("DOMContentLoaded", () => {
+  if (window.lucide) lucide.createIcons();
+  let isUpdating = false;
+  const observer = new MutationObserver(() => {
+  if (isUpdating) return;
+  isUpdating = true;
+  if (window.lucide) {
+   try { lucide.createIcons(); } catch(e){}
+  }
+  setTimeout(() => { isUpdating = false; }, 100);
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+ });
+ </script>
+    <script src="js/bottom-nav.js?v=1783518061475" defer></script>
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+</body> 
+ 
+</html> 
+

@@ -88,7 +88,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons&display=block"
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round|Material+Icons"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet">
@@ -558,7 +558,7 @@
     <script src="js/image-optimization.js?v=13"></script>
     <script src="js/auth.js?v=38"></script>
     <script src="js/premium-ad-blocker.js?v=1"></script>
-    <script src="js/auth-modal.js?v=16"></script>
+    <script src="js/auth-modal.js?v=13"></script>
     <script src="js/user.js?v=38"></script>
     <script src="js/user-ui.js?v=37"></script>
 
@@ -704,7 +704,7 @@
 
                     if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items && data.data.items.length > 0) {
                         const movie = data.data.items[0];
-                        const posterUrl = movie.thumb_url ? `https://img.ophimimg.com/${movie.thumb_url.startsWith('uploads/') ? '' : 'uploads/movies/'}${movie.thumb_url}` : null;
+                        const posterUrl = movie.thumb_url ? `https://img.ophimimg.com/${movie.thumb_url}` : null;
                         return { ...category, posterUrl };
                     }
                     return { ...category, posterUrl: null };
@@ -837,12 +837,12 @@
                 const rawImg = movie.thumb_url || movie.poster_url || '';
                 let posterUrl;
                 if (!rawImg) {
-                    posterUrl = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E';
+                    posterUrl = 'https://via.placeholder.com/300x450?text=No+Image';
                 } else if (rawImg.startsWith('http')) {
                     posterUrl = rawImg;
                 } else {
                     const filename = rawImg.replace(/^uploads\/movies\//, '');
-                    posterUrl = `https://img.ophimimg.com/${filename.startsWith('uploads/') ? '' : 'uploads/movies/'}${filename}`;
+                    posterUrl = `https://img.ophimimg.com/${filename}`;
                 }
                 const year = movie.year || 'N/A';
                 const quality = movie.quality || movie.lang || '';
@@ -853,10 +853,10 @@
                        onclick="trackMovieClick('${movie.name}', '${movie.slug}', '${currentCategory}')"
                        class="group relative block rounded-xl overflow-hidden bg-surface-dark hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-primary/20">
                         <div class="relative aspect-[2/3] overflow-hidden">
-                            <img src="${posterUrl}" 
+                            <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E" data-src="${posterUrl}" 
                                  alt="${movie.name}"
                                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                 onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                                 onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" data-tmdb-slug="${movie.slug}" data-tmdb-type="poster">
                             
                             <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
                             
@@ -1362,10 +1362,10 @@
 
     <script src="js/bottom-nav.js?v=1783518514266" defer></script>
 <script src="js/movie-slider.js"></script>
+    <script src="js/voice-search.js?v=28"></script>
 </body>
 
 </html>
-
 
 
 
