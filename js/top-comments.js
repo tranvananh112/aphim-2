@@ -233,7 +233,9 @@ function renderTheLoaiHot() {
         { name: "Tâm Lý", colorCls: "tc-genre-c2", slug: "tam-ly" },
         { name: "Tình Cảm", colorCls: "tc-genre-c3", slug: "tinh-cam" },
         { name: "Hài Hước", colorCls: "tc-genre-c4", slug: "hai-huoc" },
-        { name: "Phiêu Lưu", colorCls: "tc-genre-c5", slug: "phieu-luu" }
+        { name: "Phiêu Lưu", colorCls: "tc-genre-c5", slug: "phieu-luu" },
+        { name: "Hành Động", colorCls: "tc-genre-c2", slug: "hanh-dong" },
+        { name: "Kinh Dị", colorCls: "tc-genre-c1", slug: "kinh-di" }
     ];
     
     container.innerHTML = genres.map((g, index) => {

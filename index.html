@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="vi">
 
 <head>
@@ -515,7 +515,7 @@
     <link rel="stylesheet" href="css/seamless-sections.css?v=100">
     <link rel="stylesheet" href="css/progressive-image.css?v=13">
     <link rel="stylesheet" href="css/interests-section.css?v=103">
-    <link rel="stylesheet" href="css/top-comments.css?v=13">
+    <link rel="stylesheet" href="css/top-comments.css?v=17">
     <link rel="stylesheet" href="css/mobile-menu-modern.css?v=38">
     <link rel="stylesheet" href="css/mobile-viewport-fix.css?v=36">
     <link rel="stylesheet" href="css/avatar-frames.css?v=15">
@@ -738,7 +738,7 @@
     </style>
 
     <!-- PWA Manifest -->
-    <link rel="stylesheet" href="css/top-comments.css?v=13">
+    <link rel="stylesheet" href="css/top-comments.css?v=17">
     <meta name="theme-color" content="#6366f1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1501,7 +1501,18 @@
         <!-- Top Comments Community Dashboard -->
         <section class="py-2 md:py-3 !bg-transparent" id="top-comments-section">
             <div class="w-full max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8" style="max-width: 1600px !important; width: 100% !important; margin-left: auto !important; margin-right: auto !important;">
-                <div class="tc-container">
+                
+                                                                <div class="tc-main-wrapper">
+                    <!-- Mascot floating on top -->
+                    <div class="tc-mascot-absolute hidden lg:flex">
+                        <img src="/images/comment-mascot.png" alt="Comment Mascot" class="tc-mascot-img-absolute">
+                    </div>
+                    
+                    <!-- Full width container -->
+                    <div class="tc-container">
+
+                    <!-- Top Section -->
+                    <div class="tc-top-section">
                     <!-- Header -->
                     <div class="tc-header">
                         <span class="material-icons-round" style="color:#ffd700; font-size:24px;">emoji_events</span>
@@ -1523,10 +1534,14 @@
                         </button>
                     </div>
 
+                    
+                    </div>
                     <div class="tc-divider"></div>
 
+
                     <!-- Bottom Grid: 4 Columns -->
-                    <div class="tc-grid">
+                    <div class="tc-grid-container">
+                      <div class="tc-grid">
                         <!-- Column 1: Sôi Nổi Nhất -->
                         <div>
                             <div class="tc-col-header">
@@ -1577,11 +1592,12 @@
                                 <div id="tc-realtime-comments" class="flex flex-col gap-2 relative z-10 w-full h-full">
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
 
         <!-- Action Movies Section -->
 
@@ -2410,12 +2426,12 @@
             if (el) el.scrollBy({ left: dir === 'right' ? 800 : -800, behavior: 'smooth' });
         };
 
-        async function loadCategoryToContainer(slug, containerId, loadingId) {
+        async function loadCategoryToContainer(slug, containerId, loadingId, page = 1) {
             const loading = document.getElementById(loadingId);
             const container = document.getElementById(containerId);
             try {
                 // Tăng lên 18 phim để load "đủ" hình cho scroll ngang
-                const response = await movieAPI.fetchWithFallback(`/the-loai/${slug}?page=1`);
+                const response = await movieAPI.fetchWithFallback(`/the-loai/${slug}?page=${page}`);
                 const rawData = await response.json();
                 const data = movieAPI.normalizeResponse(rawData);
                 const items = data?.data?.items || [];
