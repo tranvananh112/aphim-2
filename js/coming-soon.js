@@ -16,16 +16,18 @@
         }
 
         try {
-            // Fetch from phim-chieu-rap API
-            const response = await movieAPI.fetchWithFallback('/danh-sach/phim-chieu-rap?page=1&limit=10', {
-                method: 'GET',
-                headers: { 'accept': 'application/json' }
-            });
+            // Fetch from phim-chieu-rap API using getMoviesFromMultipleSources for better normalization
+            let data = await movieAPI.getMoviesFromMultipleSources(1, 'phim-chieu-rap');
 
-            const data = await response.json();
+            // Fallback to phim-le if phim-chieu-rap is empty or fails
+            if (!data || !data.status || !data.data || !data.data.items || data.data.items.length === 0) {
+                console.warn('Phim chieu rap is empty or failed, falling back to phim-le');
+                data = await movieAPI.getMoviesFromMultipleSources(1, 'phim-le');
+            }
 
-            if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
-                renderComingSoonMovies(data.data.items);
+            if (data && data.status && data.data && data.data.items && data.data.items.length > 0) {
+                // Limit to top 10 movies
+                renderComingSoonMovies(data.data.items.slice(0, 10));
             } else {
                 loading.innerHTML = '<p class="text-gray-400">Không thể tải phim chiếu rạp</p>';
             }
