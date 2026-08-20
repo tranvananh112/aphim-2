@@ -1,4 +1,4 @@
-﻿require('dotenv').config({ quiet: true }); // Load .env local (nếu có), bỏ qua nếu không tìm thấy
+require('dotenv').config({ quiet: true }); // Load .env local (nếu có), bỏ qua nếu không tìm thấy
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
@@ -856,10 +856,7 @@ app.get('/api/image/team/:id', async (req, res) => {
 // 404 HANDLER
 // ==========================================
 app.use((req, res) => {
-    res.status(404).render('404', {
-        title: '404 - Không tìm thấy trang',
-        currentPage: '404'
-    });
+    res.status(404).sendFile(path.join(__dirname, '404.html'));
 });
 
 // ==========================================
