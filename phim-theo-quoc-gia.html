@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -619,20 +619,8 @@
 
                 console.log(`Loading ${countryName} movies - Page ${page}...`);
 
-                // Use movieAPI.fetchWithFallback wrapper to bypass ISP blocks and handle mirrors automatically
-                const endpoint = `/quoc-gia/${countrySlug}?page=${page}&limit=40`;
-                console.log('Fetching via proxy/mirrors:', endpoint);
 
-                const response = await movieAPI.fetchWithFallback(endpoint, {
-                    method: 'GET',
-                    headers: { 'accept': 'application/json' }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
+                const data = await movieAPI.getMoviesByCountry(countrySlug, page);
                 console.log(`${countryName} movies data:`, data);
 
                 if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
@@ -1217,7 +1205,7 @@
 
     <script src="js/bottom-nav.js?v=1783518514275" defer></script>
 <script src="js/movie-slider.js"></script>
-    <script src="js/voice-search.js?v=28"></script>
+    <script src="js/voice-search.js?v=70"></script>
 </body>
 
 </html>

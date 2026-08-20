@@ -73,22 +73,8 @@ async function loadMoviesList(listSlug, page = 1) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     try {
-        // Use movieAPI.fetchWithFallback wrapper to bypass ISP blocks and handle mirrors automatically
-        const endpoint = `/danh-sach/${listSlug}?page=${page}&limit=40`;
-        console.log('Fetching via proxy/mirrors:', endpoint);
-
-        const response = await movieAPI.fetchWithFallback(endpoint, {
-            method: 'GET',
-            headers: {
-                'accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = await movieAPI.getMoviesFromMultipleSources(page, listSlug);
+        console.log(`${listName} data:`, data);
         console.log('API Response:', data);
 
         if ((data && (data.status === 'success' || data.status === true || data.status)) && data.data) {

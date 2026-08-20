@@ -10,7 +10,7 @@ class MovieAPI {
 
     // Helper to fetch with timeout (default 6 seconds)
     async fetchWithTimeout(url, options = {}) {
-        const { timeout = 6000, ...rest } = options;
+        const { timeout = 3000, ...rest } = options;
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
         try {
@@ -30,12 +30,7 @@ class MovieAPI {
     normalizeResponse(data) {
         if (!data) return null;
         const items = data.data?.items || data.items || [];
-        const item = data.data?.item || data.item || data.movie || null;
-        
-        if (item && data.episodes && !item.episodes) {
-            item.episodes = data.episodes;
-        }
-
+        const item = data.data?.item || data.item || null;
         const isSuccess = ((data && (data.status === 'success' || data.status === true || data.status)) || data.status === true || data.status);
         return {
             status: isSuccess ? 'success' : false,
@@ -49,13 +44,12 @@ class MovieAPI {
         };
     }
 
-    // Wrapper to fetch from primary OPhim URL or fallback OPhim mirrors (phimapi.com -> phimapi.com -> phimapi.com)
-    async fetchWithFallback(endpoint, options = {}) {
-        let cleanEndpoint = endpoint || '';
-        if (cleanEndpoint.startsWith('http')) {
-            return this.fetchWithTimeout(cleanEndpoint, options);
+    // Wrapper to fetch from primary OPhim URL or fallback OPhim mirrors (phimapi.com -> phimapi.com -> phimapi.com)    // Main fetch wrapper that tries multiple APIs
+    async fetchWithFallback(endpoint, options = {}, preferredSource = 'both') {
+        let cleanEndpoint = endpoint;
+        if (cleanEndpoint.startsWith('https://')) {
+            cleanEndpoint = new URL(cleanEndpoint).pathname + new URL(cleanEndpoint).search;
         }
-
         if (cleanEndpoint.startsWith('/v1/api')) {
             cleanEndpoint = cleanEndpoint.substring('/v1/api'.length);
         }
@@ -66,18 +60,36 @@ class MovieAPI {
         const paramStr = cleanEndpoint.includes('?') ? cleanEndpoint.substring(cleanEndpoint.indexOf('?')) : '';
         const basePath = cleanEndpoint.includes('?') ? cleanEndpoint.substring(0, cleanEndpoint.indexOf('?')) : cleanEndpoint;
 
-        let urlsToTry = [
-            `/v1/api${basePath}${paramStr}`,
-            `https://ophim1.com${basePath}${paramStr}`,
-            `https://ophim1.com/v1/api${basePath}${paramStr}`,
-            `https://ophim1.com/v1/api${basePath}${paramStr}`,
-            `https://ophim1.com/v1/api${basePath}${paramStr}`
-        ];
+        let urlsToTry = [];
+        if (preferredSource === 'phimapi') {
+            urlsToTry = [
+                `https://phimapi.com/v1/api${basePath}${paramStr}`,
+                `https://phimapi.com${basePath}${paramStr}`,
+                `https://ophim1.com/v1/api${basePath}${paramStr}`,
+                `https://ophim1.com${basePath}${paramStr}`
+            ];
+        } else if (preferredSource === 'ophim1') {
+            urlsToTry = [
+                `https://ophim1.com/v1/api${basePath}${paramStr}`,
+                `https://ophim1.com${basePath}${paramStr}`,
+                `https://phimapi.com/v1/api${basePath}${paramStr}`,
+                `https://phimapi.com${basePath}${paramStr}`
+            ];
+        } else {
+            urlsToTry = [
+                `https://ophim1.com/v1/api${basePath}${paramStr}`,
+                `https://ophim1.com${basePath}${paramStr}`,
+                `https://phimapi.com/v1/api${basePath}${paramStr}`,
+                `https://phimapi.com${basePath}${paramStr}`
+            ];
+        }
 
-        if (basePath.includes('phim-moi-cap-nhat') || basePath === '/home') {
-            urlsToTry.unshift(`/v1/api/danh-sach/phim-moi-cap-nhat${paramStr}`);
-            urlsToTry.unshift(`https://ophim1.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
-            urlsToTry.unshift(`https://ophim1.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
+        if (basePath.includes('phim-moi-cap-nhat')) {
+            if (preferredSource === 'phimapi' || preferredSource === 'both') {
+                urlsToTry.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
+            } else {
+                urlsToTry.unshift(`https://ophim1.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
+            }
         }
 
         const uniqueUrls = Array.from(new Set(urlsToTry.filter(Boolean)));
@@ -100,14 +112,35 @@ class MovieAPI {
         throw lastError || new Error('All OPhim API mirrors failed');
     }
 
-    // Helper to filter out hidden movies from list responses
+    // Helper to filter out hidden movies from list responses and fix absolute image paths
     filterHiddenMovies(data) {
-        if (!data || !data.data || !Array.isArray(data.data.items)) return data;
+        if (!data) return data;
+        
+        // INTERCEPT AND FIX IMAGE URLS (if from PhimAPI or Ophim1)
+        try {
+            const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || '';
+            if (domainImage) {
+                const items = data.data?.items || data.items || [];
+                if (Array.isArray(items)) {
+                    for (const item of items) {
+                        if (item.thumb_url && !item.thumb_url.startsWith('http')) {
+                            item.thumb_url = `${domainImage}/${item.thumb_url.replace(/^\//, '')}`;
+                        }
+                        if (item.poster_url && !item.poster_url.startsWith('http')) {
+                            item.poster_url = `${domainImage}/${item.poster_url.replace(/^\//, '')}`;
+                        }
+                    }
+                }
+            }
+        } catch (e) {}
+
+        if (!data.data || !Array.isArray(data.data.items)) return data;
+        
         try {
             const hiddenMoviesList = JSON.parse(localStorage.getItem('cinestream_hidden_movies') || '[]');
             
             // HARDCODED BANNED MOVIES (DMCA, etc)
-            const hardcodedBanned = ['moi-thu-la-loi-co-ay', 'michael', 'dac-vu-xuyen-quoc-gia'];
+            const hardcodedBanned = ['moi-thu-la-loi-co-ay', 'michael', 'dac-vu-xuyen-quoc-gia', 'xac-song-thanh-pho-chet-phan-2'];
             const allBanned = [...hiddenMoviesList, ...hardcodedBanned];
             
             if (allBanned.length > 0) {
@@ -152,23 +185,67 @@ class MovieAPI {
         return response;
     }
 
-    // Fetch movie list with pagination
-    async getMovieList(page = 1) {
+    // Fetch movie list    // 1. Get latest movies
+    async getMovieList(page = 1, preferredSource = 'both') {
         try {
             if (this.useBackend) {
                 const response = await this.fetchWithAuth(`${this.backendURL}/movies?page=${page}&limit=20`);
                 const data = await response.json();
-
-                console.log('Backend response:', data);
-
-                // Always return data if we got a response
                 return this.filterHiddenMovies(data);
             } else {
-                const response = await this.fetchWithFallback(`/danh-sach/phim-moi-cap-nhat?page=${page}`, {
-                    headers: { 'accept': 'application/json' }
-                });
-                const data = await response.json();
-                return this.filterHiddenMovies(data);
+                let fetchPromises = [];
+                const endpoint = `/danh-sach/phim-moi-cap-nhat?page=${page}`;
+                
+                if (preferredSource === 'phimapi' || preferredSource === 'both') {
+                    fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'phimapi' })));
+                }
+                if (preferredSource === 'ophim1' || preferredSource === 'both') {
+                    fetchPromises.push(this.fetchWithTimeout(`https://ophim1.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
+                }
+
+                const results = await Promise.allSettled(fetchPromises);
+                
+                let combinedItems = [];
+                let firstValidData = null;
+                const seenSlugs = new Set();
+
+                for (const res of results) {
+                    if (res.status === 'fulfilled' && res.value) {
+                        const { data, source } = res.value;
+                        const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || (source === 'phimapi' ? 'https://phimimg.com' : 'https://img.ophimimg.com');
+
+                        const isSuccess = data.status === 'success' || data.status === true;
+                        if (!firstValidData && isSuccess) firstValidData = data;
+                        
+                        const items = data.items || data.data?.items || [];
+                        for (const item of items) {
+                            if (!seenSlugs.has(item.slug)) {
+                                seenSlugs.add(item.slug);
+                                
+                                if (domainImage) {
+                                    if (item.thumb_url && !item.thumb_url.startsWith('http')) {
+                                        item.thumb_url = `${domainImage}/${item.thumb_url.replace(/^\//, '')}`;
+                                    }
+                                    if (item.poster_url && !item.poster_url.startsWith('http')) {
+                                        item.poster_url = `${domainImage}/${item.poster_url.replace(/^\//, '')}`;
+                                    }
+                                }
+                                
+                                combinedItems.push(item);
+                            }
+                        }
+                    }
+                }
+
+                if (combinedItems.length === 0) throw new Error('API failed');
+
+                const mergedData = {
+                    ...firstValidData,
+                    items: combinedItems,
+                    data: firstValidData?.data ? { ...firstValidData.data, items: combinedItems } : undefined
+                };
+
+                return this.filterHiddenMovies(mergedData);
             }
         } catch (error) {
             console.error('Error fetching movie list:', error);
@@ -187,7 +264,10 @@ class MovieAPI {
         // --- AUTO BLOCK HIDDEN SLUGS ---
         try {
             const hiddenMoviesList = JSON.parse(localStorage.getItem('cinestream_hidden_movies') || '[]');
-            if (hiddenMoviesList.includes(slug)) {
+            const hardcodedBanned = ['moi-thu-la-loi-co-ay', 'michael', 'dac-vu-xuyen-quoc-gia', 'xac-song-thanh-pho-chet-phan-2'];
+            const allBanned = [...hiddenMoviesList, ...hardcodedBanned];
+            
+            if (allBanned.includes(slug)) {
                 window.location.href = '/index.html';
                 return null;
             }
@@ -273,7 +353,7 @@ class MovieAPI {
                     console.warn('⚠️ Lỗi gọi nguồn phụ song song:', e.message);
                 }
                 
-                return this.normalizeResponse(ophimData);
+                return ophimData;
             }
         } catch (error) {
             console.error('Error fetching movie detail:', error);
@@ -282,7 +362,7 @@ class MovieAPI {
     }
 
     // Search movies
-    async searchMovies(keyword, page = 1) {
+    async searchMovies(keyword, page = 1, preferredSource = 'both') {
         try {
             if (this.useBackend) {
                 const response = await this.fetchWithAuth(`${this.backendURL}/movies/search?q=${encodeURIComponent(keyword)}&page=${page}`);
@@ -298,7 +378,7 @@ class MovieAPI {
             } else {
                 const response = await this.fetchWithFallback(`/tim-kiem?keyword=${encodeURIComponent(keyword)}&page=${page}`, {
                     headers: { 'accept': 'application/json' }
-                });
+                }, preferredSource);
                 const data = await response.json();
                 return this.filterHiddenMovies(data);
             }
@@ -309,7 +389,7 @@ class MovieAPI {
     }
 
     // Get movies by category
-    async getMoviesByCategory(categorySlug, page = 1) {
+    async getMoviesByCategory(categorySlug, page = 1, preferredSource = 'both') {
         try {
             if (this.useBackend) {
                 const response = await this.fetchWithAuth(`${this.backendURL}/movies?category=${categorySlug}&page=${page}`);
@@ -326,7 +406,6 @@ class MovieAPI {
             } else {
                 let endpoint = '/danh-sach/' + categorySlug + '?page=' + page;
                 if (categorySlug.startsWith('the-loai/') || categorySlug.startsWith('quoc-gia/')) {
-                    const actualSlug = categorySlug.split('/')[1];
                     endpoint = '/' + categorySlug + '?page=' + page;
                 } else if (!categorySlug.includes('/')) {
                     const mainCategories = ['hanh-dong', 'tinh-cam', 'hai-huoc', 'vien-tuong', 'vo-thuat', 'kinh-di', 'tam-ly', 'than-thoai', 'hoat-hinh', 'phieu-luu', 'chieu-rap'];
@@ -337,11 +416,57 @@ class MovieAPI {
                     }
                 }
                 
-                const response = await this.fetchWithFallback(endpoint, {
-                    headers: { 'accept': 'application/json' }
-                });
-                const data = await response.json();
-                return this.filterHiddenMovies(data);
+                let fetchPromises = [];
+                if (preferredSource === 'phimapi' || preferredSource === 'both') {
+                    fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'phimapi' })));
+                }
+                if (preferredSource === 'ophim1' || preferredSource === 'both') {
+                    fetchPromises.push(this.fetchWithTimeout(`https://ophim1.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
+                }
+
+                const results = await Promise.allSettled(fetchPromises);
+                
+                let combinedItems = [];
+                let firstValidData = null;
+                const seenSlugs = new Set();
+
+                for (const res of results) {
+                    if (res.status === 'fulfilled' && res.value) {
+                        const { data, source } = res.value;
+                        const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || (source === 'phimapi' ? 'https://phimimg.com' : 'https://img.ophimimg.com');
+
+                        const isSuccess = data.status === 'success' || data.status === true;
+                        if (!firstValidData && isSuccess) firstValidData = data;
+                        
+                        const items = data.items || data.data?.items || [];
+                        for (const item of items) {
+                            if (!seenSlugs.has(item.slug)) {
+                                seenSlugs.add(item.slug);
+                                
+                                if (domainImage) {
+                                    if (item.thumb_url && !item.thumb_url.startsWith('http')) {
+                                        item.thumb_url = `${domainImage}/${item.thumb_url.replace(/^\//, '')}`;
+                                    }
+                                    if (item.poster_url && !item.poster_url.startsWith('http')) {
+                                        item.poster_url = `${domainImage}/${item.poster_url.replace(/^\//, '')}`;
+                                    }
+                                }
+                                
+                                combinedItems.push(item);
+                            }
+                        }
+                    }
+                }
+
+                if (combinedItems.length === 0) throw new Error('API failed');
+
+                const mergedData = {
+                    ...firstValidData,
+                    items: combinedItems,
+                    data: firstValidData?.data ? { ...firstValidData.data, items: combinedItems } : undefined
+                };
+
+                return this.filterHiddenMovies(mergedData);
             }
         } catch (error) {
             console.error('Error fetching category movies:', error);
@@ -350,7 +475,7 @@ class MovieAPI {
     }
 
     // Get movies by country
-    async getMoviesByCountry(countrySlug, page = 1) {
+    async getMoviesByCountry(countrySlug, page = 1, preferredSource = 'both') {
         try {
             if (this.useBackend) {
                 const response = await this.fetchWithAuth(`${this.backendURL}/movies?country=${countrySlug}&page=${page}`);
@@ -365,11 +490,58 @@ class MovieAPI {
                 }
                 return null;
             } else {
-                const response = await this.fetchWithFallback(`/quoc-gia/${countrySlug}?page=${page}`, {
-                    headers: { 'accept': 'application/json' }
-                });
-                const data = await response.json();
-                return this.filterHiddenMovies(data);
+                const endpoint = `/quoc-gia/${countrySlug}?page=${page}`;
+                let fetchPromises = [];
+                if (preferredSource === 'phimapi' || preferredSource === 'both') {
+                    fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'phimapi' })));
+                }
+                if (preferredSource === 'ophim1' || preferredSource === 'both') {
+                    fetchPromises.push(this.fetchWithTimeout(`https://ophim1.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
+                }
+
+                const results = await Promise.allSettled(fetchPromises);
+                
+                let combinedItems = [];
+                let firstValidData = null;
+                const seenSlugs = new Set();
+
+                for (const res of results) {
+                    if (res.status === 'fulfilled' && res.value) {
+                        const { data, source } = res.value;
+                        const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || (source === 'phimapi' ? 'https://phimimg.com' : 'https://img.ophimimg.com');
+
+                        const isSuccess = data.status === 'success' || data.status === true;
+                        if (!firstValidData && isSuccess) firstValidData = data;
+                        
+                        const items = data.items || data.data?.items || [];
+                        for (const item of items) {
+                            if (!seenSlugs.has(item.slug)) {
+                                seenSlugs.add(item.slug);
+                                
+                                if (domainImage) {
+                                    if (item.thumb_url && !item.thumb_url.startsWith('http')) {
+                                        item.thumb_url = `${domainImage}/${item.thumb_url.replace(/^\//, '')}`;
+                                    }
+                                    if (item.poster_url && !item.poster_url.startsWith('http')) {
+                                        item.poster_url = `${domainImage}/${item.poster_url.replace(/^\//, '')}`;
+                                    }
+                                }
+                                
+                                combinedItems.push(item);
+                            }
+                        }
+                    }
+                }
+
+                if (combinedItems.length === 0) throw new Error('API failed');
+
+                const mergedData = {
+                    ...firstValidData,
+                    items: combinedItems,
+                    data: firstValidData?.data ? { ...firstValidData.data, items: combinedItems } : undefined
+                };
+
+                return this.filterHiddenMovies(mergedData);
             }
         } catch (error) {
             console.error('Error fetching country movies:', error);
@@ -429,7 +601,7 @@ class MovieAPI {
     }
 
     // Get movies from multiple sources / category
-    async getMoviesFromMultipleSources(page = 1, categoryOrList = 'phim-bo') {
+    async getMoviesFromMultipleSources(page = 1, categoryOrList = 'phim-bo', preferredSource = 'both') {
         try {
             let endpoint = `/danh-sach/${categoryOrList}?page=${page}`;
             if (categoryOrList.startsWith('the-loai/') || categoryOrList.startsWith('quoc-gia/')) {
@@ -442,9 +614,58 @@ class MovieAPI {
                     endpoint = `/danh-sach/${categoryOrList}?page=${page}`;
                 }
             }
-            const res = await this.fetchWithFallback(endpoint);
-            const rawData = await res.json();
-            return this.normalizeResponse(rawData);
+            
+            let fetchPromises = [];
+            if (preferredSource === 'phimapi' || preferredSource === 'both') {
+                fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'phimapi' })));
+            }
+            if (preferredSource === 'ophim1' || preferredSource === 'both') {
+                fetchPromises.push(this.fetchWithTimeout(`https://ophim1.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
+            }
+
+            const results = await Promise.allSettled(fetchPromises);
+            
+            let combinedItems = [];
+            let firstValidData = null;
+            const seenSlugs = new Set();
+
+            for (const res of results) {
+                if (res.status === 'fulfilled' && res.value) {
+                    const { data, source } = res.value;
+                    const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || (source === 'phimapi' ? 'https://phimimg.com' : 'https://img.ophimimg.com');
+
+                    const isSuccess = data.status === 'success' || data.status === true;
+                    if (!firstValidData && isSuccess) firstValidData = data;
+                    
+                    const items = data.items || data.data?.items || [];
+                    for (const item of items) {
+                        if (!seenSlugs.has(item.slug)) {
+                            seenSlugs.add(item.slug);
+                            
+                            if (domainImage) {
+                                if (item.thumb_url && !item.thumb_url.startsWith('http')) {
+                                    item.thumb_url = `${domainImage}/${item.thumb_url.replace(/^\//, '')}`;
+                                }
+                                if (item.poster_url && !item.poster_url.startsWith('http')) {
+                                    item.poster_url = `${domainImage}/${item.poster_url.replace(/^\//, '')}`;
+                                }
+                            }
+                            
+                            combinedItems.push(item);
+                        }
+                    }
+                }
+            }
+
+            if (combinedItems.length === 0) return null;
+
+            const mergedData = {
+                ...firstValidData,
+                items: combinedItems,
+                data: firstValidData?.data ? { ...firstValidData.data, items: combinedItems } : undefined
+            };
+
+            return this.normalizeResponse(mergedData);
         } catch (err) {
             console.warn('Error in getMoviesFromMultipleSources:', err);
             return null;

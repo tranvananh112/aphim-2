@@ -1291,10 +1291,8 @@
                         <div class="interest-content">
                             <h3 class="interest-title">Hoạt Hình</h3>
                             <div class="interest-action">XEM NGAY <span class="material-icons-round">chevron_right</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
         </section>
 
         <!-- Dynamic Category Lottie Icons script -->
@@ -2210,7 +2208,7 @@
                 const response = await movieAPI.fetchWithFallback('/danh-sach/phim-moi-cap-nhat?page=1', {
                     method: 'GET',
                     headers: { 'accept': 'application/json' }
-                });
+                }, 'phimapi');
 
                 const rawData = await response.json();
                 const data = movieAPI.normalizeResponse(rawData);
@@ -2426,7 +2424,7 @@
             if (el) el.scrollBy({ left: dir === 'right' ? 800 : -800, behavior: 'smooth' });
         };
 
-        async function loadCategoryToContainer(slug, containerId, loadingId, page = 1) {
+        async function loadCategoryToContainer(slug, containerId, loadingId, page = 1, preferredSource = 'ophim1') {
             const loading = document.getElementById(loadingId);
             const container = document.getElementById(containerId);
             try {
@@ -2487,7 +2485,7 @@
         }
 
         // Call them
-        loadCategoryToContainer('hai-huoc', 'comedyContainer', 'comedyLoading');
+        loadCategoryToContainer('hai-huoc', 'comedyContainer', 'comedyLoading', 1, 'phimapi');
         loadCategoryToContainer('tinh-cam', 'romanceContainer', 'romanceLoading');
         loadCategoryToContainer('chinh-kich', 'dramaContainer', 'dramaLoading');
 
@@ -2496,7 +2494,7 @@
             const loading = document.getElementById('animationLoading');
             const container = document.getElementById('animationContainer');
             try {
-                const response = await movieAPI.fetchWithFallback('/danh-sach/hoat-hinh?page=1');
+                const response = await movieAPI.fetchWithFallback('/danh-sach/hoat-hinh?page=1', {}, 'ophim1');
                 const rawData = await response.json();
                 const data = movieAPI.normalizeResponse(rawData);
                 const items = data?.data?.items || [];
@@ -2549,7 +2547,7 @@
             const loading = document.getElementById('adventureLoading');
             const container = document.getElementById('adventureContainer');
             try {
-                const response = await movieAPI.fetchWithFallback('/the-loai/phieu-luu?page=1');
+                const response = await movieAPI.fetchWithFallback('/the-loai/phieu-luu?page=1', {}, 'ophim1');
                 const rawData = await response.json();
                 const data = movieAPI.normalizeResponse(rawData);
                 const items = data?.data?.items || [];
@@ -2600,7 +2598,7 @@
             const container = document.getElementById('sofaflixContainer');
             const loading = document.getElementById('sofaflixLoading');
             try {
-                const response = await movieAPI.fetchWithFallback('/danh-sach/phim-bo?page=1');
+                const response = await movieAPI.fetchWithFallback('/danh-sach/phim-bo?page=1', {}, 'phimapi');
                 const rawData = await response.json();
                 const data = movieAPI.normalizeResponse(rawData);
                 const items = data?.data?.items || [];
@@ -2659,7 +2657,7 @@
             const container = document.getElementById('mythologyRankingContainer');
             const loading = document.getElementById('mythologyLoading');
             try {
-                const response = await movieAPI.fetchWithFallback('/the-loai/than-thoai?page=1');
+                const response = await movieAPI.fetchWithFallback('/the-loai/than-thoai?page=1', {}, 'ophim1');
                 const rawData = await response.json();
                 const data = movieAPI.normalizeResponse(rawData);
                 const items = data?.data?.items || [];
@@ -3062,7 +3060,7 @@
     <script src="js/bottom-nav.js?v=1783518061444" defer></script>
 <script src="js/movie-slider.js"></script>
     <link rel="stylesheet" href="/css/inline-ad.css?v=16">
-    <script src="js/voice-search.js?v=28"></script>
+    <script src="js/voice-search.js?v=70"></script>
 </body>
 
 </html>

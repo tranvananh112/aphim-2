@@ -4,7 +4,7 @@ async function loadHomeMovies() {
         const response = await movieAPI.fetchWithFallback('/home', {
             method: 'GET',
             headers: { 'accept': 'application/json' }
-        });
+        }, 'ophim1');
 
         const data = await response.json();
         console.log('Home API data:', data);
@@ -315,7 +315,7 @@ async function loadVietnameseMoviesHome() {
         const response = await movieAPI.fetchWithFallback('/quoc-gia/viet-nam?page=1&limit=20', {
             method: 'GET',
             headers: { 'accept': 'application/json' }
-        });
+        }, 'ophim1');
 
         const data = await response.json();
 

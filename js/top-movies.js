@@ -4,39 +4,71 @@ async function loadTopMovies() {
     const container = document.getElementById('topMoviesContainer');
 
     try {
-        // Lấy dữ liệu từ OPhim
-        let movies = [];
-
-        // 1. Thử lấy từ movieAPI.getHome()
-        const homeData = await movieAPI.getHome();
-        if (homeData && homeData.status === 'success' && homeData.data && homeData.data.items) {
-            movies = homeData.data.items;
-        }
-
-        // 2. Nếu chưa đủ phim, lấy thêm từ danh sách phim lẻ & phim bộ hot
-        if (movies.length < 10) {
-            const fallbackRes = await movieAPI.fetchWithFallback('/danh-sach/phim-moi-cap-nhat?page=1');
-            const rawData = await fallbackRes.json();
-            const normData = movieAPI.normalizeResponse(rawData);
-            if (normData && normData.data && normData.data.items) {
-                movies = [...movies, ...normData.data.items];
+        let finalMovies = [];
+        
+        // 1. Fetch TMDB Trending
+        if (typeof getTrendingFromTMDB !== 'undefined') {
+            const tmdbMovies = await getTrendingFromTMDB();
+            
+            if (tmdbMovies && tmdbMovies.length > 0) {
+                // Lấy top 15 phim hot nhất từ TMDB để tra cứu
+                const topTmdb = tmdbMovies.slice(0, 15);
+                
+                // 2. Tìm kiếm các phim này trên Ophim đồng thời
+                const searchPromises = topTmdb.map(async (tmdbMovie) => {
+                    const query = tmdbMovie.title || tmdbMovie.name || tmdbMovie.original_title;
+                    if (!query) return null;
+                    
+                    try {
+                        const searchRes = await movieAPI.searchMovies(query, 1, 'ophim1');
+                        if (searchRes && searchRes.data && searchRes.data.items && searchRes.data.items.length > 0) {
+                            // Lấy kết quả đầu tiên khớp
+                            const ophimMatch = searchRes.data.items[0];
+                            // Ghi đè thông tin TMDB để hiển thị sao thật
+                            ophimMatch.tmdb = {
+                                vote_average: tmdbMovie.vote_average,
+                                id: tmdbMovie.id
+                            };
+                            // Ghi đè poster nét từ TMDB nếu có
+                            if (tmdbMovie.poster_path) {
+                                ophimMatch.custom_poster = `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}`;
+                            }
+                            return ophimMatch;
+                        }
+                    } catch (e) {
+                        return null;
+                    }
+                    return null;
+                });
+                
+                const results = await Promise.all(searchPromises);
+                finalMovies = results.filter(m => m !== null);
             }
         }
-
-        // Lọc bỏ trùng lặp slug
+        
+        // 3. Fallback nếu TMDB lỗi hoặc tìm không ra phim nào
+        if (finalMovies.length < 10) {
+            const homeData = await movieAPI.getHome();
+            if (homeData && homeData.status === 'success' && homeData.data && homeData.data.items) {
+                const fallbackMovies = homeData.data.items.slice(0, 15);
+                finalMovies = [...finalMovies, ...fallbackMovies];
+            }
+        }
+        
+        // Lọc trùng lặp
         const uniqueMovies = [];
         const seenSlugs = new Set();
-        for (const m of movies) {
+        for (const m of finalMovies) {
             if (m.slug && !seenSlugs.has(m.slug)) {
                 seenSlugs.add(m.slug);
                 uniqueMovies.push(m);
             }
         }
-
-        // Sắp xếp ưu tiên phim có Đánh giá Sao / IMDb / TMDB điểm cao nhất
+        
+        // Sắp xếp lại theo điểm sao
         uniqueMovies.sort((a, b) => {
-            const scoreA = parseFloat(a.tmdb?.vote_average || a.rating || a.imdb?.vote_average || (9.8 - (uniqueMovies.indexOf(a) * 0.1)));
-            const scoreB = parseFloat(b.tmdb?.vote_average || b.rating || b.imdb?.vote_average || (9.8 - (uniqueMovies.indexOf(b) * 0.1)));
+            const scoreA = parseFloat(a.tmdb?.vote_average || a.rating || (9.8 - (uniqueMovies.indexOf(a) * 0.1)));
+            const scoreB = parseFloat(b.tmdb?.vote_average || b.rating || (9.8 - (uniqueMovies.indexOf(b) * 0.1)));
             return scoreB - scoreA;
         });
 
@@ -45,11 +77,11 @@ async function loadTopMovies() {
         if (top10Movies.length > 0) {
             renderTopMovies(top10Movies);
         } else {
-            loading.innerHTML = '<p class="text-gray-400">Không thể tải top phim</p>';
+            if(loading) loading.innerHTML = '<p class="text-gray-400">Không thể tải top phim</p>';
         }
     } catch (error) {
         console.error('Error loading top movies:', error);
-        loading.innerHTML = '<p class="text-red-400">Lỗi khi tải top phim</p>';
+        if(loading) loading.innerHTML = '<p class="text-red-400">Lỗi khi tải top phim</p>';
     }
 }
 
@@ -64,7 +96,7 @@ function renderTopMovies(movies) {
 
     container.innerHTML = movies.map((movie, index) => {
         const rank = index + 1;
-        const optimizedUrl = movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 400, 80);
+        const optimizedUrl = movie.custom_poster ? movie.custom_poster : movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 400, 80);
         const detailUrl = `movie-detail.html?slug=${movie.slug}`;
         
         // Rating & Stars

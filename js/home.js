@@ -28,10 +28,26 @@ async function loadFeaturedMovies() {
     container.innerHTML = '<div class="col-span-full text-center py-10"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div></div>';
 
     try {
-        const data = await movieAPI.getMovieList(1);
+        const data = await movieAPI.getMovieList(1, 'phimapi');
 
         if (data && (data && (data.status === 'success' || data.status === true || data.status)) && data.data && data.data.items) {
-            renderMovieGrid(data.data.items, container);
+            let movies = data.data.items;
+            
+            // Lọc và ưu tiên phim có điểm đánh giá cao (sao cao) lên trước
+            movies.sort((a, b) => {
+                const scoreA = a.tmdb?.vote_average || a.imdb?.vote_average || 0;
+                const scoreB = b.tmdb?.vote_average || b.imdb?.vote_average || 0;
+                
+                if (scoreA !== scoreB) {
+                    return scoreB - scoreA;
+                }
+                return (b.year || 0) - (a.year || 0);
+            });
+            
+            // Có thể lấy top 24 phim có điểm cao nhất để hiển thị cho đẹp
+            const topMovies = movies.slice(0, 24);
+            
+            renderMovieGrid(topMovies, container);
         } else {
             container.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">Không thể tải danh sách phim</div>';
         }
