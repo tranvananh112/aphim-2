@@ -93,7 +93,7 @@ function updateUserUI() {
             <div id="userNavProfile" class="flex items-center" style="position: relative; z-index: 50;">
                 ${notificationBell}
                 <div class="relative group nav-profile-dropdown" style="padding: 4px 0; overflow: visible !important;">
-                    <a href="/profile" class="nav-profile-pill-v2 flex items-center gap-2.5 px-3 py-1.5 rounded-full transition-all duration-300 group cursor-pointer" 
+                    <a href="/profile" class="nav-profile-pill-v2 flex items-center gap-2.5 px-3 py-1 rounded-full transition-all duration-300 group cursor-pointer" 
                        style="text-decoration:none; overflow: visible !important; position: relative;">
                         ${avatarHtml}
                         <span class="hidden md:inline text-[13px] font-bold" style="color: #000 !important; white-space:nowrap; max-width:100px; overflow:hidden; text-overflow:ellipsis;">
