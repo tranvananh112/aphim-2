@@ -1186,7 +1186,7 @@ function renderServerList(episodes) {
     }).join('');
 
     container.innerHTML = labelHTML + buttonsHTML;
-    container.className = "flex flex-nowrap overflow-x-auto items-center gap-2 mb-4 w-full pb-2 hide-scrollbar";
+    container.className = "flex flex-wrap items-center gap-2 mb-4 w-full";
 }
 
 window.changeServer = function(index) {
