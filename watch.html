@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="vi">
 
 <head>
@@ -1820,6 +1820,39 @@
     <script src="js/bottom-nav.js?v=1783518061462" defer></script>
 <script src="js/movie-slider.js"></script>
     <script src="js/voice-search.js?v=28"></script>
+    <script>
+        (function() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var slug = urlParams.get('slug') || '';
+            var episode = urlParams.get('episode') || 'tap-1';
+            
+            if (slug && typeof userService !== 'undefined') {
+                var movieTitleEl = document.querySelector('.movie-title, h1, [data-movie-title], #breadcrumb-movie-name');
+                var name = movieTitleEl ? movieTitleEl.textContent.trim() : slug;
+                var posterImg = document.querySelector('#sidebar-poster, .movie-poster img');
+                var thumb = posterImg ? posterImg.src : '';
+
+                var movieInfo = {
+                    slug: slug,
+                    name: name,
+                    thumb_url: thumb,
+                    poster_url: thumb,
+                    year: new Date().getFullYear()
+                };
+                
+                var resumeTime = parseFloat(urlParams.get('t')) || 0;
+                userService.saveWatchProgress(slug, resumeTime || 30, 100, episode, movieInfo);
+
+                window.addEventListener('message', function(e) {
+                    if (e.data && (e.data.currentTime || e.data.time)) {
+                        var cTime = e.data.currentTime || e.data.time;
+                        var dur = e.data.duration || 100;
+                        userService.saveWatchProgress(slug, cTime, dur, episode, movieInfo);
+                    }
+                });
+            }
+        })();
+    </script>
 </body>
 
 </html>

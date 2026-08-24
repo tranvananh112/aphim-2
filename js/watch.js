@@ -1613,12 +1613,25 @@ function initializePlayer(episode) {
     // Hàm hỗ trợ lưu tiến độ tức thời
     function doSaveProgress() {
         if (player && player.currentTime > 0 && player.duration > 0 && currentMovie) {
+            const epSlug = (currentEpisode && currentEpisode.slug) ? currentEpisode.slug : (episode ? episode.slug : null);
+            const epName = (currentEpisode && currentEpisode.name) ? currentEpisode.name : (episode ? episode.name : null);
+            
             userService.saveWatchProgress(
                 currentMovie.slug,
                 player.currentTime,
                 player.duration,
-                episode ? episode.slug : null
+                epSlug,
+                currentMovie
             );
+
+            if (typeof userService.addToHistory === 'function') {
+                userService.addToHistory(currentMovie, epSlug, {
+                    currentTime: player.currentTime,
+                    duration: player.duration,
+                    episode: epName,
+                    episodeSlug: epSlug
+                });
+            }
         }
     }
 
@@ -1627,7 +1640,16 @@ function initializePlayer(episode) {
     player.addEventListener('play', () => {
         console.log('▶️ Video playing');
         if (progressInterval) clearInterval(progressInterval); // Dọn dẹp interval cũ nếu có
-        progressInterval = setInterval(doSaveProgress, 5000); // Cập nhật mỗi 5 giây
+        progressInterval = setInterval(doSaveProgress, 3000); // Cập nhật mỗi 3 giây
+    });
+
+    let lastTimeUpdateSave = 0;
+    player.addEventListener('timeupdate', () => {
+        const now = Date.now();
+        if (now - lastTimeUpdateSave > 2000) { // Lưu mỗi 2 giây khi video phát
+            lastTimeUpdateSave = now;
+            doSaveProgress();
+        }
     });
 
     player.addEventListener('pause', () => {
