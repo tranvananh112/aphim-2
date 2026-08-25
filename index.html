@@ -1397,15 +1397,21 @@
                         <span class="hidden md:inline uppercase"><span class="text-white">Bảng Xếp Hạng</span> <span class="text-gradient-gold">Top Phim Hot</span></span>
                         <span class="md:hidden uppercase"><span class="text-white">BXH</span> <span class="text-gradient-gold">Top Phim Hot</span></span>
                     </h2>
-                    <div class="flex gap-3">
-                        <button id="topMoviesScrollLeft"
-                            class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
-                            <span class="material-icons-round text-xl">chevron_left</span>
-                        </button>
-                        <button id="topMoviesScrollRight"
-                            class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
-                            <span class="material-icons-round text-xl">chevron_right</span>
-                        </button>
+                    <div class="flex items-center gap-3">
+                        <a href="phim-theo-quoc-gia.html?country=han-quoc&page=1"
+                            class="text-[#fcd34d] text-sm font-semibold hover:text-white transition-colors flex items-center gap-1 group">
+                            Xem tất cả <span class="material-icons-round text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </a>
+                        <div class="flex gap-2">
+                            <button id="topMoviesScrollLeft"
+                                class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
+                                <span class="material-icons-round text-xl">chevron_left</span>
+                            </button>
+                            <button id="topMoviesScrollRight"
+                                class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
+                                <span class="material-icons-round text-xl">chevron_right</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -2200,17 +2206,17 @@
 
                 const finalImgUrl = (typeof imageOptimizer !== 'undefined') ?
                     imageOptimizer.optimizeImageUrl(thumb || poster, 400, 80) :
-                    (thumb ? (thumb.startsWith('http') ? thumb : `https://img.ophimimg.com/${thumb}`) :
-                        (poster ? (poster.startsWith('http') ? poster : `https://img.ophimimg.com/${poster}`) : ''));
+                    (thumb ? (thumb.startsWith('http') ? thumb.replace('img.ophimimg.com', 'phimimg.com') : `https://phimimg.com/${thumb.replace(/^\//, '')}`) :
+                        (poster ? (poster.startsWith('http') ? poster.replace('img.ophimimg.com', 'phimimg.com') : `https://phimimg.com/${poster.replace(/^\//, '')}`) : ''));
 
                 return `
                     <div class="portrait-card group ${hiddenUI.containerClass}">
                         <a href="${linkUrl}">
                             <div class="portrait-poster-w">
-                                <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E" data-src="${finalImgUrl}" 
+                                <img src="${finalImgUrl}" 
                                      alt="${movie.name}" 
                                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                     onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+                                     onerror="if(!this.dataset.fallbackTried){this.dataset.fallbackTried='1';if(this.src.includes('img.ophimimg.com')){this.src=this.src.replace('img.ophimimg.com','phimimg.com');}else if(this.src.includes('ophim1.com')){this.src=this.src.replace('ophim1.com','phimimg.com');}else{this.src='https://aphim.top/android-chrome-512x512.png';}}"
                                      loading="lazy"
                                      decoding="async" data-tmdb-slug="${movie.slug}" data-tmdb-type="poster">
                                 

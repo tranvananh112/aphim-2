@@ -1,3 +1,17 @@
+
+window.getCleanMovieImageUrl = function(rawUrl) {
+    if (!rawUrl) return 'https://aphim.top/android-chrome-512x512.png';
+    let url = String(rawUrl).trim();
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url.replace(/img.ophimimg.com/g, 'phimimg.com').replace(/phimapi.com/uploads/g, 'phimimg.com/uploads');
+    }
+    const clean = url.replace(/^//, '');
+    if (clean.startsWith('upload/') || clean.startsWith('uploads/')) {
+        return 'https://phimimg.com/' + clean;
+    }
+    return 'https://phimimg.com/uploads/movies/' + clean;
+};
+
 // API Service for phimapi.com and Backend
 class MovieAPI {
     constructor() {
@@ -65,31 +79,27 @@ class MovieAPI {
             urlsToTry = [
                 `https://phimapi.com/v1/api${basePath}${paramStr}`,
                 `https://phimapi.com${basePath}${paramStr}`,
-                `https://ophim1.com/v1/api${basePath}${paramStr}`,
-                `https://ophim1.com${basePath}${paramStr}`
+                `https://phimapi.com/v1/api${basePath}${paramStr}`,
+                `https://phimapi.com${basePath}${paramStr}`
             ];
         } else if (preferredSource === 'ophim1') {
             urlsToTry = [
-                `https://ophim1.com/v1/api${basePath}${paramStr}`,
-                `https://ophim1.com${basePath}${paramStr}`,
+                `https://phimapi.com/v1/api${basePath}${paramStr}`,
+                `https://phimapi.com${basePath}${paramStr}`,
                 `https://phimapi.com/v1/api${basePath}${paramStr}`,
                 `https://phimapi.com${basePath}${paramStr}`
             ];
         } else {
             urlsToTry = [
-                `https://ophim1.com/v1/api${basePath}${paramStr}`,
-                `https://ophim1.com${basePath}${paramStr}`,
+                `https://phimapi.com/v1/api${basePath}${paramStr}`,
+                `https://phimapi.com${basePath}${paramStr}`,
                 `https://phimapi.com/v1/api${basePath}${paramStr}`,
                 `https://phimapi.com${basePath}${paramStr}`
             ];
         }
 
         if (basePath.includes('phim-moi-cap-nhat')) {
-            if (preferredSource === 'phimapi' || preferredSource === 'both') {
-                urlsToTry.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
-            } else {
-                urlsToTry.unshift(`https://ophim1.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
-            }
+            urlsToTry.unshift(`https://phimapi.com/danh-sach/phim-moi-cap-nhat${paramStr}`);
         }
 
         const uniqueUrls = Array.from(new Set(urlsToTry.filter(Boolean)));
@@ -116,19 +126,31 @@ class MovieAPI {
     filterHiddenMovies(data) {
         if (!data) return data;
         
-        // INTERCEPT AND FIX IMAGE URLS (if from PhimAPI or Ophim1)
+        // INTERCEPT AND FIX IMAGE URLS (If from Ophim1 or relative, ensure phimimg.com fallback)
         try {
-            const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || '';
-            if (domainImage) {
-                const items = data.data?.items || data.items || [];
-                if (Array.isArray(items)) {
-                    for (const item of items) {
-                        if (item.thumb_url && !item.thumb_url.startsWith('http')) {
-                            item.thumb_url = `${domainImage}/${item.thumb_url.replace(/^\//, '')}`;
+            const rawDomain = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || 'https://phimimg.com';
+            const safeDomain = (rawDomain.includes('img.ophimimg.com') || rawDomain.includes('phimapi.com')) ? 'https://phimimg.com' : rawDomain;
+            const items = data.data?.items || data.items || [];
+            if (Array.isArray(items)) {
+                for (const item of items) {
+                    if (item.poster_url) {
+                        if (item.poster_url.includes('img.ophimimg.com')) {
+                            item.poster_url = item.poster_url.replace('img.ophimimg.com', 'phimimg.com');
+                        } else if (!item.poster_url.startsWith('http')) {
+                            item.poster_url = `${safeDomain}/${item.poster_url.replace(/^\//, '')}`;
                         }
-                        if (item.poster_url && !item.poster_url.startsWith('http')) {
-                            item.poster_url = `${domainImage}/${item.poster_url.replace(/^\//, '')}`;
+                    }
+                    if (item.thumb_url) {
+                        if (item.thumb_url.includes('img.ophimimg.com')) {
+                            item.thumb_url = item.thumb_url.replace('img.ophimimg.com', 'phimimg.com');
+                        } else if (!item.thumb_url.startsWith('http')) {
+                            item.thumb_url = `${safeDomain}/${item.thumb_url.replace(/^\//, '')}`;
                         }
+                    } else if (item.poster_url) {
+                        item.thumb_url = item.poster_url;
+                    }
+                    if (!item.poster_url && item.thumb_url) {
+                        item.poster_url = item.thumb_url;
                     }
                 }
             }
@@ -200,7 +222,7 @@ class MovieAPI {
                     fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'phimapi' })));
                 }
                 if (preferredSource === 'ophim1' || preferredSource === 'both') {
-                    fetchPromises.push(this.fetchWithTimeout(`https://ophim1.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
+                    fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
                 }
 
                 const results = await Promise.allSettled(fetchPromises);
@@ -212,7 +234,7 @@ class MovieAPI {
                 for (const res of results) {
                     if (res.status === 'fulfilled' && res.value) {
                         const { data, source } = res.value;
-                        const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || (source === 'phimapi' ? 'https://phimimg.com' : 'https://img.ophimimg.com');
+                        const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || 'https://phimimg.com';
 
                         const isSuccess = data.status === 'success' || data.status === true;
                         if (!firstValidData && isSuccess) firstValidData = data;
@@ -421,7 +443,7 @@ class MovieAPI {
                     fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'phimapi' })));
                 }
                 if (preferredSource === 'ophim1' || preferredSource === 'both') {
-                    fetchPromises.push(this.fetchWithTimeout(`https://ophim1.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
+                    fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
                 }
 
                 const results = await Promise.allSettled(fetchPromises);
@@ -433,7 +455,7 @@ class MovieAPI {
                 for (const res of results) {
                     if (res.status === 'fulfilled' && res.value) {
                         const { data, source } = res.value;
-                        const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || (source === 'phimapi' ? 'https://phimimg.com' : 'https://img.ophimimg.com');
+                        const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || 'https://phimimg.com';
 
                         const isSuccess = data.status === 'success' || data.status === true;
                         if (!firstValidData && isSuccess) firstValidData = data;
@@ -496,7 +518,7 @@ class MovieAPI {
                     fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'phimapi' })));
                 }
                 if (preferredSource === 'ophim1' || preferredSource === 'both') {
-                    fetchPromises.push(this.fetchWithTimeout(`https://ophim1.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
+                    fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
                 }
 
                 const results = await Promise.allSettled(fetchPromises);
@@ -508,7 +530,7 @@ class MovieAPI {
                 for (const res of results) {
                     if (res.status === 'fulfilled' && res.value) {
                         const { data, source } = res.value;
-                        const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || (source === 'phimapi' ? 'https://phimimg.com' : 'https://img.ophimimg.com');
+                        const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || 'https://phimimg.com';
 
                         const isSuccess = data.status === 'success' || data.status === true;
                         if (!firstValidData && isSuccess) firstValidData = data;
@@ -620,7 +642,7 @@ class MovieAPI {
                 fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'phimapi' })));
             }
             if (preferredSource === 'ophim1' || preferredSource === 'both') {
-                fetchPromises.push(this.fetchWithTimeout(`https://ophim1.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
+                fetchPromises.push(this.fetchWithTimeout(`https://phimapi.com/v1/api${endpoint}`, { headers: { 'accept': 'application/json' }, timeout: 3000 }).then(r => r.json()).then(data => ({ data, source: 'ophim1' })));
             }
 
             const results = await Promise.allSettled(fetchPromises);
@@ -632,7 +654,7 @@ class MovieAPI {
             for (const res of results) {
                 if (res.status === 'fulfilled' && res.value) {
                     const { data, source } = res.value;
-                    const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || (source === 'phimapi' ? 'https://phimimg.com' : 'https://img.ophimimg.com');
+                    const domainImage = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || 'https://phimimg.com';
 
                     const isSuccess = data.status === 'success' || data.status === true;
                     if (!firstValidData && isSuccess) firstValidData = data;
@@ -711,16 +733,18 @@ class MovieAPI {
     }
 
     // Get image URL
-      getImageURL(imagePath, width = 400, quality = 80, isPriority = false) {
+    getImageURL(imagePath, width = 400, quality = 80, isPriority = false) {
         if (!imagePath) return '/apple-touch-icon.png';
 
         let fullUrl = imagePath;
-        if (!imagePath.startsWith('http')) {
+        if (fullUrl.includes('img.ophimimg.com')) {
+            fullUrl = fullUrl.replace('img.ophimimg.com', 'phimimg.com');
+        } else if (!imagePath.startsWith('http')) {
             let filename = imagePath.replace(/^\//, "");
             if (!filename.startsWith('uploads/')) {
                 filename = 'uploads/movies/' + filename;
             }
-            fullUrl = `${typeof API_CONFIG !== 'undefined' && API_CONFIG.IMAGE_BASE ? API_CONFIG.IMAGE_BASE : 'https://img.ophimimg.com/'}${filename}`;
+            fullUrl = `https://phimimg.com/${filename}`;
         }
 
         // Use imageOptimizer for advanced compression and caching
@@ -1075,10 +1099,28 @@ if (typeof window !== 'undefined') {
     window.MovieAPI = MovieAPI;
 }
 
-// 🚀 Auto-inject Canonical Tag on every page load
+// 🚀 Auto-inject Canonical Tag on every page load & global image error fallback for broken Ophim CDN
 document.addEventListener('DOMContentLoaded', () => {
     movieAPI.injectCanonical();
 });
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('error', function (e) {
+        if (e && e.target && e.target.tagName === 'IMG') {
+            const img = e.target;
+            if (!img.dataset.fallbackTried) {
+                img.dataset.fallbackTried = '1';
+                if (img.src && img.src.includes('img.ophimimg.com')) {
+                    img.src = img.src.replace('img.ophimimg.com', 'phimimg.com');
+                } else if (img.src && img.src.includes('phimapi.com')) {
+                    img.src = img.src.replace('phimapi.com', 'phimimg.com');
+                } else if (img.src && !img.src.includes('android-chrome')) {
+                    img.src = 'https://aphim.top/android-chrome-512x512.png';
+                }
+            }
+        }
+    }, true);
+}
 
 
 

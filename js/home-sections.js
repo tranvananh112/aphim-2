@@ -4,7 +4,7 @@ async function loadHomeMovies() {
         const response = await movieAPI.fetchWithFallback('/home', {
             method: 'GET',
             headers: { 'accept': 'application/json' }
-        }, 'ophim1');
+        }, 'phimapi');
 
         const data = await response.json();
         console.log('Home API data:', data);
@@ -38,9 +38,6 @@ async function loadHomeMovies() {
                 } catch (seoErr) {
                     console.warn('SEO dynamic injection skipped:', seoErr);
                 }
-
-                // Không render "Latest Updates" section nữa vì đã có trong index.html
-                // renderLatestMoviesSection(movies);
 
                 // Hiển thị loading và dynamicSections
                 const loading = document.getElementById('sectionsLoading');
@@ -123,20 +120,27 @@ function renderLatestMoviesSection(movies) {
         const hasCustomLink = !!movieLinks[movie.slug];
         const linkUrl = hasCustomLink ? `watch-simple.html?slug=${movie.slug}` : `movie-detail.html?slug=${movie.slug}`;
 
+        let imgUrl = typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : (movie.poster_url || movie.thumb_url || '');
+        if (imgUrl && imgUrl.includes('img.ophimimg.com')) {
+            imgUrl = imgUrl.replace('img.ophimimg.com', 'phimimg.com');
+        } else if (imgUrl && !imgUrl.startsWith('http')) {
+            imgUrl = 'https://phimimg.com/' + imgUrl.replace(/^\//, '');
+        }
+
         return `
                             <a href="${linkUrl}"
                                 class="group relative block rounded-xl overflow-hidden hover:opacity-90 transition-all duration-300 ${hiddenUI.containerClass}">
                                 <div class="aspect-[2/3] w-full overflow-hidden relative">
                                             <img alt="Xem Phim ${movie.name} (${movie.year}) Full HD Vietsub"
                                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${hiddenUI.imgClass}"
-                                                src="${typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : `https://img.ophimimg.com/${movie.poster_url || movie.thumb_url}`}"
+                                                src="${imgUrl}"
                                                 data-tmdb-slug="${movie.slug}"
                                                 data-tmdb-id="${movie.tmdb?.id || ''}"
                                                 data-tmdb-name="${(movie.name || '').replace(/"/g, '&quot;')}"
                                                 data-tmdb-year="${movie.year || ''}"
                                                 data-tmdb-type="poster"
                                                 loading="lazy"
-                                                onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
+                                                onerror="window.autoHealMovieImage ? window.autoHealMovieImage(this, typeof movie !== 'undefined' ? movie.slug : '') : null" />
                                     ${hiddenUI.badge}
                                     ${!hiddenUI.badge ? `
                                     <div class="absolute top-2 left-2 bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded">
@@ -251,20 +255,27 @@ function renderAllSections(sections) {
             const linkUrl = hasCustomLink ? `watch-simple.html?slug=${movie.slug}` : `movie-detail.html?slug=${movie.slug}`;
             const hiddenUI = window.getHiddenMovieOverlay ? window.getHiddenMovieOverlay(movie.slug) : { badge: '', imgClass: '', containerClass: '' };
 
+            let imgUrl = typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : (movie.poster_url || movie.thumb_url || '');
+            if (imgUrl && imgUrl.includes('img.ophimimg.com')) {
+                imgUrl = imgUrl.replace('img.ophimimg.com', 'phimimg.com');
+            } else if (imgUrl && !imgUrl.startsWith('http')) {
+                imgUrl = 'https://phimimg.com/' + imgUrl.replace(/^\//, '');
+            }
+
             return `
                                 <a href="${linkUrl}"
                                     class="group relative block rounded-xl overflow-hidden hover:opacity-90 transition-all duration-300 ${hiddenUI.containerClass}">
                                     <div class="aspect-[2/3] w-full overflow-hidden relative">
                                         <img alt="Xem Phim ${movie.name} (${movie.year}) Vietsub"
                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${hiddenUI.imgClass}"
-                                            src="${typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : `https://img.ophimimg.com/${movie.poster_url || movie.thumb_url}`}"
+                                            src="${imgUrl}"
                                             data-tmdb-slug="${movie.slug}"
                                             data-tmdb-id="${movie.tmdb?.id || ''}"
                                             data-tmdb-name="${(movie.name || '').replace(/"/g, '&quot;')}"
                                             data-tmdb-year="${movie.year || ''}"
                                             data-tmdb-type="poster"
                                             loading="lazy"
-                                            onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'" />
+                                            onerror="window.autoHealMovieImage ? window.autoHealMovieImage(this, typeof movie !== 'undefined' ? movie.slug : '') : null" />
                                         ${hiddenUI.badge}
                                         ${!hiddenUI.badge ? `
                                         <div class="absolute top-2 left-2 bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded">
@@ -315,7 +326,7 @@ async function loadVietnameseMoviesHome() {
         const response = await movieAPI.fetchWithFallback('/quoc-gia/viet-nam?page=1&limit=20', {
             method: 'GET',
             headers: { 'accept': 'application/json' }
-        }, 'ophim1');
+        }, 'phimapi');
 
         const data = await response.json();
 
@@ -348,20 +359,27 @@ function renderVietnameseMovies(movies) {
         const linkUrl = hasCustomLink ? `watch-simple.html?slug=${movie.slug}` : `movie-detail.html?slug=${movie.slug}`;
         const hiddenUI = window.getHiddenMovieOverlay ? window.getHiddenMovieOverlay(movie.slug) : { badge: '', imgClass: '', containerClass: '' };
 
+        let imgUrl = typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : (movie.poster_url || movie.thumb_url || '');
+        if (imgUrl && imgUrl.includes('img.ophimimg.com')) {
+            imgUrl = imgUrl.replace('img.ophimimg.com', 'phimimg.com');
+        } else if (imgUrl && !imgUrl.startsWith('http')) {
+            imgUrl = 'https://phimimg.com/' + imgUrl.replace(/^\//, '');
+        }
+
         return `
         <a href="${linkUrl}"
             class="group relative block rounded-xl overflow-hidden hover:opacity-90 transition-all duration-300 movie-card-w-sm ${hiddenUI.containerClass}">
             <div class="aspect-[2/3] w-full overflow-hidden relative">
                 <img alt="Xem Phim ${movie.name} (${movie.year}) Thuyết Minh Vietsub"
                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ${hiddenUI.imgClass}"
-                    src="${typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : `https://img.ophimimg.com/${movie.poster_url || movie.thumb_url}`}"
+                    src="${imgUrl}"
                     data-tmdb-slug="${movie.slug}"
                     data-tmdb-id="${movie.tmdb?.id || ''}"
                     data-tmdb-name="${(movie.name || '').replace(/"/g, '&quot;')}"
                     data-tmdb-year="${movie.year || ''}"
                     data-tmdb-type="poster"
                     loading="lazy"
-                    onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+                    onerror="window.autoHealMovieImage ? window.autoHealMovieImage(this, typeof movie !== 'undefined' ? movie.slug : '') : null"
                     />
                 ${hiddenUI.badge}
                 ${!hiddenUI.badge ? `
