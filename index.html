@@ -1351,6 +1351,43 @@
 
     <!-- Consolidated Main Content Area Starts Higher -->
     <div class="bg-void pb-12">
+        <!-- Continue Watching (Tiếp tục xem) Section -->
+        <section id="continueWatchingSection" class="hidden py-2 md:py-3 continue-watching-section !bg-transparent">
+            <div class="w-full max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8" style="max-width: 1600px !important; width: 100% !important; margin-left: auto !important; margin-right: auto !important;">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-xl md:text-2xl lg:text-3xl font-black tracking-tight font-nunito flex items-center lg:-ml-5">
+                        <span class="inline-block w-1.5 h-6 md:h-7 bg-[#ffd700] rounded-full mr-2.5 shadow-[0_0_12px_rgba(255,215,0,0.8)] flex-shrink-0"></span>
+                        <span class="uppercase flex items-center gap-1.5 font-black">
+                            <span style="color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;">TIẾP</span>
+                            <span style="color: #f59e0b !important; text-shadow: 0 0 8px rgba(245,158,11,0.6) !important;">TỤC</span>
+                            <span style="color: #ffd700 !important; text-shadow: 0 0 12px rgba(255,215,0,0.9) !important;">XEM</span>
+                        </span>
+                    </h2>
+                    <div class="flex items-center gap-3">
+                        <span id="continueWatchingCount" class="text-[#ffd700] font-bold text-xs md:text-sm tracking-wide bg-amber-950/60 border border-amber-500/40 px-3 py-1 rounded-full shadow-sm">0/0 phim gần nhất</span>
+                        <div class="flex gap-2">
+                            <button onclick="scrollContinueWatching('left')"
+                                class="rounded-full border border-white/20 hover:border-amber-400 flex items-center justify-center hover:bg-amber-500/20 transition-colors text-white"
+                                style="width: 34px !important; height: 34px !important; min-width: 34px !important; min-height: 34px !important;">
+                                <span class="material-icons-round text-lg">chevron_left</span>
+                            </button>
+                            <button onclick="scrollContinueWatching('right')"
+                                class="rounded-full border border-white/20 hover:border-amber-400 flex items-center justify-center hover:bg-amber-500/20 transition-colors text-white"
+                                style="width: 34px !important; height: 34px !important; min-width: 34px !important; min-height: 34px !important;">
+                                <span class="material-icons-round text-lg">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="continueWatchingContainer"
+                    class="flex gap-5 md:gap-7 overflow-x-auto scrollbar-hide items-start py-3">
+                    <!-- Cards will be dynamically loaded from LocalStorage -->
+                </div>
+            </div>
+        </section>
+        <script src="js/continue-watching.js?v=6000"></script>
+
         <!-- Top Movies Hot Section -->
         <section class="py-2 md:py-3 top-movies-section !bg-transparent">
             <div class="w-full max-w-[1600px] mx-auto px-4 md:px-6 lg:px-8" style="max-width: 1600px !important; width: 100% !important; margin-left: auto !important; margin-right: auto !important;">

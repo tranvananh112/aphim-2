@@ -85,6 +85,10 @@ class UserService {
         const limited = filtered.slice(0, 50);
         localStorage.setItem(STORAGE_KEYS.WATCH_HISTORY, JSON.stringify(limited));
 
+        try {
+            window.dispatchEvent(new CustomEvent('watchHistoryUpdated', { detail: limited }));
+        } catch(e) {}
+
         if (this.authService && this.authService.isLoggedIn()) {
             this.authService.updateProfile({ watchHistory: limited }).catch(()=>{});
         }
@@ -93,6 +97,9 @@ class UserService {
     // Clear watch history
     clearHistory() {
         localStorage.removeItem(STORAGE_KEYS.WATCH_HISTORY);
+        try {
+            window.dispatchEvent(new CustomEvent('watchHistoryUpdated', { detail: [] }));
+        } catch(e) {}
         if (this.authService && this.authService.isLoggedIn()) {
             this.authService.updateProfile({ watchHistory: [] }).catch(()=>{});
         }
@@ -129,6 +136,10 @@ class UserService {
 
         // 1. Luôn lưu ngay lập tức vào LocalStorage trên máy hiện tại
         localStorage.setItem(STORAGE_KEYS.WATCH_PROGRESS, JSON.stringify(allProgress));
+
+        try {
+            window.dispatchEvent(new CustomEvent('watchProgressUpdated', { detail: allProgress }));
+        } catch(e) {}
 
         if (movieInfo) {
             this.addToHistory(movieInfo, episode, { currentTime, duration, episodeSlug: episode });
