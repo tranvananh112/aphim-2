@@ -38,9 +38,9 @@
         }
 
         const posterUrl = mainMovie.poster_url
-            ? (mainMovie.poster_url.startsWith('http') ? mainMovie.poster_url : 'https://img.ophimimg.com/' +  mainMovie.poster_url)
+            ? (mainMovie.poster_url.startsWith('http') ? mainMovie.poster_url : 'https://phimimg.com/' +  mainMovie.poster_url)
             : (mainMovie.thumb_url
-                ? (mainMovie.thumb_url.startsWith('http') ? mainMovie.thumb_url : 'https://img.ophimimg.com/' +  mainMovie.thumb_url)
+                ? (mainMovie.thumb_url.startsWith('http') ? mainMovie.thumb_url : 'https://phimimg.com/' +  mainMovie.thumb_url)
                 : 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E');
         const title = mainMovie.name || 'Phim Kinh Dị';
         const originName = mainMovie.origin_name || '';
@@ -73,7 +73,7 @@
                     data-tmdb-year="${mainMovie.year || ''}"
                     data-tmdb-type="backdrop"
                     src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E"
-                    onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+                    onerror="window.autoHealMovieImage ? window.autoHealMovieImage(this, typeof movie !== 'undefined' ? movie.slug : '', typeof movie !== 'undefined' ? (movie.name || movie.title) : '') : null"
                     loading="eager"
                 />
                 
@@ -136,7 +136,7 @@
             let movieThumb = movie.poster_url || movie.thumb_url || '';
             // Thêm base URL nếu chưa có
             if (movieThumb && !movieThumb.startsWith('http')) {
-                movieThumb = 'https://img.ophimimg.com/' +  movieThumb;
+                movieThumb = 'https://phimimg.com/' +  movieThumb;
             }
             if (!movieThumb) {
                 movieThumb = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E';
@@ -156,7 +156,7 @@
                                         data-tmdb-year="${movie.year || ''}"
                                         data-tmdb-type="poster"
                                         src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E"
-                                        onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+                                        onerror="window.autoHealMovieImage ? window.autoHealMovieImage(this, typeof movie !== 'undefined' ? movie.slug : '', typeof movie !== 'undefined' ? (movie.name || movie.title) : '') : null"
                                         loading="lazy"
                                     />
                                     ${hiddenUI.badge}
@@ -179,7 +179,7 @@
                         ${allMovies.map((movie, index) => {
             let mobileThumb = movie.poster_url || movie.thumb_url || '';
             if (mobileThumb && !mobileThumb.startsWith('http')) {
-                mobileThumb = 'https://img.ophimimg.com/' +  mobileThumb;
+                mobileThumb = 'https://phimimg.com/' +  mobileThumb;
             }
             if (!mobileThumb) { mobileThumb = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'; }
             const isActiveMobile = index === activeIndex;
@@ -193,7 +193,7 @@
                                     data-tmdb-year="${movie.year || ''}"
                                     data-tmdb-type="poster"
                                     src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E"
-                                    onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                                    onerror="window.autoHealMovieImage ? window.autoHealMovieImage(this, typeof movie !== 'undefined' ? movie.slug : '', typeof movie !== 'undefined' ? (movie.name || movie.title) : '') : null">
                             </div>`;
         }).join('')}
                     </div>

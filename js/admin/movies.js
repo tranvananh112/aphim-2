@@ -67,10 +67,10 @@ function renderMoviesTable(movies) {
             </td>
             <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
-                    <img src="https://img.ophimimg.com/${movie.thumb_url}" 
+                    <img src="https://phimimg.com/${movie.thumb_url}" 
                          alt="${movie.name}"
                          class="w-12 h-16 object-cover rounded"
-                         onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22%3E%3Crect fill=%22%23111%22 width=%22400%22 height=%22600%22/%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                         onerror="window.autoHealMovieImage ? window.autoHealMovieImage(this, typeof movie !== 'undefined' ? movie.slug : '', typeof movie !== 'undefined' ? (movie.name || movie.title) : '') : null">
                     <div>
                         <p class="text-sm font-medium text-gray-900">${movie.name}</p>
                         <p class="text-xs text-gray-500">${movie.origin_name || ''}</p>

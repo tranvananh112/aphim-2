@@ -20,7 +20,7 @@ class ImageOptimizer {
             if (!filename.startsWith('uploads/')) {
                 filename = 'uploads/movies/' + filename;
             }
-            resolvedUrl = "https://img.ophimimg.com/" + filename;
+            resolvedUrl = "https://phimimg.com/" + filename;
         }
 
         if (!resolvedUrl.includes('localhost') && !resolvedUrl.includes('127.0.0.1')) {
@@ -70,7 +70,7 @@ class ImageOptimizer {
             if (!filename.startsWith('uploads/')) {
                 filename = 'uploads/movies/' + filename;
             }
-            full = "https://img.ophimimg.com/" + filename;
+            full = "https://phimimg.com/" + filename;
         }
 
         // Bỏ qua CDN nếu đang run local
@@ -254,7 +254,7 @@ class ImageOptimizer {
                 class="img-progressive img-loading ${extraClasses}"
                 data-original-src="${originalUrl}"
                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
-                onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+                onerror="window.autoHealMovieImage ? window.autoHealMovieImage(this, typeof movie !== 'undefined' ? movie.slug : '', typeof movie !== 'undefined' ? (movie.name || movie.title) : '') : null"
                 ${extraAttrs}
             />`;
         } else {
@@ -263,7 +263,7 @@ class ImageOptimizer {
                 alt="${altText}"
                 class="img-progressive img-desktop ${extraClasses}"
                 src="${originalUrl}"
-                onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22 style=%22background:%23111%22%3E%3Ctext fill=%22%23555%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 alignment-baseline=%22middle%22 font-family=%22sans-serif%22 font-size=%2220%22%3ENo Image%3C/text%3E%3C/svg%3E'"
+                onerror="window.autoHealMovieImage ? window.autoHealMovieImage(this, typeof movie !== 'undefined' ? movie.slug : '', typeof movie !== 'undefined' ? (movie.name || movie.title) : '') : null"
                 loading="lazy"
                 ${extraAttrs}
             />`;

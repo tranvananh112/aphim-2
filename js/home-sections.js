@@ -121,8 +121,8 @@ function renderLatestMoviesSection(movies) {
         const linkUrl = hasCustomLink ? `watch-simple.html?slug=${movie.slug}` : `movie-detail.html?slug=${movie.slug}`;
 
         let imgUrl = typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : (movie.poster_url || movie.thumb_url || '');
-        if (imgUrl && imgUrl.includes('img.ophimimg.com')) {
-            imgUrl = imgUrl.replace('img.ophimimg.com', 'phimimg.com');
+        if (imgUrl && imgUrl.includes('phimimg.com')) {
+            imgUrl = imgUrl.replace('phimimg.com', 'phimimg.com');
         } else if (imgUrl && !imgUrl.startsWith('http')) {
             imgUrl = 'https://phimimg.com/' + imgUrl.replace(/^\//, '');
         }
@@ -256,8 +256,8 @@ function renderAllSections(sections) {
             const hiddenUI = window.getHiddenMovieOverlay ? window.getHiddenMovieOverlay(movie.slug) : { badge: '', imgClass: '', containerClass: '' };
 
             let imgUrl = typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : (movie.poster_url || movie.thumb_url || '');
-            if (imgUrl && imgUrl.includes('img.ophimimg.com')) {
-                imgUrl = imgUrl.replace('img.ophimimg.com', 'phimimg.com');
+            if (imgUrl && imgUrl.includes('phimimg.com')) {
+                imgUrl = imgUrl.replace('phimimg.com', 'phimimg.com');
             } else if (imgUrl && !imgUrl.startsWith('http')) {
                 imgUrl = 'https://phimimg.com/' + imgUrl.replace(/^\//, '');
             }
@@ -360,8 +360,8 @@ function renderVietnameseMovies(movies) {
         const hiddenUI = window.getHiddenMovieOverlay ? window.getHiddenMovieOverlay(movie.slug) : { badge: '', imgClass: '', containerClass: '' };
 
         let imgUrl = typeof movieAPI !== 'undefined' ? movieAPI.getImageURL(movie.poster_url || movie.thumb_url, 350, 75) : (movie.poster_url || movie.thumb_url || '');
-        if (imgUrl && imgUrl.includes('img.ophimimg.com')) {
-            imgUrl = imgUrl.replace('img.ophimimg.com', 'phimimg.com');
+        if (imgUrl && imgUrl.includes('phimimg.com')) {
+            imgUrl = imgUrl.replace('phimimg.com', 'phimimg.com');
         } else if (imgUrl && !imgUrl.startsWith('http')) {
             imgUrl = 'https://phimimg.com/' + imgUrl.replace(/^\//, '');
         }

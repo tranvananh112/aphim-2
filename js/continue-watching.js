@@ -50,8 +50,8 @@
             }
 
             // Tự động phát hiện xem trang đang chạy trên Server Node (phụ thuộc clean URL) hay Web Tĩnh (.html)
+            const isNodeSSR = (typeof window !== 'undefined' && window.__IS_NODE_SERVER__ === true);
             const pathname = window.location.pathname;
-            const isCleanRoute = !pathname.endsWith('.html') && (pathname === '/' || pathname.startsWith('/xem-phim') || pathname.startsWith('/phim') || pathname.startsWith('/danh-sach'));
 
             container.innerHTML = validItems.map((item, index) => {
                 const progKey = item.episodeSlug ? `${item.slug}_${item.episodeSlug}` : item.slug;
@@ -73,7 +73,7 @@
                 let imgUrl = item.thumb_url || item.poster_url || '';
                 if (imgUrl) {
                     if (!imgUrl.startsWith('http')) {
-                        imgUrl = 'https://img.ophimimg.com/uploads/movies/' + imgUrl.replace(/^\/?(uploads\/movies\/)?/, '');
+                        imgUrl = 'https://phimimg.com/uploads/movies/' + imgUrl.replace(/^\/?(uploads\/movies\/)?/, '');
                     }
                     if (typeof imageOptimizer !== 'undefined' && typeof imageOptimizer.optimizeImageUrl === 'function') {
                         imgUrl = imageOptimizer.optimizeImageUrl(imgUrl, 350, 75);
@@ -86,12 +86,7 @@
                 const epParam = rawEp.startsWith('tap-') ? rawEp : `tap-${rawEp}`;
                 const timeParam = currTime > 0 ? `?t=${Math.floor(currTime)}` : '';
 
-                let watchUrl = '';
-                if (isCleanRoute) {
-                    watchUrl = `/xem-phim/${item.slug}/${epParam}${timeParam}`;
-                } else {
-                    watchUrl = `watch.html?slug=${item.slug}&episode=${epParam}${timeParam.replace('?', '&')}`;
-                }
+                let watchUrl = isNodeSSR ? `/xem-phim/${item.slug}/${epParam}${timeParam}` : `movie-detail.html?slug=${item.slug}`;
 
                 // Format nhãn tập sáng đẹp chuẩn Tone Vàng Ánh APhim (#ffd700)
                 let epLabel = 'Tập 1';

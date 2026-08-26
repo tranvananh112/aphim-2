@@ -169,7 +169,7 @@
             const rawImg = movie.thumb_url || movie.poster_url || '';
             const poster = (typeof imageOptimizer !== 'undefined' && rawImg)
                 ? imageOptimizer.optimizeImageUrl(rawImg, 100, 80)
-                : (rawImg ? `https://img.ophimimg.com/${rawImg.startsWith('uploads/') ? '' : 'uploads/movies/'}${rawImg}` : '');
+                : (rawImg ? `https://phimimg.com/${rawImg.startsWith('uploads/') ? '' : 'uploads/movies/'}${rawImg}` : '');
             const badge = movie.year || movie.episode_current || 'HD';
             const title = (movie.name || '').replace(/</g, '&lt;');
             const enTitle = (movie.origin_name || '').replace(/</g, '&lt;');

@@ -1,3 +1,94 @@
+window.autoHealMovieImage = async function(imgEl, slug, movieTitle) {
+    if (!imgEl) return;
+    
+    let step = parseInt(imgEl.dataset.healStep || '0', 10);
+    step += 1;
+    imgEl.dataset.healStep = String(step);
+    
+    const oldSrc = imgEl.src || '';
+    const cleanSlug = slug || imgEl.getAttribute('data-tmdb-slug') || imgEl.getAttribute('data-slug') || '';
+    const nameStr = movieTitle || imgEl.alt || imgEl.getAttribute('data-tmdb-name') || cleanSlug.replace(/-/g, ' ');
+
+    // STEP 1: Fast CDN domain rewrite
+    if (step === 1) {
+        if (oldSrc.includes('phimimg.com')) {
+            imgEl.src = oldSrc.replace('phimimg.com', 'phimimg.com');
+            return;
+        }
+        if (oldSrc.includes('phimimg.com/uploads')) {
+            imgEl.src = oldSrc.replace('ophim1.com', 'phimimg.com');
+            return;
+        }
+        if (oldSrc.includes('phimimg.com/uploads/movies/') && !oldSrc.includes('/202') && !oldSrc.includes('/upload/vod/')) {
+            imgEl.src = oldSrc.replace('phimimg.com/uploads/movies/', 'phimimg.com/upload/vod/');
+            return;
+        }
+    }
+
+    // STEP 2: Fetch PhimAPI detail for exact live poster URL
+    if (step <= 2 && cleanSlug) {
+        try {
+            const res = await fetch('https://phimapi.com/phim/' + cleanSlug);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.movie) {
+                    const liveImg = data.movie.poster_url || data.movie.thumb_url;
+                    if (liveImg && liveImg !== oldSrc) {
+                        imgEl.src = liveImg.startsWith('http') ? liveImg : ('https://phimimg.com/' + liveImg.replace(/^\//, ''));
+                        return;
+                    }
+                }
+            }
+        } catch (e) {}
+    }
+
+    // STEP 3: Search PhimAPI by keyword if slug lookup failed
+    if (step <= 3 && nameStr) {
+        try {
+            const searchKeyword = nameStr.replace(/xem phim/gi, '').replace(/\(\d+\)/g, '').trim();
+            const res = await fetch('https://phimapi.com/v1/api/tim-kiem?keyword=' + encodeURIComponent(searchKeyword));
+            if (res.ok) {
+                const data = await res.json();
+                const items = data?.data?.items || data?.items || [];
+                if (items && items.length > 0) {
+                    const match = items[0];
+                    const matchImg = match.poster_url || match.thumb_url;
+                    if (matchImg) {
+                        imgEl.src = matchImg.startsWith('http') ? matchImg : ('https://phimimg.com/' + matchImg.replace(/^\//, ''));
+                        return;
+                    }
+                }
+            }
+        } catch (e) {}
+    }
+
+    // STEP 4: Query TMDB Image Search
+    if (step <= 4 && nameStr) {
+        try {
+            const tmdbKey = '3fd2be6f0cd706635c9e308d824d37ce';
+            const cleanTitle = nameStr.split('(')[0].replace(/xem phim/gi, '').trim();
+            const res = await fetch('https://api.themoviedb.org/3/search/multi?api_key=' + tmdbKey + '&query=' + encodeURIComponent(cleanTitle) + '&language=vi-VN');
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.results && data.results.length > 0) {
+                    const tmdbMatch = data.results[0];
+                    const path = tmdbMatch.poster_path || tmdbMatch.backdrop_path;
+                    if (path) {
+                        imgEl.src = 'https://image.tmdb.org/t/p/w500' + path;
+                        return;
+                    }
+                }
+            }
+        } catch (e) {}
+    }
+
+    // STEP 5: Premium Fallback Card SVG with Movie Title
+    const displayTitle = (nameStr || 'APhim').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const fallbackSvg = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600' viewBox='0 0 400 600'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231a1f2c'/%3E%3Cstop offset='100%25' stop-color='%230b0e14'/%3E%3C/linearGradient%3E%3ClinearGradient id='gold' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%23ffd700'/%3E%3Cstop offset='100%25' stop-color='%23f59e0b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='600' fill='url(%23bg)'/%3E%3Ccircle cx='200' cy='220' r='60' fill='rgba(255,215,0,0.1)' stroke='url(%23gold)' stroke-width='3'/%3E%3Cpath d='M185 195 L225 220 L185 245 Z' fill='%23ffd700'/%3E%3Ctext x='200' y='360' text-anchor='middle' fill='%23ffffff' font-family='sans-serif' font-size='22' font-weight='bold'%3E" + encodeURIComponent(displayTitle) + "%3C/text%3E%3Ctext x='200' y='400' text-anchor='middle' fill='%23ffd700' font-family='sans-serif' font-size='14' font-weight='600' letter-spacing='2'%3EA PHIM CINEMA%3C/text%3E%3C/svg%3E";
+
+    imgEl.src = fallbackSvg;
+    imgEl.onerror = null;
+};
 
 window.getCleanMovieImageUrl = function(rawUrl) {
     if (!rawUrl) return 'https://aphim.top/android-chrome-512x512.png';
@@ -129,20 +220,20 @@ class MovieAPI {
         // INTERCEPT AND FIX IMAGE URLS (If from Ophim1 or relative, ensure phimimg.com fallback)
         try {
             const rawDomain = data.pathImage || data.data?.APP_DOMAIN_CDN_IMAGE || 'https://phimimg.com';
-            const safeDomain = (rawDomain.includes('img.ophimimg.com') || rawDomain.includes('phimapi.com')) ? 'https://phimimg.com' : rawDomain;
+            const safeDomain = (rawDomain.includes('phimimg.com') || rawDomain.includes('phimapi.com')) ? 'https://phimimg.com' : rawDomain;
             const items = data.data?.items || data.items || [];
             if (Array.isArray(items)) {
                 for (const item of items) {
                     if (item.poster_url) {
-                        if (item.poster_url.includes('img.ophimimg.com')) {
-                            item.poster_url = item.poster_url.replace('img.ophimimg.com', 'phimimg.com');
+                        if (item.poster_url.includes('phimimg.com')) {
+                            item.poster_url = item.poster_url.replace('phimimg.com', 'phimimg.com');
                         } else if (!item.poster_url.startsWith('http')) {
                             item.poster_url = `${safeDomain}/${item.poster_url.replace(/^\//, '')}`;
                         }
                     }
                     if (item.thumb_url) {
-                        if (item.thumb_url.includes('img.ophimimg.com')) {
-                            item.thumb_url = item.thumb_url.replace('img.ophimimg.com', 'phimimg.com');
+                        if (item.thumb_url.includes('phimimg.com')) {
+                            item.thumb_url = item.thumb_url.replace('phimimg.com', 'phimimg.com');
                         } else if (!item.thumb_url.startsWith('http')) {
                             item.thumb_url = `${safeDomain}/${item.thumb_url.replace(/^\//, '')}`;
                         }
@@ -720,16 +811,14 @@ class MovieAPI {
 
     // Get movie gallery images
     async getMovieImages(slug) {
-        try {
-            const detail = await this.getMovieDetail(slug);
-            const item = detail?.data?.item || detail?.movie;
-            if (item && item.images && Array.isArray(item.images)) {
-                return { status: 'success', images: item.images };
-            }
-            return { status: 'success', images: [] };
-        } catch (err) {
-            return { status: false, images: [] };
+        if (!slug) return null;
+        if (this.useBackend && this.backendURL) {
+            try {
+                const response = await this.fetchWithTimeout(`${this.backendURL}/phim/${slug}/images`, { timeout: 3000 });
+                if (response.ok) return await response.json();
+            } catch (error) {}
         }
+        return null;
     }
 
     // Get image URL
@@ -737,8 +826,8 @@ class MovieAPI {
         if (!imagePath) return '/apple-touch-icon.png';
 
         let fullUrl = imagePath;
-        if (fullUrl.includes('img.ophimimg.com')) {
-            fullUrl = fullUrl.replace('img.ophimimg.com', 'phimimg.com');
+        if (fullUrl.includes('phimimg.com')) {
+            fullUrl = fullUrl.replace('phimimg.com', 'phimimg.com');
         } else if (!imagePath.startsWith('http')) {
             let filename = imagePath.replace(/^\//, "");
             if (!filename.startsWith('uploads/')) {
@@ -956,28 +1045,26 @@ class MovieAPI {
 
     // Get Movie Images (TMDB Posters / Backdrops)
     async getMovieImages(slug) {
-        try {
-            const response = await this.fetchWithFallback(`/phim/${slug}/images`, {
-                headers: { 'accept': 'application/json' }
-            });
-            return await response.json();
-        } catch (error) {
-            console.error(`Error fetching images for ${slug}:`, error);
-            return null;
+        if (!slug) return null;
+        if (this.useBackend && this.backendURL) {
+            try {
+                const response = await this.fetchWithTimeout(`${this.backendURL}/phim/${slug}/images`, { timeout: 3000 });
+                if (response.ok) return await response.json();
+            } catch (error) {}
         }
+        return null;
     }
 
     // Get Movie Peoples (TMDB Cast & Directors)
     async getMoviePeoples(slug) {
-        try {
-            const response = await this.fetchWithFallback(`/phim/${slug}/peoples`, {
-                headers: { 'accept': 'application/json' }
-            });
-            return await response.json();
-        } catch (error) {
-            console.error(`Error fetching peoples for ${slug}:`, error);
-            return null;
+        if (!slug) return null;
+        if (this.useBackend && this.backendURL) {
+            try {
+                const response = await this.fetchWithTimeout(`${this.backendURL}/phim/${slug}/peoples`, { timeout: 3000 });
+                if (response.ok) return await response.json();
+            } catch (error) {}
         }
+        return null;
     }
 
     // Get Movie Keywords (TMDB Tags)
@@ -1110,8 +1197,8 @@ if (typeof window !== 'undefined') {
             const img = e.target;
             if (!img.dataset.fallbackTried) {
                 img.dataset.fallbackTried = '1';
-                if (img.src && img.src.includes('img.ophimimg.com')) {
-                    img.src = img.src.replace('img.ophimimg.com', 'phimimg.com');
+                if (img.src && img.src.includes('phimimg.com')) {
+                    img.src = img.src.replace('phimimg.com', 'phimimg.com');
                 } else if (img.src && img.src.includes('phimapi.com')) {
                     img.src = img.src.replace('phimapi.com', 'phimimg.com');
                 } else if (img.src && !img.src.includes('android-chrome')) {
