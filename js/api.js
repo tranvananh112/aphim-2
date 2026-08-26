@@ -3,9 +3,9 @@ window.getCleanMovieImageUrl = function(rawUrl) {
     if (!rawUrl) return 'https://aphim.top/android-chrome-512x512.png';
     let url = String(rawUrl).trim();
     if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url.replace(/img.ophimimg.com/g, 'phimimg.com').replace(/phimapi.com/uploads/g, 'phimimg.com/uploads');
+        return url.replace(/img\.ophimimg\.com/g, 'phimimg.com').replace(/phimapi\.com\/uploads/g, 'phimimg.com/uploads');
     }
-    const clean = url.replace(/^//, '');
+    const clean = url.replace(/^\//, '');
     if (clean.startsWith('upload/') || clean.startsWith('uploads/')) {
         return 'https://phimimg.com/' + clean;
     }
