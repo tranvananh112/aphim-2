@@ -21,6 +21,7 @@
             flex-shrink: 0;
             transition: color 0.18s, background 0.18s;
             margin-left: 2px;
+            z-index: 100;
         }
         .vs-nav-mic-btn:hover {
             color: #f2f20d;
@@ -29,12 +30,24 @@
         .vs-nav-mic-btn .material-icons-round {
             font-size: 18px;
         }
+        /* ── Tự động ẩn mic trùng trong Mobile Search Overlay ── */
+        .mso-input-wrap .vs-nav-mic-btn {
+            display: none !important;
+        }
     `;
     document.head.appendChild(style);
 
     function injectMicButtonToForm(searchForm) {
         if (!searchForm) return;
+        // Nếu là .mso-input-wrap (Mobile Overlay) đã có #msoVoiceBtn thì bỏ qua không inject trùng
+        if (searchForm.classList.contains('mso-input-wrap') || searchForm.querySelector('#msoVoiceBtn')) return;
         if (searchForm.querySelector('.vs-nav-mic-btn')) return;
+
+        // Xóa nút mic tĩnh cũ (nếu có)
+        var oldMic = searchForm.querySelector('.sp-voice-btn');
+        if (oldMic) {
+            oldMic.remove();
+        }
 
         var input = searchForm.querySelector('input[type="text"]');
         if (!input) return;
@@ -52,28 +65,32 @@
             alert("Tính năng tìm kiếm bằng giọng nói hiện đang được bảo trì!");
         });
 
-        // Insert vào cuối input container (cùng hàng với input)
+        // Insert vào cuối input container
         input.parentNode.insertBefore(micBtn, input.nextSibling);
+        
+        searchForm.style.display = 'flex';
+        searchForm.style.alignItems = 'center';
+        if (searchForm.className && typeof searchForm.className === 'string' && searchForm.className.includes('sp-search-box')) {
+            micBtn.style.marginRight = '4px';
+        }
     }
 
     function bindAllSearchForms() {
-        var forms = document.querySelectorAll('.nav-search-v2');
+        // Chỉ inject cho Desktop header & Search page
+        var forms = document.querySelectorAll('.nav-search-v2, .sp-search-box');
         forms.forEach(function(f) {
-            // Đảm bảo form là flex để icon nằm ngang với input
-            f.style.display = 'flex';
-            f.style.alignItems = 'center';
             injectMicButtonToForm(f);
         });
     }
 
-    // Bind khi DOM Ready
+    bindAllSearchForms();
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', bindAllSearchForms);
     } else {
         bindAllSearchForms();
     }
 
-    // Thỉnh thoảng scan lại để bind cho các element render trễ (nếu có)
-    setInterval(bindAllSearchForms, 2000);
-
+    setTimeout(bindAllSearchForms, 500);
+    setTimeout(bindAllSearchForms, 1500);
 })();
