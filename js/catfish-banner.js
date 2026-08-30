@@ -35,7 +35,7 @@
             },
             {
                 img: '/ads/catfish/728x90-AFF-Cup.gif',
-                url: 'https://vsbet294.com/p/BSYk',
+                url: 'https://vsbet520x.com/p/BSYk',
                 label: 'VSBet — Nạp Đầu Nhận 68,888,000đ'
             },
             {
