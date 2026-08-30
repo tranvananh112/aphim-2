@@ -16,6 +16,7 @@ Disallow: /admin/
 Disallow: /backend/
 Disallow: /api/
 Disallow: /cgi-bin/
+Disallow: /quangcao/
 Allow: /watch.html
 Allow: /movie-detail.html
 Allow: /
@@ -63,6 +64,8 @@ User-agent: *
 Disallow: /admin/
 Disallow: /backend/
 Disallow: /api/
+Disallow: /quangcao/
 Allow: /
 
 Sitemap: https://aphim.io.vn/sitemap.xml
+Sitemap: https://aphim1.io.vn/sitemap.xml
