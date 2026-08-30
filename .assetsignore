@@ -1,5 +1,10 @@
 node_modules
+node_modules/
+node_modules/*
+node_modules/**
 .git
+.git/
 html_backups
+backend
 package-lock.json
 *.log
