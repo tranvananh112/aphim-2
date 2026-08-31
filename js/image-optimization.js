@@ -280,11 +280,13 @@ class ImageOptimizer {
 
         if (!slug && !name) return null;
 
-        const cacheKey = `tmdb_img_${type}_${slug || name}`;
-        const cached = sessionStorage.getItem(cacheKey);
-        if (cached) {
-            return cached === 'null' ? null : cached;
-        }
+        const cacheKey = `tmdb_img_${type}_${slug || name}_${tmdbId || ''}`;
+        try {
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                return cached === 'null' ? null : cached;
+            }
+        } catch (e) {}
 
         const TMDB_API_KEY = '5fb3c8d9ad2ca4cd2029836befcc3ab5';
         const TMDB_BASE_URL = 'https://api.tmdb.org/3';
@@ -313,46 +315,58 @@ class ImageOptimizer {
                 }
             }
 
-            // 2. Try TMDB ID if OPhim images endpoint failed
+            // 2. Try TMDB ID with strict 1200ms timeout
             if (!imageUrl && tmdbId && tmdbId !== 'undefined' && tmdbId !== 'null' && tmdbId !== '') {
-                // Determine if it's movie or tv based on fallback (default to movie, though we can't be sure without search)
-                const res = await fetch(`${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=vi-VN`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (type === 'backdrop') {
-                        const path = data.backdrop_path || data.poster_path;
-                        if (path) imageUrl = `https://image.tmdb.org/t/p/w780${path}`;
-                    } else {
-                        const path = data.poster_path || data.backdrop_path;
-                        if (path) imageUrl = `https://image.tmdb.org/t/p/w500${path}`;
-                    }
-                }
-            }
-
-            // 3. Fallback to Search if ID failed or not present
-            if (!imageUrl && name) {
-                const searchName = encodeURIComponent(name);
-                const yearParam = year && year !== 'undefined' && year !== 'null' ? `&year=${year}` : '';
-                const res = await fetch(`${TMDB_BASE_URL}/search/multi?api_key=${TMDB_API_KEY}&query=${searchName}${yearParam}&language=vi-VN`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.results && data.results.length > 0) {
-                        const first = data.results[0];
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 1200);
+                try {
+                    const res = await fetch(`${TMDB_BASE_URL}/movie/${tmdbId}?api_key=${TMDB_API_KEY}&language=vi-VN`, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (res.ok) {
+                        const data = await res.json();
                         if (type === 'backdrop') {
-                            const path = first.backdrop_path || first.poster_path;
+                            const path = data.backdrop_path || data.poster_path;
                             if (path) imageUrl = `https://image.tmdb.org/t/p/w780${path}`;
                         } else {
-                            const path = first.poster_path || first.backdrop_path;
+                            const path = data.poster_path || data.backdrop_path;
                             if (path) imageUrl = `https://image.tmdb.org/t/p/w500${path}`;
                         }
                     }
+                } catch (err) {
+                    clearTimeout(timeoutId);
                 }
             }
-        } catch (e) {
-            console.warn('TMDB Fetch Error:', e);
-        }
 
-        sessionStorage.setItem(cacheKey, imageUrl || 'null');
+            // 3. Fallback to Search if ID failed or not present (with 1200ms timeout)
+            if (!imageUrl && name && !tmdbId) {
+                const searchName = encodeURIComponent(name);
+                const yearParam = year && year !== 'undefined' && year !== 'null' ? `&year=${year}` : '';
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 1200);
+                try {
+                    const res = await fetch(`${TMDB_BASE_URL}/search/multi?api_key=${TMDB_API_KEY}&query=${searchName}${yearParam}&language=vi-VN`, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.results && data.results.length > 0) {
+                            const first = data.results[0];
+                            if (type === 'backdrop') {
+                                const path = first.backdrop_path || first.poster_path;
+                                if (path) imageUrl = `https://image.tmdb.org/t/p/w780${path}`;
+                            } else {
+                                const path = first.poster_path || first.backdrop_path;
+                                if (path) imageUrl = `https://image.tmdb.org/t/p/w500${path}`;
+                            }
+                        }
+                    }
+                } catch (err) {
+                    clearTimeout(timeoutId);
+                }
+            }
+        } catch (e) {}
+
+        // Always cache result (even if null) to avoid infinite retry loops
+        try { sessionStorage.setItem(cacheKey, imageUrl || 'null'); } catch(e) {}
         return imageUrl;
     }
 }
@@ -365,12 +379,15 @@ document.addEventListener('DOMContentLoaded', () => {
     imageOptimizer.setupLazyLoading();
 });
 
-// Observe DOM changes cho progressive images mới được inject vào DOM
+// Debounced DOM observer for dynamic content
+let _mutationDebounceTimer = null;
 const _progressiveMutationObserver = new MutationObserver(() => {
-    // Setup lazy loading cho data-src images
-    imageOptimizer.setupLazyLoading();
-    // Setup progressive observer cho img.img-progressive mới
-    imageOptimizer.setupProgressiveObserver();
+    if (_mutationDebounceTimer) return;
+    _mutationDebounceTimer = setTimeout(() => {
+        _mutationDebounceTimer = null;
+        imageOptimizer.setupLazyLoading();
+        imageOptimizer.setupProgressiveObserver();
+    }, 300);
 });
 
 _progressiveMutationObserver.observe(document.body, {

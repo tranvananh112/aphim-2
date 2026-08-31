@@ -54,7 +54,6 @@
     <link rel="manifest" href="/site.webmanifest">
     <link rel="shortcut icon" href="/favicon.ico">
     <meta name="google-site-verification" content="ZaG8-2NWGlPn2wKuj_i2NQZv7fmVc1FG_qCixUgNhuY" />
-    <meta name="google-site-verification" content="3Lb-uuSezPJVpCxmhkETkAep21zShjbhmN7cjL6TI_U" />
 
     <!-- Critical Inline CSS - Splash Loader hiển thị LẬP TỨC -->
     <style>
@@ -562,6 +561,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center center;
         }
 
         .action-small-poster {
@@ -582,6 +582,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center center;
         }
 
         .action-info-overlay {
@@ -1301,12 +1302,12 @@
         (function () {
             // Màu chính cho từng icon (định dạng Lottie normalized 0-1)
             var ICONS = [
-                { id: 'lottie-phim-bo',   path: '/icon-phim-bo.json',   color: [1.000, 1.000, 1.000] },  // #FFFFFF
-                { id: 'lottie-phim-moi',  path: '/icon-phim-moi.json',  color: [1.000, 1.000, 1.000] },  // #FFFFFF
-                { id: 'lottie-hanh-dong', path: '/icon-hanh-dong.json', color: [1.000, 1.000, 1.000] },  // #FFFFFF
-                { id: 'lottie-tinh-cam',  path: '/icon-tinh-cam.json',  color: [1.000, 1.000, 1.000] },  // #FFFFFF
-                { id: 'lottie-hai-huoc',  path: '/icon-hai-huoc.json',  color: [1.000, 1.000, 1.000] },  // #FFFFFF
-                { id: 'lottie-hoat-hinh', path: '/icon-hoat-hinh.json', color: [1.000, 1.000, 1.000] },  // #FFFFFF
+                { id: 'lottie-phim-bo',   path: '/icons/icon-phim-bo.json',   color: [1.000, 1.000, 1.000] },  // #FFFFFF
+                { id: 'lottie-phim-moi',  path: '/icons/icon-phim-moi.json',  color: [1.000, 1.000, 1.000] },  // #FFFFFF
+                { id: 'lottie-hanh-dong', path: '/icons/icon-hanh-dong.json', color: [1.000, 1.000, 1.000] },  // #FFFFFF
+                { id: 'lottie-tinh-cam',  path: '/icons/icon-tinh-cam.json',  color: [1.000, 1.000, 1.000] },  // #FFFFFF
+                { id: 'lottie-hai-huoc',  path: '/icons/icon-hai-huoc.json',  color: [1.000, 1.000, 1.000] },  // #FFFFFF
+                { id: 'lottie-hoat-hinh', path: '/icons/icon-hoat-hinh.json', color: [1.000, 1.000, 1.000] },  // #FFFFFF
             ];
 
             function initOne(icon) {
@@ -1398,21 +1399,15 @@
                         <span class="hidden md:inline uppercase"><span class="text-white">Bảng Xếp Hạng</span> <span class="text-gradient-gold">Top Phim Hot</span></span>
                         <span class="md:hidden uppercase"><span class="text-white">BXH</span> <span class="text-gradient-gold">Top Phim Hot</span></span>
                     </h2>
-                    <div class="flex items-center gap-3">
-                        <a href="phim-theo-quoc-gia.html?country=han-quoc&page=1"
-                            class="text-[#fcd34d] text-sm font-semibold hover:text-white transition-colors flex items-center gap-1 group">
-                            Xem tất cả <span class="material-icons-round text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                        </a>
-                        <div class="flex gap-2">
-                            <button id="topMoviesScrollLeft"
-                                class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
-                                <span class="material-icons-round text-xl">chevron_left</span>
-                            </button>
-                            <button id="topMoviesScrollRight"
-                                class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
-                                <span class="material-icons-round text-xl">chevron_right</span>
-                            </button>
-                        </div>
+                    <div class="flex gap-3">
+                        <button id="topMoviesScrollLeft"
+                            class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
+                            <span class="material-icons-round text-xl">chevron_left</span>
+                        </button>
+                        <button id="topMoviesScrollRight"
+                            class="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
+                            <span class="material-icons-round text-xl">chevron_right</span>
+                        </button>
                     </div>
                 </div>
 
@@ -2129,7 +2124,7 @@
     <script src="js/api.js?v=15"></script>
     <script src="js/data-cache.js?v=13"></script>
     <script src="js/api-optimization.js?v=13"></script>
-    <script src="js/image-optimization.js?v=13"></script>
+    <script src="js/image-optimization.js?v=14"></script>
     <script src="js/user.js?v=38"></script>
     <script src="js/rating.js?v=13"></script>
     <script src="js/home.js?v=13"></script>
@@ -2370,14 +2365,19 @@
                 const thumb = movie.thumb_url || '';
                 const poster = movie.poster_url || '';
 
-                // Backdrop prioritized for landscape (poster_url)
-                const backdropUrl = poster || thumb;
+                // Backdrop (16:9 ngang): Ưu tiên poster_url nếu là ảnh ngang, hoặc thumb_url
+                let backdropUrl = thumb || poster;
+                if (poster && (poster.includes('banner') || poster.includes('backdrop') || poster.includes('thumb'))) {
+                    backdropUrl = poster;
+                }
+
+                // Poster (2:3 dọc): Ưu tiên poster_url
+                let posterUrl = poster || thumb;
+
                 const finalBackdrop = (typeof imageOptimizer !== 'undefined') ?
                     imageOptimizer.optimizeImageUrl(backdropUrl, 600, 75) :
                     (backdropUrl.startsWith('http') ? backdropUrl : `https://phimimg.com/${backdropUrl}`);
 
-                // Poster prioritized for portrait (thumb_url)
-                const posterUrl = thumb || poster;
                 const finalPoster = (typeof imageOptimizer !== 'undefined') ?
                     imageOptimizer.optimizeImageUrl(posterUrl, 200, 70) :
                     (posterUrl.startsWith('http') ? posterUrl : `https://phimimg.com/${posterUrl}`);
@@ -2486,13 +2486,19 @@
                             const thumb = movie.thumb_url || '';
                             const poster = movie.poster_url || '';
 
-                            // Đảo lại logic: Backdrop ưu tiên poster_url (ngang), Poster ưu tiên thumb_url (dọc)
-                            const backdropUrl = poster || thumb;
+                            // Backdrop (16:9 ngang): Ưu tiên poster_url nếu là ảnh ngang, hoặc thumb_url
+                            let backdropUrl = thumb || poster;
+                            if (poster && (poster.includes('banner') || poster.includes('backdrop') || poster.includes('thumb'))) {
+                                backdropUrl = poster;
+                            }
+
+                            // Poster (2:3 dọc): Ưu tiên poster_url
+                            let posterUrl = poster || thumb;
+
                             const finalBackdrop = (typeof imageOptimizer !== 'undefined') ?
                                 imageOptimizer.optimizeImageUrl(backdropUrl, 600, 75) :
                                 (backdropUrl.startsWith('http') ? backdropUrl : `https://phimimg.com/${backdropUrl}`);
 
-                            const posterUrl = thumb || poster;
                             const finalPoster = (typeof imageOptimizer !== 'undefined') ?
                                 imageOptimizer.optimizeImageUrl(posterUrl, 200, 70) :
                                 (posterUrl.startsWith('http') ? posterUrl : `https://phimimg.com/${posterUrl}`);
@@ -3023,7 +3029,7 @@
 
     <!-- ====== APhim Catfish Banner + Popup ====== -->
     <link rel="stylesheet" href="/css/catfish-banner.css?v=17">
-    <script src="/js/catfish-banner.js?v=18" defer></script>
+    <script src="/js/catfish-banner.js?v=19" defer></script>
     <!-- Section Swipe: Snap-to-card universal cho mọi section phím -->
     <script src="js/section-swipe.js?v=5" defer></script>
     <!-- ====== End Catfish Banner ====== -->
