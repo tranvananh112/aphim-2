@@ -11,7 +11,7 @@
                 var parts = rest.split('/');
                 var slug = parts[0] || '';
                 var ep = parts[1] || '';
-                var query = search ? search + '&slug=' + encodeURIComponent(slug) + (ep ? '&ep=' + encodeURIComponent(ep) : '') : '?slug=' + encodeURIComponent(slug) + (ep ? '&ep=' + encodeURIComponent(ep) : '');
+                var query = search ? search + '&slug=' + encodeURIComponent(slug) + (ep ? '&episode=' + encodeURIComponent(ep) : '') : '?slug=' + encodeURIComponent(slug) + (ep ? '&episode=' + encodeURIComponent(ep) : '');
                 window.location.replace('/watch.html' + query + hash);
             } else if (p.startsWith('/phim/')) {
                 var slug = p.substring('/phim/'.length).split('/')[0];

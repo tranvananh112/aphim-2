@@ -506,7 +506,7 @@ function renderMovieDetail(movie) {
         const customLink = movieLinks[movie.slug];
 
         if (customLink) {
-            const isHtmlEnv = window.location.pathname.includes('.html');
+            const isHtmlEnv = window.location.pathname.includes('.html') || window.location.hostname.includes('io.vn');
             if (isHtmlEnv) {
                 watchBtn.href = `/watch.html?slug=${movie.slug}`;
             } else {
@@ -519,7 +519,7 @@ function renderMovieDetail(movie) {
             const serverIndex = typeof currentServerIndexDetail !== 'undefined' ? currentServerIndexDetail : 0;
             const firstEpisode = movie.episodes[serverIndex]?.server_data[0] || movie.episodes[0].server_data[0];
             const cleanSlug = firstEpisode.slug.replace(/^tap-/, '');
-            const isHtmlEnv = window.location.pathname.includes('.html');
+            const isHtmlEnv = window.location.pathname.includes('.html') || window.location.hostname.includes('io.vn');
             if (isHtmlEnv) {
                 watchBtn.href = `/watch.html?slug=${movie.slug}&episode=tap-${cleanSlug}&server=${serverIndex}`;
             } else {
@@ -1251,7 +1251,7 @@ window.changeServerDetail = function(index) {
     if (watchBtn && currentMovie.episodes[index]?.server_data && currentMovie.episodes[index].server_data.length > 0) {
         const firstEp = currentMovie.episodes[index].server_data[0];
         const cleanSlug = firstEp.slug.replace(/^tap-/, '');
-        const isHtmlEnv = window.location.pathname.includes('.html');
+        const isHtmlEnv = window.location.pathname.includes('.html') || window.location.hostname.includes('io.vn');
         if (isHtmlEnv) {
             watchBtn.href = `/watch.html?slug=${currentMovie.slug}&episode=tap-${cleanSlug}&server=${index}`;
         } else {
