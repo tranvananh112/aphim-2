@@ -28,12 +28,6 @@
 
         banners: [
             {
-                img: '/quangcao/8svui/BANNER.mp4',
-                url: 'https://8svui.com',
-                label: '8SVui — Khuyến Mãi 150%',
-                isVideo: true
-            },
-            {
                 img: '/ads/catfish/728x90-AFF-Cup.gif',
                 url: 'https://vsbet520x.com/p/BSYk',
                 label: 'VSBet — Nạp Đầu Nhận 68,888,000đ'
