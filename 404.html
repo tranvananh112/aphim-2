@@ -1,6 +1,37 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
+    <script>
+        (function() {
+            var p = window.location.pathname;
+            var search = window.location.search || '';
+            var hash = window.location.hash || '';
+            if (p.startsWith('/xem-phim/')) {
+                var rest = p.substring('/xem-phim/'.length);
+                var parts = rest.split('/');
+                var slug = parts[0] || '';
+                var ep = parts[1] || '';
+                var query = search ? search + '&slug=' + encodeURIComponent(slug) + (ep ? '&ep=' + encodeURIComponent(ep) : '') : '?slug=' + encodeURIComponent(slug) + (ep ? '&ep=' + encodeURIComponent(ep) : '');
+                window.location.replace('/watch.html' + query + hash);
+            } else if (p.startsWith('/phim/')) {
+                var slug = p.substring('/phim/'.length).split('/')[0];
+                var query = search ? search + '&slug=' + encodeURIComponent(slug) : '?slug=' + encodeURIComponent(slug);
+                window.location.replace('/movie-detail.html' + query + hash);
+            } else if (p.startsWith('/the-loai/')) {
+                var cat = p.substring('/the-loai/'.length).split('/')[0];
+                var query = search ? search + '&category=' + encodeURIComponent(cat) : '?category=' + encodeURIComponent(cat);
+                window.location.replace('/categories.html' + query + hash);
+            } else if (p.startsWith('/quoc-gia/')) {
+                var country = p.substring('/quoc-gia/'.length).split('/')[0];
+                var query = search ? search + '&country=' + encodeURIComponent(country) : '?country=' + encodeURIComponent(country);
+                window.location.replace('/phim-theo-quoc-gia.html' + query + hash);
+            } else if (p.startsWith('/tim-kiem/')) {
+                var kw = p.substring('/tim-kiem/'.length).split('/')[0];
+                var query = search ? search + '&keyword=' + encodeURIComponent(kw) : '?keyword=' + encodeURIComponent(kw);
+                window.location.replace('/search.html' + query + hash);
+            }
+        })();
+    </script>
     <meta name="view-transition" content="same-origin" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

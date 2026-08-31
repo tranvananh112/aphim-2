@@ -1,0 +1,7 @@
+# Cloudflare Pages SPA Rewrites (200 Rewrite for clean URLs)
+/xem-phim/*    /watch.html               200
+/phim/*        /movie-detail.html        200
+/the-loai/*    /categories.html          200
+/quoc-gia/*    /phim-theo-quoc-gia.html  200
+/tim-kiem/*    /search.html              200
+/danh-sach/*   /danh-sach.html           200
